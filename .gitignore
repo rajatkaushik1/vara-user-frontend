@@ -1,0 +1,91 @@
+        # Logs
+        logs
+        *.log
+        npm-debug.log*
+        yarn-debug.log*
+        yarn-error.log*
+        pnpm-debug.log*
+        lerna-debug.log*
+
+        # Diagnostic reports (https://nodejs.org/api/report.html)
+        .report/
+
+        # Node.js
+        # dependencies
+        /node_modules
+        /.pnp
+        /.pnp.js
+
+        # production
+        /build
+        /dist
+        /tmp
+        /out
+        /es
+        /lib
+
+        # misc
+        .DS_Store
+        .env.local
+        .env*.local
+        .npm
+        .eslintcache
+        .stylelintcache
+        .prettiercache
+
+        # IDEs and editors
+        /.idea
+        .project
+        .classpath
+        .cproject
+        *.iml
+        *.ipr
+        *.iws
+        .vscode/
+
+        # macOS
+        .DS_Store
+
+        # Windows
+        Thumbs.db
+        ehthumbs.db
+        Desktop.ini
+
+        # Yarn
+        .yarn/*
+        !.yarn/patches
+        !.yarn/releases
+        !.yarn/plugins
+        !.yarn/sdks
+        !.yarn/versions
+
+        # Vite
+        .vite/
+
+        # Caching
+        .cache/
+        .next/
+        .nuxt/
+        .parcel-cache/
+
+        # Coverage
+        /coverage
+
+        # Storybook
+        .storybook/out
+
+        # Netlify
+        .netlify/
+
+        # Vercel
+        .vercel/
+
+        # Docker
+        Dockerfile.prod
+        .dockerignore
+
+        # Other
+        *.env
+        *.env.production
+        *.env.development
+        
