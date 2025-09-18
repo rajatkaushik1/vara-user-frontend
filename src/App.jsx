@@ -1,7 +1,10 @@
 // src/App.jsx
 
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { API_BASE_URL } from './config';
+import { API_BASE_URL, TASTE_ENDPOINTS } from './config';
+import { CONTENT_VERSION_URL, withVersion } from './config';
+import { useContentVersion } from './hooks/useContentVersion';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import HeroSection from './components/HeroSection';
 import MusicContent from './components/MusicContent';
@@ -10,85 +13,884 @@ import Footer from './components/Footer';
 import SearchPage from './SearchPage';
 import LoginPage from './LoginPage';
 import PremiumPage from './PremiumPage';
+import FAQ from './pages/Footer/FAQ.jsx';
+import AboutUs from './pages/Footer/AboutUs.jsx';
+import PrivacyPolicyPage from './pages/Footer/PrivacyPolicyPage.jsx';
+import TermsOfService from './pages/Footer/TermsOfService.jsx';
+import LicenseAgreement from './pages/Footer/LicenseAgreement.jsx';
+import LicenseVerificationPage from './pages/LicenseVerificationPage.jsx';
+import FeedbackPage from './pages/FeedbackPage.jsx';
+import LicenseModal from './components/LicenseModal';
+import GoToTopButton from './components/GoToTopButton';
+
+// Updated Notification Component with Yellow Theme
+const Notification = ({ message, type, onClose }) => {
+  useEffect(() => {
+    if (message) {
+      const timer = setTimeout(() => {
+        onClose();
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [message, onClose]);
+
+  if (!message) return null;
+
+  const getNotificationStyle = () => {
+    switch (type) {
+      case 'success':
+        return { backgroundColor: '#ebba2f', color: '#000' }; // Yellow theme
+      case 'favorite':
+        return { backgroundColor: '#ebba2f', color: '#000' }; // Yellow theme for favorites
+      case 'warning':
+        return { backgroundColor: '#ff9800', color: '#fff' }; // Orange for warnings
+      case 'error':
+        return { backgroundColor: '#f44336', color: '#fff' }; // Red for errors
+      default:
+        return { backgroundColor: '#ebba2f', color: '#000' };
+    }
+  };
+
+  return (
+    <div style={{
+      position: 'fixed',
+      bottom: '20px',
+      right: '20px',
+      zIndex: 9999,
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'flex-end',
+      pointerEvents: 'none'
+    }}>
+      <div
+        className="notification"
+        style={{
+          ...getNotificationStyle(),
+          position: 'relative',
+          padding: '12px 48px 12px 16px',
+          borderRadius: '8px',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+          fontSize: '14px',
+          fontWeight: '500',
+          maxWidth: '300px',
+          transform: 'translateX(0)',
+          animation: 'slideIn 0.3s ease-out',
+          pointerEvents: 'auto'
+        }}
+      >
+        {/* Close button inside notification, top-right */}
+        <button
+          className="notification-close-btn"
+          onClick={onClose}
+          aria-label="Close notification"
+        >
+          ×
+        </button>
+        {message}
+        <style>{`
+          @keyframes slideIn {
+            from {
+              transform: translateX(100%);
+              opacity: 0;
+            }
+            to {
+              transform: translateX(0);
+              opacity: 1;
+            }
+          }
+        `}</style>
+      </div>
+    </div>
+  );
+};
+
+// The initial state for our navigation history when a new tab is selected.
+const initialNavigationState = {
+  view: 'for-you',
+  genreId: null,
+  subGenreId: null,
+  title: 'For You',
+};
 
 function App() {
-  // All state declarations remain the same
-  const [activeTab, setActiveTab] = useState('home');
-  const [currentPage, setCurrentPage] = useState('main');
-  const [searchTerm, setSearchTerm] = useState('');
+  const navigate = useNavigate();
+  const location = useLocation();
+  // --- Data & Loading States ---
   const [genres, setGenres] = useState([]);
   const [subGenres, setSubGenres] = useState([]);
   const [songs, setSongs] = useState([]);
+  // ✅ NEW: Add trending songs state
+  const [trendingSongs, setTrendingSongs] = useState([]);
+  const [loadingTrending, setLoadingTrending] = useState(false);
   const [error, setError] = useState(null);
+  
+  // NEW: Progressive loading states
+  const [loadingHeader, setLoadingHeader] = useState(true);
+  const [loadingHero, setLoadingHero] = useState(true);
+  const [loadingMusicContent, setLoadingMusicContent] = useState(true);
+  const [loadingSongs, setLoadingSongs] = useState(true);
+  const [loadingGenres, setLoadingGenres] = useState(false);
+  const [loadingSubGenres, setLoadingSubGenres] = useState(false);
+  // --- Instruments ---
+  const [instruments, setInstruments] = useState([]);
+  const [loadingInstruments, setLoadingInstruments] = useState(false);
+  const [instrumentsLoaded, setInstrumentsLoaded] = useState(false);
+
+  // --- Moods (NEW) ---
+  const [moods, setMoods] = useState([]);
+  const [loadingMoods, setLoadingMoods] = useState(false);
+  const [moodsLoaded, setMoodsLoaded] = useState(false);
+  
+  // Track which data has been loaded
+  const [songsLoaded, setSongsLoaded] = useState(false);
+  const [genresLoaded, setGenresLoaded] = useState(false);
+  const [subGenresLoaded, setSubGenresLoaded] = useState(false);
+  // ✅ NEW: Track trending data loading
+  const [trendingLoaded, setTrendingLoaded] = useState(false);
+
+  // --- UI & Page State ---
+  const [activeTab, setActiveTab] = useState('home');
+  const [currentPage, setCurrentPage] = useState('main');
+  const [navigationHistory, setNavigationHistory] = useState([initialNavigationState]);
+  
+  // Notification state
+  const [notification, setNotification] = useState({ message: '', type: '' });
+
+  // NEW: Track if user came from premium page
+  const [cameFromPremium, setCameFromPremium] = useState(false);
+
+  // --- Search State ---
+  const [searchTerm, setSearchTerm] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const [quickSearchSuggestions, setQuickSearchSuggestions] = useState([
-    "vlog", "happy music", "documentary", "food", "finance", "tech", "comedy"
-  ]);
-  const searchInputRef = useRef(null);
-  const quickSearchOverlayRef = useRef(null);
   const [showSearchPage, setShowSearchPage] = useState(false);
   const [currentSearchQuery, setCurrentSearchQuery] = useState('');
-  const [selectedGenreForSubgenres, setSelectedGenreForSubgenres] = useState(null);
-  const [selectedSubgenreForSongs, setSelectedSubgenreForSongs] = useState(null);
-  const [displayedSubgenreTitle, setDisplayedSubgenreTitle] = useState(null);
-  const [displayedGenreTitle, setDisplayedGenreTitle] = useState(null);
-  const [favouriteSongs, setFavouriteSongs] = useState(new Set());
-  const [loadingInitial, setLoadingInitial] = useState(true);
-  const [loadingContentTabs, setLoadingContentTabs] = useState(true);
-  const [loadingSongs, setLoadingSongs] = useState(true);
+  const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
+  const searchInputRef = useRef(null);
+  const quickSearchOverlayRef = useRef(null);
+  const suppressHomeResetRef = useRef(false);
+  const quickSearchSuggestions = useMemo(() => ["vlog", "happy music", "documentary", "food", "finance", "tech", "comedy"], []);
+
+  // --- Music Player State ---
   const audioRef = useRef(new Audio());
   const [currentPlayingSong, setCurrentPlayingSong] = useState(null);
+  const [playQueue, setPlayQueue] = useState([]);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [volume, setVolume] = useState(0.7);
-  const [searchHistory, setSearchHistory] = useState(null);
-  const [isPlayerVisible, setIsPlayerVisible] = useState(false);
   const [previousVolume, setPreviousVolume] = useState(0.7);
+  const [isPlayerVisible, setIsPlayerVisible] = useState(false);
+  // ADD:
+  const [isAudioLoading, setIsAudioLoading] = useState(false);
 
-  // All other functions from your file remain here...
+  // --- User State ---
+  const [favouriteSongs, setFavouriteSongs] = useState(new Set());
+  const [currentUser, setCurrentUser] = useState(null);
+  const [currentSongId, setCurrentSongId] = useState(null); // <-- Add state for currentSongId
+
+  const [licenseModalOpen, setLicenseModalOpen] = useState(false);
+  const [licenseModalData, setLicenseModalData] = useState(null);
+
+  // --- Auto-scroll flag for tabs when navigation comes from "Explore" / "Try Audio"
+  const [autoScrollTabs, setAutoScrollTabs] = useState(false);
+  const clearAutoScrollTabs = useCallback(() => setAutoScrollTabs(false), []);
+
+  // --- FIXED: Correct Premium Song Detection ---
+  const isPremiumSong = (song) => {
+    const t = song?.collectionType;
+    return t === 'paid' || t === 'premium';
+  };
+
+  // --- Backend URL Helper Functions ---
+  const getAuthBackendUrl = () => {
+    const authUrl = import.meta.env.VITE_REACT_APP_AUTH_BACKEND_URL;
+    return authUrl && authUrl.trim() !== '' ? authUrl : null;
+  };
+
+  const getDataBackendUrl = () => {
+    return import.meta.env.VITE_REACT_APP_BACKEND_URL || 'https://vara-admin-backend.onrender.com';
+  };
+
+  // --- Memoized Derived State ---
+  const currentView = useMemo(() => navigationHistory[navigationHistory.length - 1], [navigationHistory]);
+
+  // --- UPDATED: Instruments-first search suggestions ---
   const filteredSuggestions = useMemo(() => {
     if (searchTerm.trim() === '') return [];
     const lowerCaseSearchTerm = searchTerm.toLowerCase();
-    const matchedSongTitles = songs.filter(s => s.title.toLowerCase().includes(lowerCaseSearchTerm)).map(s => s.title);
-    const matchedGenreNames = genres.filter(g => g.name.toLowerCase().includes(lowerCaseSearchTerm)).map(g => g.name);
-    const matchedSubGenreNames = subGenres.filter(sg => sg.name.toLowerCase().includes(lowerCaseSearchTerm)).map(sg => sg.name);
-    const allSuggestions = [...new Set([...matchedSongTitles, ...matchedGenreNames, ...matchedSubGenreNames])];
-    return allSuggestions.slice(0, 10);
-  }, [searchTerm, songs, genres, subGenres]);
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (searchInputRef.current && !searchInputRef.current.contains(event.target) &&
-          quickSearchOverlayRef.current && !quickSearchOverlayRef.current.contains(event.target)) {
-        setIsSearchFocused(false);
+    // Instruments first (max 5)
+    const matchedInstrumentNames = (instruments || [])
+      .filter(i => i?.name && i.name.toLowerCase().includes(lowerCaseSearchTerm))
+      .map(i => i.name)
+      .slice(0, 5);
+
+    // Moods (max 4)
+    const matchedMoodNames = (moods || [])
+      .filter(m => m?.name && m.name.toLowerCase().includes(lowerCaseSearchTerm))
+      .map(m => m.name)
+      .slice(0, 4);
+
+    // Songs (max 4)
+    const matchedSongTitles = songs
+      .filter(s => s.title && s.title.toLowerCase().includes(lowerCaseSearchTerm))
+      .map(s => s.title)
+      .slice(0, 4);
+
+    // Genres (max 3)
+    const matchedGenreNames = genres
+      .filter(g => g.name && g.name.toLowerCase().includes(lowerCaseSearchTerm))
+      .map(g => g.name)
+      .slice(0, 3);
+
+    // Sub-genres (max 3)
+    const matchedSubGenreNames = subGenres
+      .filter(sg => sg.name && sg.name.toLowerCase().includes(lowerCaseSearchTerm))
+      .map(sg => sg.name)
+      .slice(0, 3);
+
+    const allSuggestions = [...new Set([
+      ...matchedInstrumentNames,
+      ...matchedMoodNames,     // NEW
+      ...matchedSongTitles,
+      ...matchedGenreNames,
+      ...matchedSubGenreNames
+    ])];
+
+    return allSuggestions.slice(0, 10);
+  }, [searchTerm, songs, genres, subGenres, instruments, moods]);
+
+  // --- FIXED: Database-based Favorites using AUTH BACKEND ---
+  const fetchUserFavorites = useCallback(async () => {
+    if (!currentUser) {
+      setFavouriteSongs(new Set());
+      return;
+    }
+
+    try {
+      // FIXED: Use AUTH backend for user favorites
+      const favoritesResponse = await fetch(`${getAuthBackendUrl()}/api/user/favorites`, {
+        credentials: 'include'
+      });
+
+      if (favoritesResponse.ok) {
+        const favoriteIds = await favoritesResponse.json();
+        setFavouriteSongs(new Set(favoriteIds));
+      } else if (favoritesResponse.status === 401) {
+        // User not authenticated, clear favorites
+        setFavouriteSongs(new Set());
       }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    } catch (error) {
+      console.error('Error fetching favorites:', error);
+      setFavouriteSongs(new Set());
+    }
+  }, [currentUser]);
+
+  // ADD: StrictMode-safe current user fetch helper
+  const fetchCurrentUser = useCallback(async () => {
+    const authBackendUrl = getAuthBackendUrl();
+    if (!authBackendUrl) {
+      console.log('ℹ️ Auth backend not configured - running in demo mode');
+      setCurrentUser(null);
+      return null;
+    }
+    try {
+      console.log('🔍 Checking auth status at:', `${authBackendUrl}/api/user`);
+      const response = await fetch(`${authBackendUrl}/api/user`, {
+        credentials: 'include',
+        headers: { 'Accept': 'application/json' }
+      });
+      if (response.ok) {
+        const userData = await response.json();
+        setCurrentUser(userData);
+        console.log('✅ User logged in:', userData);
+        return userData;
+      } else if (response.status === 401) {
+        console.log('ℹ️ No user logged in (401) - Auth backend running but no active session');
+        setCurrentUser(null);
+        return null;
+      } else {
+        console.log(`⚠️ Auth check failed with status: ${response.status}`);
+        setCurrentUser(null);
+        return null;
+      }
+    } catch (error) {
+      console.log('⚠️ Auth backend not available - running without authentication:', error.message);
+      setCurrentUser(null);
+      return null;
+    }
+  }, [getAuthBackendUrl]);
+
+  // FIXED: Check auth status using AUTH BACKEND (StrictMode-safe, run once per page load)
+  useEffect(() => {
+    // Guard StrictMode re-mount in development by using a global flag
+    if (typeof window !== 'undefined' && window.__VARA_AUTH_INIT__ === true) {
+      return;
+    }
+    if (typeof window !== 'undefined') {
+      window.__VARA_AUTH_INIT__ = true;
+    }
+
+    // Read URL params exactly once at startup
+    const urlParams = new URLSearchParams(window.location.search);
+
+    // Handle "came from premium" marker
+    const fromPremium = urlParams.get('from') === 'premium';
+    if (fromPremium) {
+      setCameFromPremium(true);
+      setNotification({
+        message: 'Please log in to access premium features and unlock your music journey! 🎵',
+        type: 'warning'
+      });
+    }
+
+    // Handle post-login redirect
+    if (urlParams.get('login') === 'success') {
+      // Clean the URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+
+      if (fromPremium || cameFromPremium) {
+        // If we came from premium, go back to premium page with a success toast
+        setCameFromPremium(false);
+        setCurrentPage('premium');
+        setActiveTab('premium');
+        setNotification({
+          message: '✅ Successfully logged in! Welcome to premium features.',
+          type: 'success'
+        });
+        navigate('/premium', { replace: true });
+      } else {
+        setNotification({
+          message: '✅ Successfully logged in!',
+          type: 'success'
+        });
+        navigate('/home', { replace: true });
+      }
+    }
+
+    // Fetch current user once
+    fetchCurrentUser();
+  }, []); // Do not add dependencies; global flag ensures single run
+
+  // Fetch favorites when user changes
+  useEffect(() => {
+    fetchUserFavorites();
+  }, [fetchUserFavorites]);
+
+  // --- Data Fetching using DATA BACKEND ---
+  // In-flight promise guards to dedupe parallel fetches
+  const songsPromiseRef = useRef(null);
+  const genresPromiseRef = useRef(null);
+  const subGenresPromiseRef = useRef(null);
+  const trendingPromiseRef = useRef(null);
+  const instrumentsPromiseRef = useRef(null);
+  const moodsPromiseRef = useRef(null);
+
+  const fetchSongs = useCallback(async () => {
+    // If a request is already in-flight, return it
+    if (songsPromiseRef.current) return songsPromiseRef.current;
+    // If already loaded, do not fetch again
+    if (songsLoaded) return null;
+
+    setLoadingSongs(true);
+    const backendUrl = getDataBackendUrl();
+
+    const p = (async () => {
+      try {
+        const res = await fetch(`${backendUrl}/api/songs`);
+        if (!res.ok) throw new Error('Failed to fetch songs from the server.');
+        const data = await res.json();
+        setSongs(data);
+        setSongsLoaded(true);
+        return data;
+      } catch (err) {
+        console.error('Error fetching songs:', err);
+        setError('Failed to load songs. Please check your connection and try again.');
+        throw err;
+      } finally {
+        setLoadingSongs(false);
+        songsPromiseRef.current = null;
+      }
+    })();
+
+    songsPromiseRef.current = p;
+    return p;
+  }, [songsLoaded, getDataBackendUrl]);
+
+  const fetchGenres = useCallback(async () => {
+    if (genresPromiseRef.current) return genresPromiseRef.current;
+    if (genresLoaded) return null;
+
+    setLoadingGenres(true);
+    const backendUrl = getDataBackendUrl();
+
+    const p = (async () => {
+      try {
+        const res = await fetch(`${backendUrl}/api/genres`);
+        if (!res.ok) throw new Error('Failed to fetch genres from the server.');
+        const data = await res.json();
+        setGenres(data);
+        setGenresLoaded(true);
+        return data;
+      } catch (err) {
+        console.error('❌ Error fetching genres:', err);
+        setError('Failed to load genres. Please check your connection and try again.');
+        throw err;
+      } finally {
+        setLoadingGenres(false);
+        genresPromiseRef.current = null;
+      }
+    })();
+
+    genresPromiseRef.current = p;
+    return p;
+  }, [genresLoaded, getDataBackendUrl]);
+
+  const fetchSubGenres = useCallback(async () => {
+    if (subGenresPromiseRef.current) return subGenresPromiseRef.current;
+    if (subGenresLoaded) return null;
+
+    setLoadingSubGenres(true);
+    const backendUrl = getDataBackendUrl();
+
+    const p = (async () => {
+      try {
+        const res = await fetch(`${backendUrl}/api/subgenres`);
+        if (!res.ok) throw new Error('Failed to fetch subgenres from the server.');
+        const data = await res.json();
+        setSubGenres(data);
+        setSubGenresLoaded(true);
+        return data;
+      } catch (err) {
+        console.error('❌ Error fetching subgenres:', err);
+        setError('Failed to load subgenres. Please check your connection and try again.');
+        throw err;
+      } finally {
+        setLoadingSubGenres(false);
+        subGenresPromiseRef.current = null;
+      }
+    })();
+
+    subGenresPromiseRef.current = p;
+    return p;
+  }, [subGenresLoaded, getDataBackendUrl]);
+
+  const fetchTrendingSongs = useCallback(async () => {
+    if (trendingPromiseRef.current) return trendingPromiseRef.current;
+    if (trendingLoaded) return null;
+
+    setLoadingTrending(true);
+    const backendUrl = getDataBackendUrl();
+
+    const p = (async () => {
+      try {
+        const res = await fetch(`${backendUrl}/api/songs/trending?limit=15`);
+        if (!res.ok) throw new Error('Failed to fetch trending songs from the server.');
+        const data = await res.json();
+        setTrendingSongs(data);
+        setTrendingLoaded(true);
+        return data;
+      } catch (err) {
+        console.error('❌ Error fetching trending songs:', err);
+        setTrendingSongs([]);
+        throw err;
+      } finally {
+        setLoadingTrending(false);
+        trendingPromiseRef.current = null;
+      }
+    })();
+
+    trendingPromiseRef.current = p;
+    return p;
+  }, [trendingLoaded, getDataBackendUrl]);
+
+  const fetchInstruments = useCallback(async () => {
+    if (instrumentsPromiseRef.current) return instrumentsPromiseRef.current;
+    if (instrumentsLoaded) return null;
+
+    setLoadingInstruments(true);
+    const backendUrl = getDataBackendUrl();
+
+    const p = (async () => {
+      try {
+        const res = await fetch(`${backendUrl}/api/instruments`);
+        if (!res.ok) throw new Error('Failed to fetch instruments from the server.');
+        const data = await res.json();
+        setInstruments(Array.isArray(data) ? data : []);
+        setInstrumentsLoaded(true);
+        return data;
+      } catch (err) {
+        console.error('❌ Error fetching instruments:', err);
+        throw err;
+      } finally {
+        setLoadingInstruments(false);
+        instrumentsPromiseRef.current = null;
+      }
+    })();
+
+    instrumentsPromiseRef.current = p;
+    return p;
+  }, [instrumentsLoaded, getDataBackendUrl]);
+
+  // NEW: Fetch moods (mirrors fetchInstruments)
+  const fetchMoods = useCallback(async () => {
+    if (moodsPromiseRef.current) return moodsPromiseRef.current;
+    if (moodsLoaded) return null;
+
+    setLoadingMoods(true);
+    const backendUrl = getDataBackendUrl();
+
+    const p = (async () => {
+      try {
+        const res = await fetch(`${backendUrl}/api/moods`);
+        if (!res.ok) throw new Error('Failed to fetch moods from the server.');
+        const data = await res.json();
+        setMoods(Array.isArray(data) ? data : []);
+        setMoodsLoaded(true);
+        return data;
+      } catch (err) {
+        console.error('❌ Error fetching moods:', err);
+        throw err;
+      } finally {
+        setLoadingMoods(false);
+        moodsPromiseRef.current = null;
+      }
+    })();
+
+    moodsPromiseRef.current = p;
+    return p;
+  }, [moodsLoaded, getDataBackendUrl]);
+
+  // Refetch ONLY core lists (songs, genres, sub-genres) when content version changes.
+  const refetchCoreLists = useCallback(async (v) => {
+    try {
+      const backendUrl = getDataBackendUrl();
+      const [songsRes, genresRes, subGenresRes, moodsRes] = await Promise.all([
+        fetch(withVersion(`${backendUrl}/api/songs`, v)),
+        fetch(withVersion(`${backendUrl}/api/genres`, v)),
+        fetch(withVersion(`${backendUrl}/api/subgenres`, v)),
+        fetch(withVersion(`${backendUrl}/api/moods`, v)), // NEW
+      ]);
+
+      const [songsData, genresData, subData, moodsData] = await Promise.all([
+        songsRes.ok ? songsRes.json() : Promise.resolve(songs),
+        genresRes.ok ? genresRes.json() : Promise.resolve(genres),
+        subGenresRes.ok ? subGenresRes.json() : Promise.resolve(subGenres),
+        moodsRes.ok ? moodsRes.json() : Promise.resolve(moods),
+      ]);
+
+      setSongs(Array.isArray(songsData) ? songsData : []);
+      setGenres(Array.isArray(genresData) ? genresData : []);
+      setSubGenres(Array.isArray(subData) ? subData : []);
+      setMoods(Array.isArray(moodsData) ? moodsData : []);
+    } catch (e) {
+      console.error('Content-version refresh failed:', e?.message || e);
+    }
+  }, [getDataBackendUrl, songs, genres, subGenres, moods]);
+
+  // Watch the content version from admin backend and refresh core lists when it changes.
+  useContentVersion({
+    versionUrl: CONTENT_VERSION_URL,
+    onChange: (newV /*, payload */) => {
+      // Refresh ONLY core lists (songs, genres, sub-genres) with a versioned URL.
+      refetchCoreLists(newV);
+    },
+    intervalMs: 15000 // ~15s polling; also re-checks on window focus/visibility
+  });
+
+  // --- Auto-fetch user favorites on mount ---
+  useEffect(() => {
+    fetchUserFavorites();
+  }, [fetchUserFavorites]);
+
+  // --- Data Fetching - INITIAL LOAD ---
+  // In-flight promise guards to dedupe parallel fetches
+  const initialLoadPromiseRef = useRef(null);
+
+  const startProgressiveLoading = useCallback(async () => {
+    // If an initial load is already in progress, return it
+    if (initialLoadPromiseRef.current) return initialLoadPromiseRef.current;
+
+    setError(null);
+    
+    // Step 1: Load Header
+    setLoadingHeader(true);
+    await new Promise(resolve => setTimeout(resolve, 100));
+    setLoadingHeader(false);
+    
+    // Step 2: Load Hero Section
+    setLoadingHero(true);
+    await new Promise(resolve => setTimeout(resolve, 100));
+    setLoadingHero(false);
+    
+    // Step 3: Load Music Content Section
+    setLoadingMusicContent(true);
+    await new Promise(resolve => setTimeout(resolve, 100));
+    setLoadingMusicContent(false);
+    
+    // Step 4: Load ALL data in parallel for instant access
+    const p = (async () => {
+      try {
+        await Promise.all([
+          fetchSongs(),
+          fetchGenres(),
+          fetchSubGenres(),
+          fetchTrendingSongs(),
+          fetchInstruments(),
+          fetchMoods(), // NEW
+        ]);
+      } catch (e) {
+        console.error('Error during initial data load:', e);
+        setError('Failed to load initial data. Please refresh the page.');
+      }
+    })();
+
+    initialLoadPromiseRef.current = p;
+    return p;
+  }, [fetchSongs, fetchGenres, fetchSubGenres, fetchTrendingSongs, fetchInstruments, fetchMoods]);
+
+  // Replace old fetchData with progressive loading (StrictMode-safe: run once per page load)
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.__VARA_DATA_INIT__ === true) {
+      return;
+    }
+    if (typeof window !== 'undefined') {
+      window.__VARA_DATA_INIT__ = true;
+    }
+    startProgressiveLoading();
+  }, [startProgressiveLoading]);
+
+  const handleLoginSuccess = useCallback((userData) => {
+    setCurrentUser(userData);
+    setNotification({ message: '✅ Successfully logged in!', type: 'success' });
   }, []);
 
-  // --- FIX FOR PROBLEM 3: SCROLL TO TOP ---
+  // FIXED: handleLogout using AUTH BACKEND
+  const handleLogout = useCallback(async () => {
+    try {
+      await fetch(`${getAuthBackendUrl()}/api/logout`, {
+        method: 'POST',
+        credentials: 'include'
+      });
+      setCurrentUser(null);
+      setFavouriteSongs(new Set()); // Clear favorites on logout
+      setCurrentPage('main');
+      setActiveTab('home');
+      
+      setNotification({ message: '✅ You have been logged out', type: 'success' });
+      
+    } catch (error) {
+      console.error('Logout error:', error);
+      setNotification({ message: '❌ Logout failed', type: 'error' });
+    }
+  }, []);
+
+  // --- Core Navigation Logic ---
+  const scrollToSection = useCallback((sectionId = 'content-tabs-section') => {
+    setTimeout(() => {
+        const section = document.getElementById(sectionId);
+        if (section) {
+            const header = document.querySelector('.header');
+            const headerHeight = header ? header.offsetHeight : 0;
+            const y = section.getBoundingClientRect().top + window.pageYOffset - headerHeight;
+            window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+    }, 0);
+  }, []);
+
+  const navigateTo = useCallback((newView) => {
+    // mark music content loading while view transitions
+    setLoadingMusicContent(true);
+    setNavigationHistory(prevHistory => [...prevHistory, newView]);
+
+    // IMPORTANT: DO NOT call scrollToSection() here.
+    // MusicContent will scroll itself once it has finished rendering the tabs.
+    setTimeout(() => {
+      setLoadingMusicContent(false);
+    }, 300);
+  }, []);
+
+  const handleBackButtonClick = useCallback(() => {
+    if (navigationHistory.length > 1) {
+      setNavigationHistory(prevHistory => prevHistory.slice(0, -1));
+    }
+  }, [navigationHistory.length]);
+
+  const handleTabClick = useCallback((viewType) => {
+    let newInitialState;
+    let newActiveTab;
+    switch (viewType) {
+        case 'genres': 
+            newInitialState = { view: 'all-genres', title: 'Genres' }; 
+            newActiveTab = 'home';
+            // Data already loaded - no need to fetch
+            break;
+        case 'sub-genres': 
+            newInitialState = { view: 'all-sub-genres', title: 'Sub-Genres' }; 
+            newActiveTab = 'home';
+            // Data already loaded - no need to fetch
+            break;
+        case 'instruments':
+            newInitialState = { view: 'all-instruments', title: 'Instruments' };
+            newActiveTab = 'home';
+            break;
+        case 'moods':
+            newInitialState = { view: 'all-moods', title: 'Moods' };
+            newActiveTab = 'home';
+            break;
+        case 'free-songs': 
+            newInitialState = { view: 'free-songs', title: 'Free Songs' }; 
+            newActiveTab = 'home';
+            break;
+        case 'favourites': 
+            newInitialState = { view: 'favourites', title: 'Favourites' }; 
+            newActiveTab = 'favourites';
+            break;
+        default: 
+            newInitialState = { view: 'for-you', title: 'For You' }; 
+            newActiveTab = 'home';
+            break;
+    }
+    
+    setLoadingMusicContent(true);
+    setNavigationHistory([newInitialState]);
+    setActiveTab(newActiveTab);
+    scrollToSection();
+    setTimeout(() => setLoadingMusicContent(false), 300);
+  }, [scrollToSection]);
+
+  const handleExploreGenre = useCallback((genreId, fromExplore = false) => {
+    console.log('🔍 Exploring genre:', genreId);
+    const genre = genres.find(g => g._id === genreId);
+    if (genre) {
+      console.log('✅ Genre found:', genre.name);
+      if (fromExplore) setAutoScrollTabs(true);
+      navigateTo({ view: 'sub-genres-by-genre', genreId: genre._id, title: genre.name });
+    } else {
+      console.error('❌ Genre not found:', genreId);
+      setNotification({ message: '❌ Genre not found', type: 'error' });
+    }
+  }, [genres, navigateTo]);
+
+  const handleExploreSubgenre = useCallback((subGenreId, fromExplore = false) => {
+    console.log('🔍 Exploring subgenre:', subGenreId);
+    const subGenre = subGenres.find(sg => sg._id === subGenreId);
+    if (subGenre) {
+      console.log('✅ SubGenre found:', subGenre.name);
+      if (fromExplore) setAutoScrollTabs(true);
+      navigateTo({ view: 'songs-by-sub-genre', subGenreId: subGenre._id, title: subGenre.name });
+    } else {
+      console.error('❌ SubGenre not found:', subGenreId);
+      setNotification({ message: '❌ Sub-genre not found', type: 'error' });
+    }
+  }, [subGenres, navigateTo]);
+
+  // --- Explore instrument handler ---
+  const handleExploreInstrument = useCallback((instrumentId, fromExplore = false) => {
+    console.log('🔍 Exploring instrument:', instrumentId);
+    const inst = instruments.find(i => i._id === instrumentId);
+    if (inst) {
+      console.log('✅ Instrument found:', inst.name);
+      if (fromExplore) setAutoScrollTabs(true);
+      navigateTo({ view: 'songs-by-instrument', instrumentId: inst._id, title: inst.name });
+    } else {
+      console.error('❌ Instrument not found:', instrumentId);
+      setNotification({ message: '❌ Instrument not found', type: 'error' });
+    }
+  }, [instruments, navigateTo]);
+
+  // NEW: Explore mood handler
+  const handleExploreMood = useCallback((moodId, fromExplore = false) => {
+    console.log('🔍 Exploring mood:', moodId);
+    const m = moods.find(i => i._id === moodId);
+    if (m) {
+      console.log('✅ Mood found:', m.name);
+      if (fromExplore) setAutoScrollTabs(true);
+      navigateTo({ view: 'songs-by-mood', moodId: m._id, title: m.name });
+    } else {
+      console.error('❌ Mood not found:', moodId);
+      setNotification({ message: '❌ Mood not found', type: 'error' });
+    }
+  }, [moods, navigateTo]);
+
+  const handleNavLinkClick = useCallback((tabName, sectionId, fromExplore = false) => {
+    if (tabName === 'login' || tabName === 'premium') {
+      setCurrentPage(tabName);
+      setActiveTab(tabName);
+      setShowSearchPage(false);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      navigate('/' + tabName);
+      return;
+    }
+    navigate('/home');
+    setCurrentPage('main');
+    setActiveTab(tabName);
+    setShowSearchPage(false);
+    setSearchTerm('');
+    if (tabName === 'home') {
+        setNavigationHistory([initialNavigationState]);
+        // If this was triggered from the hero/TRY AUDIO button, mark auto-scroll allowed
+        if (fromExplore && sectionId) {
+            setAutoScrollTabs(true);
+            scrollToSection(sectionId);
+        } else {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    } else if (tabName === 'favourites') {
+        handleTabClick('favourites');
+    }
+  }, [handleTabClick, scrollToSection]);
+
+  // NEW: Handle premium page navigation with login check
+  const handlePremiumAccess = useCallback(() => {
+    if (!currentUser) {
+      // User not logged in - redirect to login with premium flag
+      setCurrentPage('login');
+      setActiveTab('login');
+      setCameFromPremium(true);
+      setNotification({ message: 'Please log in to access premium features and unlock your music journey! 🎵', type: 'warning' });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return false; // Indicate that premium access was denied
+    }
+    return true; // User is logged in, allow premium access
+  }, [currentUser]);
+
+  // NEW: Handle search focus - data already loaded
+  const handleSearchFocus = useCallback(() => {
+    setIsSearchFocused(true);
+    // No need to fetch - data already loaded
+  }, []);
+
   const handleSearchSubmit = useCallback((queryToSearch = searchTerm) => {
-    if (queryToSearch.trim() !== '') {
-      window.scrollTo(0, 0); // Scroll to top
-      setCurrentSearchQuery(queryToSearch.trim());
+    const query = queryToSearch.trim();
+    if (query) {
+      window.scrollTo(0, 0);
+      navigate(`/search?q=${encodeURIComponent(query)}`);
+      setCurrentSearchQuery(query);
       setShowSearchPage(true);
-      setActiveTab('home'); // Keep home active conceptually for search
-      setCurrentPage('main'); // Stay on the main page contextually
-      setSelectedGenreForSubgenres(null);
-      setSelectedSubgenreForSongs(null);
-      setDisplayedSubgenreTitle(null);
-      setDisplayedGenreTitle(null);
+      setActiveTab('home');
+      setCurrentPage('main');
       setIsSearchFocused(false);
-      setSearchHistory(null);
+      setActiveSuggestionIndex(-1);
     }
   }, [searchTerm]);
 
   const handleSearchKeyDown = useCallback((e) => {
-    if (e.key === 'Enter') handleSearchSubmit();
-  }, [handleSearchSubmit]);
+    const suggestions = filteredSuggestions.length > 0 ? filteredSuggestions : quickSearchSuggestions;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setActiveSuggestionIndex(prev => (prev + 1) % suggestions.length);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActiveSuggestionIndex(prev => (prev - 1 + suggestions.length) % suggestions.length);
+    } else if (e.key === 'Enter') {
+      if (activeSuggestionIndex > -1) handleSearchSubmit(suggestions[activeSuggestionIndex]);
+      else handleSearchSubmit();
+    }
+  }, [activeSuggestionIndex, filteredSuggestions, quickSearchSuggestions, handleSearchSubmit]);
+
+  useEffect(() => { setActiveSuggestionIndex(-1); }, [searchTerm]);
 
   const handleSuggestionClick = useCallback((suggestion) => {
     setSearchTerm(suggestion);
@@ -99,141 +901,157 @@ function App() {
     setShowSearchPage(false);
     setCurrentSearchQuery('');
     setSearchTerm('');
-    setSearchHistory(null);
-    setActiveTab('home'); // Return to home tab
-  }, []);
-  
-  // All music player functions (handlePlayPause, etc.) remain unchanged...
-  const handlePlayPause = useCallback((songToPlay = currentPlayingSong) => {
-    const audio = audioRef.current;
-    let currentSongList = [];
-    if (showSearchPage) {
-      currentSongList = songs.filter(song => {
-        const query = currentSearchQuery.toLowerCase();
-        return song.title.toLowerCase().includes(query) ||
-               (song.genres && song.genres.some(g => g.name.toLowerCase().includes(query))) ||
-               (song.subGenres && song.subGenres.some(sg => sg.name.toLowerCase().includes(query)));
+    navigate('/home'); // keep URL in sync when leaving search
+  }, [navigate]);
+
+  const handleExploreFromSearch = useCallback((type, id) => {
+    // Set suppression flag so the /home URL→state effect does NOT reset to "For You" once.
+    suppressHomeResetRef.current = true;
+    handleBackToMainApp(); // this will navigate('/home') and close the search UI
+    setTimeout(() => {
+        if (type === 'genre') handleExploreGenre(id);
+        else if (type === 'subGenre') handleExploreSubgenre(id);
+        else if (type === 'instrument') handleExploreInstrument(id);
+        else if (type === 'mood') handleExploreMood(id); // already present
+    }, 50);
+  }, [handleBackToMainApp, handleExploreGenre, handleExploreSubgenre, handleExploreInstrument, handleExploreMood]);
+
+  // --- Music Player Logic ---
+  // NEW: Track song interactions
+  const trackSongInteraction = useCallback(async (songId, interactionType, additionalData = {}) => {
+    try {
+      const trackingData = {
+        interactionType,
+        userId: currentUser?.email || 'anonymous',
+        userEmail: currentUser?.email,
+        ...additionalData
+      };
+
+      const response = await fetch(`${getDataBackendUrl()}/api/songs/track/${songId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(trackingData)
       });
-    } else if (selectedSubgenreForSongs) {
-      currentSongList = songs.filter(song => song.subGenres.some(sg => sg._id === selectedSubgenreForSongs));
-    } else if (activeTab === 'freesongs') {
-      currentSongList = songs.filter(song => song.collectionType === 'free');
-    } else if (activeTab === 'favourites') {
-      currentSongList = songs.filter(song => favouriteSongs.has(song._id));
-    } else {
-      currentSongList = songs;
-    }
 
-    if (!songToPlay && !audio.src && currentSongList.length > 0) {
-      songToPlay = currentSongList[0];
+      if (response.ok) {
+        console.log(`✅ Tracked ${interactionType} for song ${songId}`);
+      }
+    } catch (error) {
+      console.log(`⚠️ Failed to track ${interactionType}:`, error);
     }
+  }, [currentUser]);
 
+  // NEW: Track song interactions for taste profile
+  const trackTasteInteraction = useCallback(async (song, interactionType, additionalData = {}) => {
+    // Only track for logged-in users
+    if (!currentUser) return;
+
+    try {
+      const trackingData = {
+        songId: song._id,
+        interactionType,
+        genres: song.genres || [],
+        subGenres: song.subGenres || [],
+        ...additionalData
+      };
+
+      const response = await fetch(TASTE_ENDPOINTS.trackInteraction(), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(trackingData)
+      });
+
+      if (response.ok) {
+        console.log(`✅ Taste interaction tracked: ${interactionType} for song ${song.title}`);
+      }
+    } catch (error) {
+      console.log(`⚠️ Failed to track taste interaction:`, error);
+    }
+  }, [currentUser]);
+
+  const playSong = useCallback((song) => {
+    const audio = audioRef.current;
+    // ADD:
+    setIsAudioLoading(true);
+    setCurrentPlayingSong(song);
+    setCurrentSongId(song._id); // <-- Set currentSongId when a song is played
+    setIsPlayerVisible(true);
+    audio.src = song.audioUrl;
+    audio.play().then(() => {
+      setIsPlaying(true);
+      
+      // Track play interaction for both analytics and taste
+      trackSongInteraction(song._id, 'play', {
+        startTime: 0,
+        duration: song.duration || 0
+      });
+      
+      // Track for taste profile
+      trackTasteInteraction(song, 'play');
+    }).catch(e => console.error("Error playing song:", e));
+  }, [trackSongInteraction, trackTasteInteraction]);
+
+  const handlePlayPause = useCallback((songToPlay, queue = []) => {
+    const audio = audioRef.current;
     if (songToPlay) {
-      setIsPlayerVisible(true);
-      if (audio.src !== songToPlay.audioUrl) {
-        setCurrentPlayingSong(songToPlay);
-        audio.src = songToPlay.audioUrl;
-        audio.play().then(() => setIsPlaying(true)).catch(e => console.error("Error playing new song:", e));
-      } else if (isPlaying) {
+      if (currentPlayingSong?._id === songToPlay._id) {
+        if (isPlaying) {
+          audio.pause();
+          setIsPlaying(false);
+        } else {
+          audio.play().then(() => setIsPlaying(true));
+        }
+      } else {
+        setPlayQueue(queue);
+        setCurrentSongId(songToPlay._id); // <-- Set currentSongId when play is triggered from SearchPage
+        playSong(songToPlay);
+      }
+    } else if (currentPlayingSong) {
+      if (isPlaying) {
         audio.pause();
         setIsPlaying(false);
       } else {
-        audio.play().then(() => setIsPlaying(true)).catch(e => console.error("Error resuming song:", e));
+        audio.play().then(() => setIsPlaying(true));
       }
-    } else if (isPlaying) {
-      audio.pause();
-      setIsPlaying(false);
     }
-  }, [currentPlayingSong, songs, isPlaying, showSearchPage, currentSearchQuery, selectedSubgenreForSongs, activeTab, favouriteSongs]);
+  }, [currentPlayingSong, isPlaying, playSong]);
 
   const handleNextSong = useCallback(() => {
-    if (!currentPlayingSong || songs.length === 0) return;
-    let currentSongList = [];
-    if (showSearchPage) {
-      currentSongList = songs.filter(song => {
-        const query = currentSearchQuery.toLowerCase();
-        return song.title.toLowerCase().includes(query) || (song.genres && song.genres.some(g => g.name.toLowerCase().includes(query))) || (song.subGenres && song.subGenres.some(sg => sg.name.toLowerCase().includes(query)));
-      });
-    } else if (selectedSubgenreForSongs) {
-      currentSongList = songs.filter(song => song.subGenres.some(sg => sg._id === selectedSubgenreForSongs));
-    } else if (activeTab === 'freesongs') {
-      currentSongList = songs.filter(song => song.collectionType === 'free');
-    } else if (activeTab === 'favourites') {
-      currentSongList = songs.filter(song => favouriteSongs.has(song._id));
-    } else {
-      currentSongList = songs;
-    }
-    if (currentSongList.length === 0) return;
-    const currentIndex = currentSongList.findIndex(song => song._id === currentPlayingSong._id);
-    const nextIndex = (currentIndex + 1) % currentSongList.length;
-    handlePlayPause(currentSongList[nextIndex]);
-  }, [currentPlayingSong, songs, handlePlayPause, showSearchPage, currentSearchQuery, selectedSubgenreForSongs, activeTab, favouriteSongs]);
+    if (playQueue.length === 0) return;
+    const currentIndex = playQueue.findIndex(song => song._id === currentPlayingSong?._id);
+    if (currentIndex === -1) return;
+    const nextIndex = (currentIndex + 1) % playQueue.length;
+    playSong(playQueue[nextIndex]);
+  }, [playQueue, currentPlayingSong, playSong]);
 
   const handlePreviousSong = useCallback(() => {
-    if (!currentPlayingSong || songs.length === 0) return;
-    let currentSongList = [];
-    if (showSearchPage) {
-      currentSongList = songs.filter(song => {
-        const query = currentSearchQuery.toLowerCase();
-        return song.title.toLowerCase().includes(query) || (song.genres && song.genres.some(g => g.name.toLowerCase().includes(query))) || (song.subGenres && song.subGenres.some(sg => sg.name.toLowerCase().includes(query)));
-      });
-    } else if (selectedSubgenreForSongs) {
-      currentSongList = songs.filter(song => song.subGenres.some(sg => sg._id === selectedSubgenreForSongs));
-    } else if (activeTab === 'freesongs') {
-      currentSongList = songs.filter(song => song.collectionType === 'free');
-    } else if (activeTab === 'favourites') {
-      currentSongList = songs.filter(song => favouriteSongs.has(song._id));
-    } else {
-      currentSongList = songs;
-    }
-    if (currentSongList.length === 0) return;
-    const currentIndex = currentSongList.findIndex(song => song._id === currentPlayingSong._id);
-    const prevIndex = (currentIndex - 1 + currentSongList.length) % currentSongList.length;
-    handlePlayPause(currentSongList[prevIndex]);
-  }, [currentPlayingSong, songs, handlePlayPause, showSearchPage, currentSearchQuery, selectedSubgenreForSongs, activeTab, favouriteSongs]);
+    if (playQueue.length === 0) return;
+    const currentIndex = playQueue.findIndex(song => song._id === currentPlayingSong?._id);
+    if (currentIndex === -1) return;
+    const prevIndex = (currentIndex - 1 + playQueue.length) % playQueue.length;
+    playSong(playQueue[prevIndex]);
+  }, [playQueue, currentPlayingSong, playSong]);
 
   const handleEnded = useCallback(() => {
-    setIsPlaying(false);
     handleNextSong();
   }, [handleNextSong]);
-
-  const fetchData = useCallback(async () => {
-    setError(null);
-    setLoadingInitial(true);
-    setLoadingContentTabs(true);
-    setLoadingSongs(true);
-    try {
-      const [genresRes, subGenresRes, songsRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/api/genres`),
-        fetch(`${API_BASE_URL}/api/subgenres`),
-        fetch(`${API_BASE_URL}/api/songs`)
-      ]);
-      const genresData = await genresRes.json();
-      const subGenresData = await subGenresRes.json();
-      const songsData = await songsRes.json();
-      if (!genresRes.ok || !subGenresRes.ok || !songsRes.ok) throw new Error('Failed to fetch initial data.');
-      setGenres(genresData);
-      setSubGenres(subGenresData);
-      setSongs(songsData);
-    } catch (err) {
-      console.error("Error fetching data:", err);
-      setError("Failed to load data. Please try again later.");
-    } finally {
-      setLoadingInitial(false);
-      setLoadingContentTabs(false);
-      setLoadingSongs(false);
-    }
-  }, []);
-
-  useEffect(() => { fetchData(); }, [fetchData]);
-
+  
   useEffect(() => {
     const audio = audioRef.current;
-    const setAudioData = () => {
+    // ADD:
+    const handleCanPlay = () => {
+      setIsAudioLoading(false);
       setDuration(audio.duration);
-      setProgress(0);
-      setCurrentTime(0);
     };
+    const handlePlaying = () => {
+      setIsAudioLoading(false);
+    };
+    const setAudioData = () => { setDuration(audio.duration); };
     const updateProgress = () => {
       setCurrentTime(audio.currentTime);
       setProgress((audio.currentTime / audio.duration) * 100 || 0);
@@ -241,28 +1059,32 @@ function App() {
     audio.addEventListener('loadedmetadata', setAudioData);
     audio.addEventListener('timeupdate', updateProgress);
     audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('canplay', handleCanPlay);
+    audio.addEventListener('playing', handlePlaying);
     audio.volume = volume;
     return () => {
       audio.removeEventListener('loadedmetadata', setAudioData);
       audio.removeEventListener('timeupdate', updateProgress);
       audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('canplay', handleCanPlay);
+      audio.removeEventListener('playing', handlePlaying);
     };
   }, [volume, handleEnded]);
 
   const handleSeek = (e) => {
     const audio = audioRef.current;
-    const seekTime = (e.target.value / 100) * audio.duration;
-    audio.currentTime = seekTime;
-    setProgress(e.target.value);
+    if (audio.duration) {
+        const seekTime = (e.target.value / 100) * audio.duration;
+        audio.currentTime = seekTime;
+        setProgress(e.target.value);
+    }
   };
 
   const handleVolumeChange = (e) => {
     const newVolume = parseFloat(e.target.value);
-    audioRef.current.volume = newVolume;
     setVolume(newVolume);
-    if (newVolume > 0) {
-      setPreviousVolume(newVolume);
-    }
+    audioRef.current.volume = newVolume;
+    if (newVolume > 0) setPreviousVolume(newVolume);
   };
 
   const toggleMute = useCallback(() => {
@@ -278,11 +1100,14 @@ function App() {
   }, [volume, previousVolume]);
 
   const handleClosePlayer = useCallback(() => {
+    // ADD:
+    setIsAudioLoading(false);
     if (isPlaying) {
       audioRef.current.pause();
       setIsPlaying(false);
     }
     setIsPlayerVisible(false);
+    setCurrentPlayingSong(null);
   }, [isPlaying]);
 
   const formatTime = (seconds) => {
@@ -292,162 +1117,456 @@ function App() {
     return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
   };
 
-  const handleToggleFavourite = useCallback((songId) => {
-    setFavouriteSongs(prev => {
-      const newFavs = new Set(prev);
-      if (newFavs.has(songId)) newFavs.delete(songId);
-      else newFavs.add(songId);
-      return newFavs;
-    });
-  }, []);
+  // UPDATED: Enhanced download handling with taste tracking
+  const handleDownload = useCallback(async (song) => {
+    try {
+      // 0) Basic validation
+      if (!song || !(song._id || song.id)) {
+        setNotification({ message: '❌ Invalid song data. Please try again.', type: 'error' });
+        return;
+      }
 
-  const handleDownload = useCallback((songUrl, songTitle) => {
-    console.log(`Download: ${songTitle} from ${songUrl}`);
-  }, []);
-  
-  // --- FIX FOR PROBLEM 3: SCROLL TO TOP ---
-  const handleNavLinkClick = useCallback((tabName, sectionId) => {
-    window.scrollTo(0, 0); // Scroll to top on any main navigation
-    if (tabName === 'login' || tabName === 'premium') {
-      setCurrentPage(tabName);
-      setActiveTab(tabName);
-      setShowSearchPage(false);
-      setSelectedGenreForSubgenres(null);
-      setSelectedSubgenreForSongs(null);
+      const authBase = (typeof getAuthBackendUrl === 'function')
+        ? getAuthBackendUrl()
+        : ((typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_REACT_APP_AUTH_BACKEND_URL) || 'http://localhost:5000');
+      const authRoot = String(authBase).replace(/\/+$/, '');
+
+      const safeSongId = song._id || song.id;
+      const safeTitle = song.title || song.name || 'Track';
+      const songUrl = song?.audioUrl || song?.url || song?.cloudinaryUrl || song?.fileUrl || null;
+
+      // 1) Login required
+      if (!currentUser) {
+        setNotification({ message: '🔒 Please login to download songs', type: 'warning' });
+        return;
+      }
+
+      // 2) Premium gating BEFORE any server tracking
+      const premium = isPremiumSong(song);
+      if (premium && !currentUser.is_premium) {
+        setNotification({
+          message: '🎵 This is a premium track. Upgrade to Vara Premium to download paid songs and unlock the full library.',
+          type: 'warning'
+        });
+        return;
+      }
+
+      // 3) Monthly limit pre-check
+      try {
+        const limitsRes = await fetch(`${authRoot}/api/user/limits`, {
+          method: 'GET',
+          credentials: 'include',
+          headers: { Accept: 'application/json' }
+        });
+        if (limitsRes.ok) {
+          const limits = await limitsRes.json();
+          if ((limits?.remaining ?? 0) <= 0) {
+            const plan = limits?.plan === 'premium' ? 'premium' : 'free';
+            const msg = plan === 'premium'
+              ? 'You’ve reached your monthly limit of 50 downloads on this account. To get more downloads right now, sign in with a different Google account and upgrade there.'
+              : 'You’ve reached your monthly download limit on the Free plan. Upgrade to Premium to unlock up to 50 downloads per month.';
+            setNotification({ message: msg, type: 'warning' });
+            return;
+          }
+        }
+      } catch {
+        // If the pre-check fails unexpectedly, we stop (safer than decrementing incorrectly)
+        setNotification({ message: '⚠️ Could not verify your download limit. Please try again.', type: 'error' });
+        return;
+      }
+
+      // 4) Track the download on the server (authoritative)
+      const trackRes = await fetch(`${authRoot}/api/user/track-download`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ songId: safeSongId, songTitle: safeTitle })
+      });
+
+      if (trackRes.status === 429) {
+        let body = {};
+        try { body = await trackRes.json(); } catch {}
+        const plan = body?.plan === 'premium' ? 'premium' : 'free';
+        const msg = plan === 'premium'
+          ? 'You’ve reached your monthly limit of 50 downloads on this account. To get more downloads right now, sign in with a different Google account and upgrade there.'
+          : 'You’ve reached your monthly download limit on the Free plan. Upgrade to Premium to unlock up to 50 downloads per month.';
+        setNotification({ message: msg, type: 'warning' });
+        window.dispatchEvent(new CustomEvent('vara:download-recorded', { detail: { remaining: typeof body?.remaining === 'number' ? body.remaining : undefined } }));
+        return;
+      }
+      if (!trackRes.ok) {
+        setNotification({ message: 'We couldn’t verify your download. Please try again in a moment.', type: 'error' });
+        return;
+      }
+
+      // --- License modal integration (do not modify other logic) ---
+      let payload = {};
+      try { payload = await trackRes.json(); } catch {}
+
+      // Notify the header badge; update immediately then revalidate
+      window.dispatchEvent(new CustomEvent('vara:download-recorded', {
+        detail: {
+          remaining: typeof payload?.remaining === 'number' ? payload.remaining : undefined,
+          optimisticDelta: (typeof payload?.remaining === 'number') ? undefined : -1
+        }
+      }));
+
+      // Seed modal with immediate data
+      setLicenseModalData({
+        licenseId: payload?.licenseId,
+        issuedToEmail: payload?.issuedToEmail,
+        subscriptionStatus: payload?.subscriptionStatus || (payload?.plan === 'premium' ? 'Active' : 'Inactive'),
+        validFor: payload?.validFor || 'Use on YouTube & Social Platforms',
+        songTitle: (song?.title || song?.name || 'Track'),
+        issuedAtUtcIso: null, // will be filled after verify
+        remaining: typeof payload?.remaining === 'number' ? payload.remaining : undefined
+      });
+      setLicenseModalOpen(true);
+
+      // Enrich with verify call (to get issuedAt)
+      try {
+        const verifyRes = await fetch(`${authRoot}/api/license/verify?id=${encodeURIComponent(payload?.licenseId)}`, { method: 'GET' });
+        if (verifyRes.ok) {
+          const v = await verifyRes.json();
+          setLicenseModalData((d) => d ? ({
+            ...d,
+            issuedAtUtcIso: v?.issuedAtUtcIso || d.issuedAtUtcIso,
+            subscriptionStatus: v?.subscriptionStatus || d.subscriptionStatus,
+            validFor: v?.validFor || d.validFor,
+            songTitle: v?.songTitle || d.songTitle
+          }) : d);
+        }
+      } catch {}
+      // --- end License modal integration ---
+
+      // Keep badge in sync
+      window.dispatchEvent(new CustomEvent('vara:download-recorded'));
+
+      // 5) Now actually download the file
+      if (!songUrl) {
+        setNotification({ message: '❌ Download link is missing for this track.', type: 'error' });
+        return;
+      }
+
+      setNotification({ message: `⬇️ Preparing "${safeTitle}" for download...`, type: 'success' });
+
+      const response = await fetch(songUrl, {
+        method: 'GET',
+        headers: { Accept: 'audio/*' }
+      });
+      if (!response.ok) throw new Error(`Failed to fetch audio file: ${response.status}`);
+
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+
+      // Build filename
+      const sanitizedTitle = safeTitle.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '-').toUpperCase();
+      const customFilename = `${sanitizedTitle}-VARAMUSIC.COM.mp3`;
+
+      const downloadLink = document.createElement('a');
+      downloadLink.href = blobUrl;
+      downloadLink.download = customFilename;
+      downloadLink.style.display = 'none';
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+      setTimeout(() => window.URL.revokeObjectURL(blobUrl), 1000);
+
+      setNotification({ message: `✅ "${safeTitle}" downloaded successfully!`, type: 'success' });
+
+      // Optional analytics/taste tracking (non-blocking)
+      try {
+        trackSongInteraction(safeSongId, 'download');
+        trackTasteInteraction(song, 'download');
+      } catch {}
+
+    } catch (error) {
+      console.error('❌ Download error:', error);
+      setNotification({ message: '❌ Download failed. Please try again.', type: 'error' });
+    }
+  }, [currentUser, isPremiumSong, trackSongInteraction, trackTasteInteraction, getAuthBackendUrl]);
+
+  // FIXED: Database-based favorite handling with taste tracking
+  const handleToggleFavourite = useCallback(async (songId) => {
+    // Check if user is logged in
+    if (!currentUser) {
+      setNotification({ message: '❤️ Please login to add songs to favorites', type: 'warning' });
       return;
     }
 
-    setCurrentPage('main');
-    setActiveTab(tabName);
-    setSelectedGenreForSubgenres(null);
-    setSelectedSubgenreForSongs(null);
-    setDisplayedSubgenreTitle(null);
-    setDisplayedGenreTitle(null);
-    setShowSearchPage(false);
-    setCurrentSearchQuery('');
-    setSearchTerm('');
-    setIsSearchFocused(false);
-    setSearchHistory(null);
+    const isCurrentlyFavorite = favouriteSongs.has(songId);
+    const song = songs.find(s => s._id === songId);
+
+    // Track the interaction
+    trackSongInteraction(songId, isCurrentlyFavorite ? 'unfavorite' : 'favorite');
     
-    if (sectionId) {
-      setTimeout(() => {
-        const section = document.getElementById(sectionId);
-        if (section) {
-          const header = document.querySelector('.header');
-          const headerHeight = header ? header.offsetHeight : 0;
-          window.scrollTo({ top: section.offsetTop - headerHeight, behavior: 'smooth' });
-        }
-      }, 0);
+    // Track for taste profile
+    if (song) {
+      trackTasteInteraction(song, isCurrentlyFavorite ? 'unfavorite' : 'favorite');
     }
-  }, []);
 
-  const handleExploreGenre = useCallback((genreId, origin = 'main') => {
-    const genre = genres.find(g => g._id === genreId);
-    if (genre) {
-      if (origin === 'search') setSearchHistory(currentSearchQuery);
-      else setSearchHistory(null);
-      setSelectedGenreForSubgenres(genreId);
-      setSelectedSubgenreForSongs(null);
-      setDisplayedSubgenreTitle(null);
-      setDisplayedGenreTitle(genre.name);
-      setActiveTab('genres'); // Set active tab to genres
-      setShowSearchPage(false);
-      const section = document.getElementById('content-tabs-section');
-      if (section) {
-          const header = document.querySelector('.header');
-          const headerHeight = header ? header.offsetHeight : 0;
-          window.scrollTo({ top: section.offsetTop - headerHeight, behavior: 'smooth' });
+    try {
+      const response = await fetch(`${getAuthBackendUrl()}/api/user/favorites${isCurrentlyFavorite ? `/${songId}` : ''}`, {
+        method: isCurrentlyFavorite ? 'DELETE' : 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: isCurrentlyFavorite ? undefined : JSON.stringify({ songId })
+      });
+
+      if (response.ok) {
+        setFavouriteSongs(prev => {
+          const newFavs = new Set(prev);
+          if (isCurrentlyFavorite) {
+            newFavs.delete(songId);
+          } else {
+            newFavs.add(songId);
+            setNotification({ message: '💛 This song is added to Favourites', type: 'favorite' });
+          }
+          return newFavs;
+        });
+      } else {
+        throw new Error('Failed to update favorites');
       }
+    } catch (error) {
+      console.error('Error updating favorites:', error);
+      setNotification({ message: '❌ Failed to update favorites', type: 'error' });
     }
-  }, [genres, currentSearchQuery]);
+  }, [currentUser, favouriteSongs, songs, trackSongInteraction, trackTasteInteraction, getAuthBackendUrl]);
 
-  const handleExploreSubgenre = useCallback((subgenreId, origin = 'main') => {
-    const subgenre = subGenres.find(sg => sg._id === subgenreId);
-    if (subgenre) {
-      if (origin === 'search') setSearchHistory(currentSearchQuery);
-      else setSearchHistory(null);
-      setSelectedSubgenreForSongs(subgenreId);
-      setDisplayedSubgenreTitle(subgenre.name);
-      // Keep the parent genre selected so we can go back to it
-      if (subgenre.genre) {
-        setSelectedGenreForSubgenres(subgenre.genre._id);
-        setDisplayedGenreTitle(subgenre.genre.name);
-      }
-      setActiveTab('subgenres');
-      setShowSearchPage(false);
-      const section = document.getElementById('content-tabs-section');
-      if (section) {
-          const header = document.querySelector('.header');
-          const headerHeight = header ? header.offsetHeight : 0;
-          window.scrollTo({ top: section.offsetTop - headerHeight, behavior: 'smooth' });
-      }
+  // REPLACE: refreshUserData to use fetchCurrentUser
+  const refreshUserData = async () => {
+    console.log('🔄 Manually refreshing user data...');
+    await fetchCurrentUser();
+  };
+
+  // Add scrollToTabs function for smooth scroll to tab section
+  const scrollToTabs = () => {
+    const tabSection = document.getElementById('main-tab-section');
+    if (tabSection) {
+      tabSection.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [subGenres, currentSearchQuery]);
+  };
 
-  // --- FIX FOR PROBLEMS 1 & 2: BACK BUTTON LOGIC ---
-  const handleBackButtonClick = useCallback(() => {
-    // If we are viewing songs of a sub-genre...
-    if (selectedSubgenreForSongs) {
-      // ...go back to the list of sub-genres.
-      setSelectedSubgenreForSongs(null);
-      setDisplayedSubgenreTitle(null);
-      // The parent genre title is already set, so it will show correctly.
-      setActiveTab('genres'); // The view will show sub-genres for the selected genre
-    } 
-    // Else, if we are viewing sub-genres of a genre...
-    else if (selectedGenreForSubgenres) {
-      // ...go back to the main list of all genres.
-      setSelectedGenreForSubgenres(null);
-      setDisplayedGenreTitle(null);
-      setActiveTab('genres');
-    }
-  }, [selectedSubgenreForSongs, selectedGenreForSubgenres]);
-  
-  const mainContentFilteredSongs = useMemo(() => songs.filter(song => {
-    if (activeTab === 'home') return true;
-    if (activeTab === 'freesongs') return song.collectionType === 'free';
-    if (activeTab === 'favourites') return favouriteSongs.has(song._id);
-    return false;
-  }), [songs, activeTab, favouriteSongs]);
-
-  const subgenresForSelectedGenre = useMemo(() => selectedGenreForSubgenres
-    ? subGenres.filter(sg => sg.genre && sg.genre._id === selectedGenreForSubgenres)
-    : [], [subGenres, selectedGenreForSubgenres]);
-
-  const songsForSelectedSubgenre = useMemo(() => selectedSubgenreForSongs
-    ? songs.filter(song => song.subGenres.some(sg => sg._id === selectedSubgenreForSongs))
-    : [], [songs, selectedSubgenreForSongs]);
-  
   const renderPage = () => {
     switch (currentPage) {
-      case 'login':
-        return <LoginPage />;
-      case 'premium':
-        return <PremiumPage />;
-      case 'main':
+      case 'login': return <LoginPage onLoginSuccess={handleLoginSuccess} />;
+      case 'premium': return <PremiumPage currentUser={currentUser} onPremiumAccess={handlePremiumAccess} />;
       default:
-        return showSearchPage ? (
-          <SearchPage {...{searchQuery: currentSearchQuery, songs, genres, subGenres, onBack: handleBackToMainApp, handlePlayPause, currentPlayingSong, isPlaying, formatTime, favouriteSongs, handleToggleFavourite, handleDownload, loadingSongs, handleExploreGenre, handleExploreSubgenre}} />
-        ) : (
+        if (showSearchPage) {
+          return (
+            <SearchPage
+              searchQuery={currentSearchQuery} songs={songs} genres={genres} subGenres={subGenres}
+              onBack={handleBackToMainApp}
+              handlePlayPause={handlePlayPause}
+              currentPlayingSong={currentPlayingSong} isPlaying={isPlaying} formatTime={formatTime}
+              favouriteSongs={favouriteSongs} handleToggleFavourite={handleToggleFavourite}
+              handleDownload={handleDownload} loadingSongs={loadingSongs} onExplore={handleExploreFromSearch}
+              currentUser={currentUser}
+              currentSongId={currentSongId}
+              instruments={instruments}
+              moods={moods}
+            />
+          );
+        }
+        return (
           <>
-            <HeroSection loadingInitial={loadingInitial} handleNavLinkClick={handleNavLinkClick} />
-            <MusicContent {...{loadingContentTabs, activeTab, setActiveTab, setSelectedGenreForSubgenres, setSelectedSubgenreForSongs, setDisplayedSubgenreTitle, setDisplayedGenreTitle, selectedGenreForSubgenres, selectedSubgenreForSongs, loadingSongs, handleBackButtonClick, displayedGenreTitle, displayedSubgenreTitle, error, songsForSelectedSubgenre, handleExploreGenre, handleExploreSubgenre, handlePlayPause, currentPlayingSong, isPlaying, formatTime, favouriteSongs, handleToggleFavourite, handleDownload, subgenresForSelectedGenre, genres, subGenres, mainContentFilteredSongs}} />
+            <HeroSection loadingHeader={loadingHeader} loadingHero={loadingHero} handleNavLinkClick={handleNavLinkClick} currentUser={currentUser} />
+            <MusicContent
+                loadingMusicContent={loadingMusicContent}
+                loadingSongs={loadingSongs}
+                loadingGenres={loadingGenres} 
+                loadingSubGenres={loadingSubGenres}
+                trendingSongs={trendingSongs}
+                loadingTrending={loadingTrending}
+                error={error}
+                currentView={currentView}
+                showBackButton={navigationHistory.length > 1}
+                onBackButtonClick={handleBackButtonClick}
+                onTabClick={handleTabClick}
+                onExploreGenre={handleExploreGenre}
+                onExploreSubgenre={handleExploreSubgenre}
+                // --- Pass instruments props ---
+                instruments={instruments}
+                loadingInstruments={loadingInstruments}
+                onExploreInstrument={handleExploreInstrument}
+                // --- NEW: Pass moods props ---
+                moods={moods}
+                loadingMoods={loadingMoods}
+                onExploreMood={handleExploreMood}
+                songs={songs}
+                genres={genres}
+                subGenres={subGenres}
+                favouriteSongs={favouriteSongs}
+                currentPlayingSong={currentPlayingSong}
+                isPlaying={isPlaying}
+                onPlayPause={handlePlayPause}
+                onToggleFavourite={handleToggleFavourite}
+                onDownload={handleDownload}
+                formatTime={formatTime}
+                currentUser={currentUser}
+                autoScrollTabs={autoScrollTabs}
+                clearAutoScrollTabs={clearAutoScrollTabs}
+            />
           </>
         );
     }
   };
 
+  // URL → state sync effect
+  useEffect(() => {
+    const path = location.pathname;
+    if (path === '/' || path === '/home') {
+      // Skip one-time reset when transitioning from /search to a specific view.
+      if (suppressHomeResetRef.current) {
+        suppressHomeResetRef.current = false; // consume the flag
+        return; // do NOT reset to "For You" — let navigateTo(...) from explore run
+      }
+      setCurrentPage('main');
+      setActiveTab('home');
+      setShowSearchPage(false);
+      setSearchTerm('');
+      setNavigationHistory([initialNavigationState]);
+    } else if (path === '/login') {
+      setCurrentPage('login');
+      setActiveTab('login');
+      setShowSearchPage(false);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (path === '/premium') {
+      setCurrentPage('premium');
+      setActiveTab('premium');
+      setShowSearchPage(false);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [location.pathname]);
+
+  // Dedicated effect for /search deep link handling
+  useEffect(() => {
+    if (location.pathname === '/search') {
+      const params = new URLSearchParams(location.search || '');
+      const q = params.get('q') || '';
+      setCurrentPage('main');
+      setActiveTab('home');
+      setShowSearchPage(true);
+      setCurrentSearchQuery(q);
+      setSearchTerm(q);
+      setIsSearchFocused(false);
+      setActiveSuggestionIndex(-1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [location.pathname, location.search]);
+
   return (
-    <div className={currentPage === 'premium' ? 'app-wrapper premium-background' : 'app-wrapper'}>
-      <Header {...{loadingInitial, currentPage, searchInputRef, searchTerm, setSearchTerm, handleSearchKeyDown, handleSearchSubmit, isSearchFocused, setIsSearchFocused, quickSearchOverlayRef, filteredSuggestions, quickSearchSuggestions, handleSuggestionClick, activeTab, showSearchPage, handleNavLinkClick}} />
-      <main>
-        {renderPage()}
-      </main>
-      {isPlayerVisible && (
-        <MusicPlayer {...{loadingSongs, currentPlayingSong, isPlaying, progress, duration, currentTime, volume, handlePreviousSong, handlePlayPause, handleNextSong, handleSeek, handleVolumeChange, formatTime, toggleMute, handleClosePlayer}} />
-      )}
-      <Footer />
-    </div>
+    <Routes>
+      <Route path="/faq" element={<FAQ />} />
+      <Route path="/about" element={<React.Fragment><AboutUs /></React.Fragment>} />
+      <Route path="/privacy-policy" element={<React.Fragment><PrivacyPolicyPage /></React.Fragment>} />
+      <Route path="/terms" element={<React.Fragment><TermsOfService /></React.Fragment>} />
+      <Route path="/license" element={<React.Fragment><LicenseAgreement /></React.Fragment>} />
+      <Route path="/license-verification" element={<LicenseVerificationPage />} />
+      <Route
+        path="*"
+        element={
+          <>
+            <div className={currentPage === 'premium' ? 'app-wrapper premium-background' : 'app-wrapper'}>
+              <Header
+                loadingHeader={loadingHeader}
+                currentPage={currentPage} activeTab={activeTab}
+                searchInputRef={searchInputRef} searchTerm={searchTerm} setSearchTerm={setSearchTerm}
+                handleSearchKeyDown={handleSearchKeyDown} handleSearchSubmit={handleSearchSubmit}
+                isSearchFocused={isSearchFocused} setIsSearchFocused={setIsSearchFocused}
+                handleSearchFocus={handleSearchFocus}
+                quickSearchOverlayRef={quickSearchOverlayRef}
+                filteredSuggestions={filteredSuggestions}
+                quickSearchSuggestions={quickSearchSuggestions}
+                handleSuggestionClick={handleSuggestionClick}
+                activeSuggestionIndex={activeSuggestionIndex}
+                showSearchPage={showSearchPage}
+                handleNavLinkClick={handleNavLinkClick}
+                currentUser={currentUser}
+                onLogout={handleLogout}
+                setCurrentUser={setCurrentUser}
+                onUserUpdate={refreshUserData} // ✅ Pass the refresh function
+              />
+              {/* Notification component with yellow theme */}
+              <Notification 
+                message={notification.message}
+                type={notification.type}
+                onClose={() => setNotification({ message: '', type: '' })}
+              />
+              <LicenseModal
+                open={licenseModalOpen}
+                onClose={() => setLicenseModalOpen(false)}
+                data={licenseModalData}
+              />
+              <Routes>
+                <Route path="/" element={<Navigate to="/home" replace />} />
+                <Route path="/home" element={renderPage()} />
+                <Route
+                  path="/search"
+                  element={
+                    <SearchPage
+                      searchQuery={currentSearchQuery}
+                      songs={songs}
+                      genres={genres}
+                      subGenres={subGenres}
+                      onBack={handleBackToMainApp}
+                      handlePlayPause={handlePlayPause}
+                      currentPlayingSong={currentPlayingSong}
+                      isPlaying={isPlaying}
+                      formatTime={formatTime}
+                      favouriteSongs={favouriteSongs}
+                      handleToggleFavourite={handleToggleFavourite}
+                      handleDownload={handleDownload}
+                      loadingSongs={loadingSongs}
+                      onExplore={handleExploreFromSearch}
+                      currentUser={currentUser}
+                      currentSongId={currentSongId}
+                      instruments={instruments}
+                      moods={moods}
+                    />
+                  }
+                />
+                <Route path="/login" element={<LoginPage onLoginSuccess={handleLoginSuccess} />} />
+                <Route path="/premium" element={<PremiumPage currentUser={currentUser} onPremiumAccess={handlePremiumAccess} />} />
+                <Route path="/feedback" element={<FeedbackPage currentUser={currentUser} />} />
+                {/* Keep any other routes here unchanged */}
+              </Routes>
+              <GoToTopButton
+                show={currentPage === 'main' && (activeTab === 'home' || activeTab === 'favourites') && !showSearchPage}
+                onGoTop={() => scrollToSection('content-tabs-section')}
+                bottomOffset={isPlayerVisible ? 96 : 24}
+                showOnMobile={true}
+              />
+              <MusicPlayer
+                isPlayerVisible={isPlayerVisible}
+                toggleMute={toggleMute} handleClosePlayer={handleClosePlayer}
+                handleSeek={handleSeek} handleVolumeChange={handleVolumeChange} formatTime={formatTime}
+                handlePreviousSong={handlePreviousSong} handlePlayPause={handlePlayPause} handleNextSong={handleNextSong}
+                progress={progress} duration={duration} currentTime={currentTime} volume={volume}
+                loadingSongs={loadingSongs} currentPlayingSong={currentPlayingSong} isPlaying={isPlaying}
+                // --- NEW PROPS ---
+                handleToggleFavourite={handleToggleFavourite}
+                handleDownload={handleDownload}
+                favouriteSongs={favouriteSongs}
+                currentUser={currentUser}
+                // ADD:
+                isAudioLoading={isAudioLoading}
+              />
+              <Footer
+                onPremiumClick={() => {
+                  setCurrentPage('premium');
+                  setActiveTab('premium');
+                  navigate('/premium');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+              />
+            </div>
+          </>
+        }
+      />
+    </Routes>
   );
 }
 

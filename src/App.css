@@ -66,14 +66,13 @@ body {
   font-family: 'Inter', sans-serif;
   font-size: 1em;
   font-weight: 500;
-  transition: color 0.3s ease, transform 0.2s ease;
+  transition: color 0.3s ease;
   position: relative;
   padding-bottom: 5px;
 }
 
 .nav-link:hover {
   color: #eebb2d;
-  transform: translateY(-2px);
 }
 
 .nav-link.active {
@@ -200,17 +199,91 @@ body {
   padding: 0 18px;
 }
 
-.search-button:hover {
-  background-color: #d4a72a;
+/* Clear (X) button inside the search bar — refined, accessible, consistent with theme */
+.search-clear-button {
+  background: transparent;
+  border: none;
+  color: #cfcfcf;                 /* subtle by default */
+  width: 32px;                    /* slightly larger for better hit target */
+  height: 32px;
+  margin-right: 8px;              /* spacing before the main search button */
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    transform 120ms ease,
+    box-shadow 160ms ease;
 }
 
+.search-clear-button:hover {
+  background-color: rgba(255, 255, 255, 0.10);  /* subtle hover */
+  color: #ffffff;
+  transform: scale(1.00);
+}
+
+.search-clear-button:active {
+  transform: scale(0.98);
+  background-color: rgba(255, 255, 255, 0.14);
+}
+
+/* Keyboard accessibility: crisp focus ring that matches VARA yellow */
+.search-clear-button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(235,186,47,0.9);  /* VARA yellow ring */
+  background-color: rgba(235,186,47,0.10);
+  color: #ffffff;
+}
+
+.search-clear-button span {
+  display: inline-block;
+  font-size: 18px;    /* crisp “×” size for 32px button */
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: 0;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .search-clear-button {
+    transition: background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
+  }
+}
+
+/* Slightly larger touch target on coarse pointers (mobile) */
+@media (pointer: coarse) {
+  .search-clear-button {
+    width: 36px;
+    height: 36px;
+  }
+  .search-clear-button span {
+    font-size: 20px;
+  }
+}
+
+/* Tighten on very small screens */
+@media (max-width: 480px) {
+  .search-clear-button {
+    width: 28px;
+    height: 28px;
+    margin-right: 6px;
+  }
+  .search-clear-button span {
+    font-size: 16px;
+  }
+}
 .search-button svg {
   width: 22px;
   height: 22px;
   stroke: #1a1a1a;
   stroke-width: 2.5;
 }
-
 .quick-search-overlay {
   position: absolute;
   top: calc(100% + 8px);
@@ -248,7 +321,8 @@ body {
   transition: background-color 0.2s ease;
 }
 
-.suggestion-item:hover {
+.suggestion-item:hover,
+.suggestion-item.active { /* ADDON 2: Style for active suggestion */
   background-color: #3e3e3e;
 }
 
@@ -357,7 +431,7 @@ body {
   display: flex;
   justify-content: center;
   margin-top: 0;
-  margin-bottom: 30px;
+  margin-bottom: 0px;
   gap: 30px;
   border-bottom: 2px solid #333;
   padding-bottom: 15px;
@@ -388,13 +462,43 @@ body {
 .tab-button.active { color: #facc25; }
 .tab-button.active::after { background-color: #facc25; }
 
+/* --- NEW & MODIFIED: Content Header for Back Button and Title --- */
+.content-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* This will push items to the edges */
+  padding: 0px 0px;
+  box-sizing: border-box;
+  min-height: 0px; /* Give it a fixed height to prevent layout shifts */
+  position: relative; /* Needed for absolute centering */
+}
+
 .back-button-container {
-  width: 100%;
+  flex: 1 1 0%; /* Takes up left space */
   display: flex;
   justify-content: flex-start;
-  padding: 20px 40px;
-  box-sizing: border-box;
 }
+
+/* This is a spacer div to balance the flexbox */
+.back-button-container.spacer {
+  flex: 1 1 0%;
+}
+
+.content-display-title {
+  color: #ebba2f;
+  font-size: 2.5em;
+  font-weight: bold;
+  text-align: center;
+  /* NEW: Glowing effect */
+ 
+  /* NEW: Absolute positioning to guarantee center alignment */
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  margin-top: 20px;
+}
+
 .back-button {
   background-color: #2a2a2a;
   color: #fff;
@@ -409,6 +513,8 @@ body {
   font-weight: 600;
   transition: background-color 0.3s ease, transform 0.2s ease;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  margin-top: 15px;
+  margin-left: 40px;
 }
 .back-button:hover {
   background-color: #3a3a3a;
@@ -419,24 +525,13 @@ body {
   height: 20px;
   stroke: currentColor;
 }
-.subgenre-display-title {
-  color: #ebba2f;
-  font-size: 2.5em;
-  font-weight: bold;
-  text-align: center;
-  margin-top: 30px;
-  margin-bottom: 20px;
-  width: 100%;
-  padding: 0 20px;
-  box-sizing: border-box;
-}
 
 .content-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-  padding: 30px 40px;
-  padding-bottom: 120px;
+  gap: 25px;
+  padding: 20px 40px;
+  padding-bottom: 12px;
 }
 .content-grid.genres-grid {
   grid-template-columns: repeat(4, 1fr);
@@ -513,27 +608,52 @@ body {
   transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
 }
 .genre-pill:hover, .subgenre-pill:hover {
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(233,186,46,255);
   transform: translateY(-1px);
+   box-shadow: 0 5px 5px rgba(255, 193, 7, 0.5);
 }
 .genre-pill { background-color: #e74c3c; color: white; }
 .subgenre-pill { background-color: #3498db; color: white; }
 .song-card-bottom-row {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 10px;
-  width: 100%;
+  flex-direction: column; /* Stack the metadata and actions vertically */
   justify-content: space-between;
+  flex-grow: 1; /* Allow it to take up remaining space */
+  margin-top: 10px;
   padding-top: 5px;
-  flex-shrink: 0;
 }
-.song-timestamp {
+
+/* Container for the new metadata items (BPM, Key, Vocal Icon) */
+.song-metadata-container {
+  display: flex;
+  align-items: center;
+  gap: 12px; /* Space between items */
+  margin-bottom: 10px; /* Space between this row and the actions row */
+}
+
+/* Individual style for each metadata item (BPM, Key) */
+.metadata-item {
   font-size: 0.9em;
   color: #b0b0b0;
-  white-space: nowrap;
-  flex-shrink: 0;
+  font-weight: 500;
 }
+
+/* Style for the vocal icon image */
+.vocal-icon {
+  width: 20px;
+  height: 20px;
+  /* This makes the white icon visible on the dark background */
+  filter: brightness(0) invert(0.8);
+}
+
+/* Container for the existing action buttons (Timestamp, Like, Download, Play) */
+.song-actions-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Pushes timestamp to the left and buttons to the right */
+  width: 100%;
+}
+
 .icon-button {
   background: none;
   border: none;
@@ -580,6 +700,8 @@ body {
   height: 30px;
   object-fit: contain;
   filter: invert(100%);
+  mix-blend-mode: normal;                 /* ensure no blending issues */
+  transition: filter 180ms ease;          /* smoother transition for glow */
 }
 .genre-card {
   background-color: #282828;
@@ -591,13 +713,22 @@ body {
   padding: 20px;
   text-align: center;
   overflow: hidden;
+  height: 100%; /* Ensure full height of grid cell */
 }
 .genre-card-image {
   width: 150px;
   height: 150px;
   object-fit: cover;
   border-radius: 10px;
-  margin-bottom: 15px;
+  margin-bottom: 0px;
+  flex-shrink: 0; /* Prevent image from shrinking */
+}
+.genre-card-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1; /* Take up remaining space */
+  width: 100%;
+  min-height: 0; /* Allow flex child to shrink below content size */
 }
 .genre-card-name {
     font-family: 'Montserrat', sans-serif;
@@ -609,56 +740,18 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     width: 100%;
+    flex-shrink: 0; /* Prevent title from shrinking */
 }
 .genre-card-description-wrapper {
   max-height: 80px;
   overflow-y: auto;
-  margin-bottom: 15px;
+  margin-bottom: 0px;
   width: 100%;
   padding-right: 5px;
   box-sizing: border-box;
   scrollbar-width: thin;
   scrollbar-color: #e9ba2e transparent;
-}
-.genre-card-description-wrapper::-webkit-scrollbar { width: 8px; }
-.genre-card-description-wrapper::-webkit-scrollbar-track { background: transparent; }
-.genre-card-description-wrapper::-webkit-scrollbar-thumb { background-color: #e9ba2e; border-radius: 4px; border: 2px solid transparent; }
-.genre-card-description-wrapper::-webkit-scrollbar-thumb:hover { background-color: #d4a72a; }
-.genre-card-description {
-  font-family: 'Inter', sans-serif;
-  font-size: 0.95em;
-  color: #b0b0b0;
-  margin: 0;
-  line-height: 1.5;
-}
-.explore-button {
-  background-color: #e9ba2e;
-  color: #1a1a1a;
-  padding: 10px 25px;
-  border: none;
-  border-radius: 25px;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 1em;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-  width: 100%;
-}
-.explore-button:hover {
-  background-color: #d4a72a;
-  transform: translateY(-2px);
-}
-.subgenre-genre-pill {
-    background-color: #e74c3c;
-    color: white;
-    padding: 4px 10px;
-    border-radius: 9999px;
-    display: inline-block;
-    margin-top: 8px;
-    font-size: 0.9375rem;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+  flex: 1; /* Allow description area to grow and fill space */
 }
 
 /* --- Music Player Bar Styles --- */
@@ -779,25 +872,358 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
-  min-width: 150px;
+  min-width: 50px;
+  position: relative;
 }
-.volume-bar {
-  height: 4px;
-  background-image: linear-gradient(#b0b0b0, #b0b0b0);
-}
-.volume-bar::-webkit-slider-thumb { background: #e0e0e0; }
-.volume-bar::-moz-range-thumb { background: #e0e0e0; }
 
-/* --- Footer styles --- */
-.footer {
-  background-color: #121212;
-  color: #b0b0b0;
-  text-align: center;
-  padding: 25px 20px;
-  border-top: 1px solid #333;
-  box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.5);
-  padding-bottom: 100px;
+/* --- NEW: Heart & Download Controls --- */
+.player-fav-dl-controls {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-width: 0;
 }
+
+/* --- Vertical Volume Slider Styles --- */
+.player-volume input[type="range"].volume-bar {
+  width: 14px;
+  height: 100px;
+  background: linear-gradient(to top, #ebba2f 0%, #ebba2f 0%, #555 0%, #555 100%);
+  border-radius: 8px;
+  outline: none;
+  cursor: pointer;
+  /* REPLACE deprecated appearance: slider-vertical with standards-based vertical writing mode */
+  writing-mode: vertical-lr;
+  direction: rtl;
+  margin-bottom: 0;
+  transition: background-size 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+  /* Remove background-image and background-size, use JS for dynamic fill if needed */
+}
+
+/* Webkit browsers (Chrome, Edge, Safari) */
+.player-volume input[type="range"].volume-bar::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  background: #050405 !important;
+  background-color: #050405 !important;
+  cursor: pointer;
+  box-shadow: 0 0 5px rgba(0,0,0,0.3);
+  border: 2px solid #fff2;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+}
+.player-volume input[type="range"].volume-bar::-webkit-slider-runnable-track {
+  height: 100px;
+  border-radius: 8px;
+  background: linear-gradient(
+    to top,
+    #ebba2f 0%,
+    #ebba2f calc(var(--volume, 0) * 100%),
+    #555 calc(var(--volume, 0) * 100%),
+    #555 100%
+  );
+}
+
+/* Firefox */
+.player-volume input[type="range"].volume-bar::-moz-range-thumb {
+  background: #050405;
+  cursor: pointer;
+  box-shadow: 0 0 5px rgba(0,0,0,0.3);
+  border: 2px solid #fff2;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+}
+.player-volume input[type="range"].volume-bar::-moz-range-progress {
+  background-color: #ebba2f;
+}
+.player-volume input[type="range"].volume-bar::-moz-range-track {
+  background: #555;
+  border-radius: 8px;
+}
+
+/* IE/Edge */
+.player-volume input[type="range"].volume-bar::-ms-fill-lower {
+  background: #ebba2f;
+  border-radius: 8px;
+}
+.player-volume input[type="range"].volume-bar::-ms-fill-upper {
+  background: #555;
+  border-radius: 8px;
+}
+.player-volume input[type="range"].volume-bar::-ms-thumb {
+  background: #050405;
+  cursor: pointer;
+  box-shadow: 0 0 5px rgba(0,0,0,0.3);
+  border: 2px solid #fff2;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+}
+
+/* Remove default outline/focus for all browsers */
+.player-volume input[type="range"].volume-bar:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 2px #e9ba2e44;
+}
+.player-volume input[type="range"].volume-bar::-moz-focus-outer {
+  border: 0;
+}
+
+/* Hide the blue focus ring in Chrome/Edge */
+.player-volume input[type="range"].volume-bar:focus::-webkit-slider-thumb {
+  outline: none;
+  border: 2px solid #ebba2f;
+}
+
+/* --- PREMIUM ICON GOLDEN COLOR + SHINE ON CARD HOVER --- */
+.premium-indicator-icon,
+.trending-premium-indicator-icon {
+  transition: filter 0.3s;
+  position: relative;
+  z-index: 1;
+}
+
+/* Gold color filter for PNG on card or icon hover */
+.song-card:hover .premium-indicator-icon,
+.song-card .premium-indicator-icon:hover,
+.trending-song-card:hover .trending-premium-indicator-icon,
+.trending-song-card .trending-premium-indicator-icon:hover {
+  filter:
+    invert(100%)                                                  /* keep icon white */
+    drop-shadow(0 0 3px rgba(235,186,47,0.75))                    /* golden glow */
+    drop-shadow(0 0 8px rgba(235,186,47,0.55))
+    drop-shadow(0 0 14px rgba(235,186,47,0.45));
+}
+
+/* Shine animation overlay for the lotus icon */
+.song-card:hover .premium-indicator-icon::before,
+.song-card .premium-indicator-icon:hover::before,
+.trending-song-card:hover .trending-premium-indicator-icon::before,
+.trending-song-card .trending-premium-indicator-icon:hover::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -60%;
+  width: 60%;
+  height: 100%;
+  pointer-events: none;
+  background: linear-gradient(
+    120deg,
+    rgba(255,255,255,0) 0%,
+    rgba(255,255,255,0.7) 50%,
+    rgba(255,255,255,0) 100%
+  );
+  transform: skewX(-20deg);
+  animation: lotus-shine 1.5s linear 0s 1;
+  z-index: 2;
+  border-radius: 8px;
+}
+
+@keyframes lotus-shine {
+  0% { left: -60%; }
+  100% { left: 120%; }
+}
+
+/* --- Footer Styles --- */
+.footer {
+    background-color: #0c0c0c; /* A slightly different dark shade for contrast */
+    color: #a0a0a0;
+    padding: 100px 40px 0px 0px;
+    border-top: 1px solid #222;
+    position: relative;
+    overflow: hidden; /* Important for the lotus image effect */
+  
+}
+
+.footer-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 40px;
+    max-width: 1200px;
+    margin: 0 0;
+    position: relative;
+    z-index: 2;
+}
+
+/* Left side: Lotus and Logo */
+.footer-left {
+    position: relative;
+    width: 250px;
+    height: 250px;
+    flex-shrink: 0;
+}
+
+.footer-lotus-image {
+    position: absolute;
+    
+    top: 50%;
+    transform: translateY(-50%);
+    width: 400px;
+    height: auto;
+    opacity: 0.8;
+    z-index: 1;
+
+}
+
+.footer-logo {
+    position: absolute;
+    left: 0px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 180px;
+    height: auto;
+    z-index: 2;
+}
+
+/* Right side: Tagline and Links */
+.footer-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex-grow: 1;
+}
+
+.footer-tagline {
+    font-size: 1.1em;
+    font-style: italic;
+    color: #c0c0c0;
+    margin: 0 0 30px 0;
+    text-align: center;
+    width: 100%;
+}
+
+.footer-links-section {
+    width: 100%;
+    text-align: center;
+}
+
+.footer-links-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.5em;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0 0 10px 0;
+    position: relative;
+    display: inline-block;
+    padding-bottom: 8px;
+}
+
+.footer-links-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 2px;
+    background-color: #eebb2d;
+}
+
+.footer-links-container {
+    display: flex;
+    justify-content: center;
+    gap: 80px;
+    margin-top: 20px;
+}
+
+.footer-links-column {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    text-align: left;
+}
+
+.footer-links-column li {
+    margin-bottom: 12px;
+}
+
+.footer-link {
+    color: #a0a0a0;
+    text-decoration: none;
+    font-size: 1em;
+    transition: color 0.3s ease;
+    /* Removed transform transition */
+}
+
+.footer-link:hover {
+    color: #eebb2d;
+    /* Removed transform: translateX(3px); */
+}
+
+/* Bottom Copyright Section */
+.footer-bottom {
+    text-align: center;
+    margin-top: 100px;
+    padding-top: 20px;
+    border-top: 1px solid #222;
+    position: relative;
+    z-index: 2;
+}
+
+.footer-copyright {
+    font-size: 0.9em;
+    color: #777;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 900px) {
+    .footer-container {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .footer-left {
+        width: 200px;
+        height: 200px;
+        margin-bottom: 20px;
+    }
+
+    .footer-lotus-image {
+        width: 320px;
+        left: -80px;
+    }
+
+    .footer-logo {
+        width: 150px;
+    }
+
+    .footer-right {
+        align-items: center;
+    }
+
+    .footer-links-container {
+        gap: 50px;
+    }
+}
+
+@media (max-width: 500px) {
+    .footer {
+        padding: 40px 20px 20px 20px;
+    }
+
+    .footer-left {
+        display: none; /* Hide the lotus on very small screens to save space */
+    }
+
+    .footer-links-container {
+        flex-direction: column;
+        gap: 0;
+        align-items: center;
+    }
+
+    .footer-links-column {
+        text-align: center;
+    }
+
+    .footer-links-column li {
+        margin-bottom: 15px;
+    }
+}
+
 
 /* --- Search Results Page Specific Styles --- */
 .search-results-section {
@@ -806,7 +1232,7 @@ body {
 }
 .search-results-title {
     color: #ebba2f;
-    font-size: 2.5em;
+    font-size: 1.25em;
     font-weight: bold;
     text-align: center;
     margin-top: 30px;
@@ -815,6 +1241,7 @@ body {
     padding: 0 20px;
     box-sizing: border-box;
 }
+
 
 /* --- Login Page Styles --- */
 @keyframes fadeInSlideUp {
@@ -837,6 +1264,23 @@ body {
   background-position: center;
   background-repeat: no-repeat;
 }
+/* -------- collapse empty full-width sections (used by MusicContent carousels) -------- */
+.full-width-section {
+  grid-column: 1 / -1;       /* same as inline gridColumn before */
+  margin-bottom: 0rem;      /* keep same spacing when content exists */
+  padding: 0;               /* default */
+  min-height: 0;            /* important to allow collapse */
+}
+
+/* If the wrapper has no children (child returned null), hide it completely */
+.full-width-section:empty {
+  display: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  height: 0 !important;
+  min-height: 0 !important;
+}
+
 .login-form-wrapper {
   background-color: rgba(0, 0, 0, 0.6);
   padding: 40px;
@@ -942,15 +1386,15 @@ body {
 
 /* --- Search Page Carousel Styles --- */
 .search-carousel-container {
-    margin-bottom: 40px;
+    margin-bottom: 20px;
 }
 .search-carousel-title {
-    font-size: 1.8em;
+    font-size: 1.4em;
     font-weight: 600;
     color: #e0e0e0;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     text-transform: capitalize;
-    padding: 0 40px;
+    padding: 0 40px; /* align with 40px left gutter of carousel cards */
 }
 .carousel-wrapper {
     position: relative;
@@ -959,9 +1403,17 @@ body {
     display: flex;
     gap: 25px;
     overflow-x: auto;
-    padding: 0 40px 20px 40px;
+    /* Add padding to make space for buttons that will overlap */
+    padding: 0 60px 20px 40px; 
+    /* CHANGED: left padding from 60px to 80px */
     scrollbar-width: none;
     -ms-overflow-style: none;
+    /* Crucial for smooth scrolling on touch devices */
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+}
+.carousel-scroll-area > * {
+    scroll-snap-align: start;
 }
 .carousel-scroll-area::-webkit-scrollbar {
     display: none;
@@ -969,11 +1421,12 @@ body {
 .carousel-scroll-button {
     position: absolute;
     top: 50%;
-    transform: translateY(-50%);
-    background-color: #ebba2f;
+    /* Adjust transform to account for button height */
+    transform: translateY(-60%);
+    background-color: rgba(235, 186, 47, 0.9);
     color: #1a1a1a;
     border: none;
-    border-radius: 8px;
+    border-radius: 50%;
     width: 45px;
     height: 45px;
     cursor: pointer;
@@ -981,14 +1434,22 @@ body {
     align-items: center;
     justify-content: center;
     box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-    transition: background-color 0.3s ease, transform 0.2s ease;
     z-index: 10;
+    /* ADDON 1: Add transition for smooth hiding/showing */
+    opacity: 1;
+    transition: opacity 0.3s ease, transform 0.2s ease, background-color 0.3s ease;
 }
 .carousel-scroll-button.left { left: 10px; }
 .carousel-scroll-button.right { right: 10px; }
 .carousel-scroll-button:hover {
     background-color: #d4a72a;
-    transform: translateY(-50%) scale(1.05);
+    transform: translateY(-60%) scale(1.05);
+}
+/* ADDON 1: Class to hide buttons */
+.carousel-scroll-button.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-60%) scale(0.8);
 }
 .no-results-text {
     color: #888;
@@ -998,7 +1459,6 @@ body {
     padding: 40px 0;
 }
 
-/* THIS IS THE CORRECTED RULE */
 .carousel-scroll-area .search-song-card {
     flex: 0 0 450px; 
     width: 450px;
@@ -1008,90 +1468,46 @@ body {
     width: 300px;
 }
 
-/* --- Responsive Adjustments --- */
-@media (max-width: 1200px) {
-  .content-grid { grid-template-columns: repeat(2, 1fr); }
-  .content-grid.genres-grid { grid-template-columns: repeat(3, 1fr); }
+/* --- TRENDING CAROUSEL STYLES --- */
+.trending-carousel-container {
+    margin-bottom: 0px;
 }
 
-@media (max-width: 1024px) {
-  .header { padding: 15px 20px; margin-left: 10px; margin-right: 10px; width: calc(100% - 20px); }
-  .nav-links { gap: 15px; }
-  .hero-section h1 { font-size: 2.8em; }
-  .music-content { padding: 20px; }
-  .content-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); padding: 20px; padding-bottom: 120px; }
-  .content-grid.genres-grid { grid-template-columns: repeat(2, 1fr); }
-  .song-card-image { width: 160px; height: 160px; min-width: 160px; }
-  .song-text-and-button-wrapper { height: 160px; }
-  .music-player-bar { flex-direction: column; align-items: flex-start; padding: 10px 15px; gap: 10px; }
-  .player-song-info, .player-controls, .player-progress, .player-volume { width: 100%; justify-content: center; min-width: unset; }
-  .player-progress { order: -1; }
-  .player-song-info { order: 0; }
-  .player-controls { order: 1; }
-  .player-volume { order: 2; }
-  .search-container { flex-grow: 1; width: 100%; order: -1; max-width: none; }
-  .impact-text { font-size: 1.5em; }
-  .try-audio-button { padding: 12px 30px; font-size: 1.1em; }
-  .song-card-bottom-row { gap: 8px; }
-  .icon-button svg { width: 18px; height: 18px; }
-  .play-button { width: 36px; height: 36px; font-size: 1.1em; }
-  .song-timestamp { font-size: 0.8em; }
-  .skeleton-song-image { width: 160px; height: 160px; }
-  .skeleton-genre-image { width: 120px; height: 120px; }
-  .skeleton-premium-button { width: 100%; }
+.trending-carousel-title {
+    font-size: 1.4em;
+    font-weight: 600;
+    color: #e0e0e0;
+    margin-bottom: 20px;
+    text-transform: capitalize;
+    padding: 0 40px;
 }
 
-@media (max-width: 768px) {
-  .header { flex-direction: column; padding: 15px 20px; margin-left: 10px; margin-right: 10px; width: calc(100% - 20px); }
-  .header-left { flex-direction: column; gap: 10px; }
-  .header-right { width: 100%; justify-content: center; margin-top: 15px; gap: 15px; }
-  .nav-links { width: 100%; justify-content: center; margin-top: 0; }
-  .nav-link { font-size: 1em; }
-  .premium-button { width: 100%; }
-  .hero-section { padding: 60px 15px; }
-  .hero-sub-heading { font-size: 1.2em; }
-  .hero-section h1 { font-size: 2.8em; }
-  .hero-description { font-size: 1.1em; }
-  .search-container { flex-direction: column; align-items: stretch; padding: 10px; height: auto; }
-  .search-input { width: auto; margin-bottom: 10px; }
-  .search-button { width: 100%; }
-  .content-tabs { flex-wrap: wrap; gap: 15px; margin-top: 30px; }
-  .tab-button { font-size: 1.1em; }
-  .content-grid { grid-template-columns: 1fr; padding: 15px; padding-bottom: 120px; }
-  .content-grid.genres-grid { grid-template-columns: 1fr; }
-  .song-card-image { height: 180px; width: 180px; }
-  .song-text-and-button-wrapper { height: 180px; }
-  .footer { padding-bottom: 100px; }
-  .song-card-bottom-row { gap: 6px; }
-  .icon-button svg { width: 16px; height: 16px; }
-  .play-button { width: 32px; height: 32px; font-size: 1em; }
-  .song-timestamp { font-size: 0.75em; }
-  .subgenre-display-title { font-size: 2em; margin-top: 20px; margin-bottom: 15px; }
-  .skeleton-logo { height: 40px; }
-  .skeleton-nav-link { width: 60px; }
-  .hero-section .skeleton-text-line { height: 16px; }
-  .skeleton-button-large { width: 150px; height: 45px; }
-  .skeleton-song-image { width: 150px; height: 150px; }
-  .skeleton-genre-image { width: 100px; height: 100px; }
-  .skeleton-pill { width: 50px; }
-  .search-carousel-container, .search-carousel-title { padding: 0 15px; }
-  .carousel-scroll-area { padding: 0 15px 20px 15px; gap: 15px; }
-  .carousel-scroll-area .search-song-card,
-  .carousel-scroll-area .genre-card {
-      flex-basis: 280px;
-      width: 280px;
-  }
-  .carousel-scroll-button { display: none; }
+.trending-carousel-wrapper {
+    position: relative;
 }
 
-@media (max-width: 480px) {
-  .subgenre-display-title { font-size: 1.5em; margin-top: 15px; margin-bottom: 10px; }
+.trending-carousel-scroll-area {
+    display: flex;
+    gap: 25px;
+    overflow-x: auto;
+    /* Add padding to show partial cards and make space for buttons */
+    padding: 0 60px 20px 80px; /* Extra left padding to show partial card */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
 }
-/* ================================
-    SEARCH PAGE SONG CARD STYLES
-    ================================ */
 
-.search-song-card {
+.trending-carousel-scroll-area > * {
+    scroll-snap-align: start;
+}
+
+.trending-carousel-scroll-area::-webkit-scrollbar {
+    display: none;
+}
+
+/* Trending Song Card - Same as Raw Library Cards */
+.trending-song-card {
   background-color: #282828;
   border-radius: 15px;
   overflow: hidden;
@@ -1100,9 +1516,12 @@ body {
   align-items: flex-start;
   padding: 25px;
   position: relative;
+  /* Fixed width to show exactly 3 cards */
+  flex: 0 0 450px;
+  width: 450px;
 }
 
-.search-song-card-image {
+.trending-song-card-image {
   width: 180px;
   height: 180px;
   min-width: 180px;
@@ -1111,7 +1530,7 @@ body {
   margin-right: 15px;
 }
 
-.search-song-text-and-button-wrapper {
+.trending-song-text-and-button-wrapper {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
@@ -1119,196 +1538,470 @@ body {
   height: 180px;
 }
 
-.search-song-card-info {
+.trending-song-card-info {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
 }
 
-.search-genre-scroll-wrapper {
-  overflow-y: auto;
-  max-height: 80px;
-  padding-right: 5px;
-  flex-grow: 1;
-  scrollbar-width: thin;
-  scrollbar-color: #e9ba2e transparent;
+.trending-genre-scroll-wrapper {
+    overflow-y: auto;
+    max-height: 80px;
+    padding-right: 5px;
+    flex-grow: 1;
+    scrollbar-width: thin;
+    scrollbar-color: #e9ba2e transparent;
 }
 
-.search-genre-scroll-wrapper::-webkit-scrollbar {
-  width: 8px;
+.trending-genre-scroll-wrapper::-webkit-scrollbar {
+    width: 8px;
 }
 
-.search-genre-scroll-wrapper::-webkit-scrollbar-track {
-  background: transparent;
+.trending-genre-scroll-wrapper::-webkit-scrollbar-track {
+    background: transparent;
 }
 
-.search-genre-scroll-wrapper::-webkit-scrollbar-thumb {
-  background-color: #e9ba2e;
-  border-radius: 4px;
-  border: 2px solid transparent;
+.trending-genre-scroll-wrapper::-webkit-scrollbar-thumb {
+    background-color: #e9ba2e;
+    border-radius: 4px;
+    border: 2px solid transparent;
 }
 
-.search-genre-scroll-wrapper::-webkit-scrollbar-thumb:hover {
-  background-color: #d4a72a;
+.trending-genre-scroll-wrapper::-webkit-scrollbar-thumb:hover {
+    background-color: #d4a72a;
 }
 
-.search-song-card-info h4 {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 1.3em;
-  color: #ffffff;
-  margin: 0 0 6px 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  flex-shrink: 0;
+.trending-song-card-info h4 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.3em;
+    color: #ffffff;
+    margin: 0 0 6px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-shrink: 0;
 }
 
-.search-genre-pill-container, .search-subgenre-pill-container {
+.trending-genre-pill-container, .trending-subgenre-pill-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 6px;
+    flex-shrink: 0;
+}
+
+.trending-genre-pill, .trending-subgenre-pill {
+    padding: 5px 10px;
+    border-radius: 18px;
+    font-size: 0.8em;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+}
+
+.trending-genre-pill:hover, .trending-subgenre-pill:hover {
+    background-color: rgba(233,186,46,255);
+    transform: translateY(-1px);
+      box-shadow: 0 5px 5px rgba(255, 193, 7, 0.5);
+}
+
+.trending-genre-pill {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.trending-subgenre-pill {
+    background-color: #3498db;
+    color: white;
+}
+
+/* Trending Card Bottom Section - Same as Raw Library */
+.trending-song-card-bottom-row-final {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: 10px;
+}
+
+.trending-metadata-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex-grow: 1;
+    margin-right: 10px;
+}
+
+.trending-card-row {
+    display: flex;
+    width: 100%;
+    align-items: center;
+}
+
+.trending-card-column {
+    flex-basis: 33.33%;
+    display: flex;
+    align-items: center;
+}
+
+.trending-card-column.left {
+    justify-content: flex-start;
+}
+
+.trending-card-column.center {
+    justify-content: center;
+}
+
+.trending-card-column.right {
+    justify-content: center;
+}
+
+.trending-metadata-item,
+.trending-song-timestamp {
+    font-size: 0.9em;
+    color: #b0b0b0;
+    font-weight: 500;
+    white-space: nowrap;
+    min-width: 50px;
+    text-align: center;
+}
+
+.trending-icon-button {
+    background: none;
+    border: none;
+    color: #b0b0b0;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+    flex-shrink: 0;
+}
+
+.trending-icon-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: scale(1.1);
+}
+
+.trending-icon-button svg {
+    width: 20px;
+    height: 20px;
+}
+
+.trending-vocal-icon {
+    width: 33px;
+    height: 33px;
+    filter: brightness(0) invert(0.8);
+}
+
+.trending-play-button {
+    background-color: #ebba2f;
+    color: #1a1a1a;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+}
+
+.trending-play-button:hover {
+    background-color: #d4a72a;
+}
+
+.trending-premium-indicator {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    z-index: 10;
+}
+
+.trending-premium-indicator-icon {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+    filter: invert(100%);
+    mix-blend-mode: normal;                 /* ensure no blending issues */
+    transition: filter 180ms ease;          /* smoother transition for glow */
+}
+
+/* Responsive adjustments for trending carousel */
+@media (max-width: 1024px) {
+    .trending-carousel-scroll-area {
+        padding: 0 15px 20px 40px;
+        gap: 15px;
+    }
+    .trending-song-card {
+        flex-basis: 380px;
+        width: 380px;
+    }
+}
+
+@media (max-width: 768px) {
+    .trending-carousel-title {
+        padding: 0 15px;
+    }
+    .trending-carousel-scroll-area {
+        padding: 0 15px 20px 15px;
+        gap: 15px;
+    }
+    .trending-song-card {
+        flex-basis: 280px;
+        width: 280px;
+    }
+    .carousel-scroll-button {
+        display: none;
+    }
+}
+
+/* --- FINAL & CORRECTED STYLES for Song Card --- */
+
+/* This is the new main container for the bottom part of the card */
+.song-card-bottom-row {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 6px;
-  flex-shrink: 0;
+  flex-direction: column; /* Stack the metadata and actions vertically */
+  justify-content: space-between;
+  flex-grow: 1; /* Allow it to take up remaining space */
+  margin-top: 10px;
+  padding-top: 5px;
 }
 
-.search-genre-pill, .search-subgenre-pill {
-  padding: 5px 10px;
-  border-radius: 18px;
-  font-size: 0.8em;
-  font-weight: 500;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
-}
-
-.search-genre-pill:hover, .search-subgenre-pill:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-  transform: translateY(-1px);
-}
-
-.search-genre-pill {
-  background-color: #e74c3c;
-  color: white;
-}
-
-.search-subgenre-pill {
-  background-color: #3498db;
-  color: white;
-}
-
-.search-song-card-bottom-row {
+/* Container for the new metadata items (BPM, Key, Vocal Icon) */
+.song-metadata-container {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-top: 10px;
-  width: 100%;
-  justify-content: space-between;
-  padding-top: 5px;
-  flex-shrink: 0;
+  gap: 12px; /* Space between items */
+  margin-bottom: 10px; /* Space between this row and the actions row */
 }
 
-.search-song-timestamp {
+/* Individual style for each metadata item (BPM, Key) */
+.metadata-item {
   font-size: 0.9em;
   color: #b0b0b0;
-  white-space: nowrap;
-  flex-shrink: 0;
+  font-weight: 500;
 }
 
-.search-icon-button {
-  background: none;
-  border: none;
-  color: #b0b0b0;
-  cursor: pointer;
-  padding: 5px;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
-  flex-shrink: 0;
-}
-
-.search-icon-button:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  transform: scale(1.1);
-}
-
-.search-icon-button svg {
+/* Style for the vocal icon image */
+.vocal-icon {
   width: 20px;
   height: 20px;
+  /* This makes the white icon visible on the dark background */
+  filter: brightness(0) invert(0.8);
 }
 
-.search-icon-button svg.lucide-heart[fill="#ebba2f"] {
-  stroke: #ebba2f;
+/* Container for the existing action buttons (Timestamp, Like, Download, Play) */
+.song-actions-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Pushes timestamp to the left and buttons to the right */
+  width: 100%;
+}
+/* --- FINAL & CORRECTED STYLES for Song Card --- */
+
+/* This is the new main container for the bottom part of the card */
+.song-card-bottom-row-final {
+  display: flex;
+  align-items: flex-end; /* Aligns items to the bottom */
+  justify-content: space-between; /* Pushes metadata grid left and play button right */
+  margin-top: auto; /* Pushes this whole section to the bottom */
+  padding-top: 10px;
 }
 
-.search-play-button {
-  background-color: #ebba2f;
-  color: #1a1a1a;
-  border: none;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
+/* This is the container for the two metadata/action rows */
+.metadata-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* Vertical space between the two rows */
+  flex-grow: 1; /* Allows the grid to take up available space */
+  /* This ensures the grid doesn't get squished by the play button */
+  margin-right: 10px; 
+}
+
+/* This styles BOTH rows to ensure they behave consistently */
+.card-row {
+  display: flex;
+  width: 100%;
+  align-items: center; /* Vertically centers items within each row */
+}
+
+/* This is the container for each of the 3 columns */
+.card-column {
+  flex-basis: 33.33%; /* Each column takes up exactly one-third of the space */
+  display: flex;
+  align-items: center;
+}
+
+/* --- Column Alignment --- */
+.card-column.left {
+  justify-content: flex-start; /* Aligns content to the left */
+}
+.card-column.center {
+  justify-content: center; /* Aligns content to the center */
+}
+/* THIS IS THE KEY FIX: We now center the content in the right column */
+.card-column.right {
+  justify-content: center; /* Aligns content to the center */
+}
+
+/* --- Item Styling --- */
+
+/* Styles for BPM, Key, and Duration text */
+.metadata-item,
+.song-timestamp {
+  font-size: 0.9em;
+  color: #b0b0b0;
+  font-weight: 500;
+  white-space: nowrap;
+  /* This gives the text elements a minimum width to prevent them from collapsing 
+     and helps maintain the visual center alignment */
+  min-width: 50px; 
+  text-align: center; /* Ensures text itself is centered if the container is wider */
+}
+
+/* A group for the heart and vocal icons to keep them together */
+.action-buttons-group {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 1.2em;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  gap: 12px; /* Space between heart and vocal icons */
+}
+
+/* Style for the vocal icon image. */
+.vocal-icon {
+  width: 33px;
+  height: 33px;
+  filter: brightness(0) invert(0.8); /* Makes the icon white/grey */
+}
+
+/* This ensures the old, unused class from your original file doesn't interfere. */
+.song-card-bottom-row {
+  display: none !important;
+}
+
+.explore-button:hover {
+  background-color: #d4a72a;
+  transform: translateY(-2px);
+}
+
+.subgenre-genre-pill {
+    background-color: #e74c3c;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 0.9375rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* --- TOOLTIP STYLES --- */
+.tooltip-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tooltip {
+  position: absolute;
+  background-color: #ebba2f;
+  color: #1a1a1a;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.85em;
+  font-weight: 600;
+  white-space: nowrap;
+  z-index: 1000;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-5px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
 }
 
-.search-play-button:hover {
-  background-color: #d4a72a;
-}
-
-.search-premium-indicator {
+/* Arrow pointing to the element */
+.tooltip::after {
+  content: '';
   position: absolute;
-  top: 0px;
-  right: 0px;
-  z-index: 10;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-style: solid;
 }
 
-.search-premium-indicator-icon {
-  width: 30px;
-  height: 30px;
-  object-fit: contain;
-  filter: invert(100%);
-}
-/* This container will hold the new close button */
-.player-extra-controls {
-  display: flex;
-  align-items: center;
-  /* Adjust this if you want to position it differently on smaller screens */
-  margin-left: 10px; 
+/* Tooltip above element (default) */
+.tooltip.tooltip-top {
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-5px);
 }
 
-/* Style for the close button itself */
-.close-player-button {
-  color: #b0b0b0; /* Same as other icons */
+.tooltip.tooltip-top::after {
+  top: 100%;
+  border-width: 6px 6px 0 6px;
+  border-color: #ebba2f transparent transparent transparent;
 }
 
-.close-player-button:hover {
-  color: #ebba2f; /* Highlight on hover */
-  background-color: rgba(255, 255, 255, 0.1);
-  transform: scale(1.1);
+/* Tooltip below element (when not enough space above) */
+.tooltip.tooltip-bottom {
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(5px);
 }
 
-/* Optional: Adjust main player bar on small screens to make space */
-@media (max-width: 1024px) {
-  .music-player-bar {
-    /* This ensures all items fit nicely in the flex-column layout */
-    justify-content: space-around; 
-  }
-  .player-extra-controls {
-    /* Position it absolutely on mobile if needed, or just let it flow */
-    order: 3; /* Example: place it after volume */
-    margin-left: 0;
-  }
+.tooltip.tooltip-bottom::after {
+  bottom: 100%;
+  border-width: 0 6px 6px 6px;
+  border-color: transparent transparent #ebba2f transparent;
 }
-/* /src/App.css */
-/* /src/App.css */
-/* REPLACE your old premium page styles with these new ones. */
+
+/* Show tooltip on hover */
+.tooltip-wrapper:hover .tooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+
+  filter: drop-shadow(0 0 5px rgba(235, 186, 47, 0.7));
+  flex-shrink: 0;
+}
+
+/* Force tooltip below for premium lotus icon */
+.premium-indicator .tooltip,
+.trending-premium-indicator .tooltip {
+  top: calc(100% + 8px) !important;
+  bottom: auto !important;
+  left: 50%;
+  transform: translateX(-50%) translateY(5px) !important;
+}
+
+.premium-indicator .tooltip::after,
+.trending-premium-indicator .tooltip::after {
+  bottom: 100%;
+  top: auto;
+  border-width: 0 6px 6px 6px;
+  border-color: transparent transparent #ebba2f transparent;
+}
+
+/* --- Header Premium Button Active State --- */
+.premium-button.premium-page-active {
+  background: #1a1a1a;
+  color: #ebba2f;
+  box-shadow: 0 0 15px rgba(235, 186, 47, 0.6);
+  border: 1px solid #ebba2f;
+}
+.premium-button.premium-page-active .premium-icon {
+  filter: brightness(0) saturate(100%) invert(80%) sepia(28%) saturate(1578%) hue-rotate(359deg) brightness(96%) contrast(93%);
+}
 
 /* --- App Wrapper for Background --- */
 .app-wrapper.premium-background {
@@ -1330,18 +2023,16 @@ body {
   padding: 0 20px 120px 20px; 
 }
 
-/* MODIFIED: Changed to a new grid layout */
 .premium-content-container {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* Two equal columns */
+  grid-template-columns: repeat(2, 1fr);
   gap: 30px;
   width: 100%;
   max-width: 1100px;
-  /* MODIFIED: Further reduced top padding to shift content up */
   padding-top: 50px; 
 }
 
-/* --- Premium Card Base Styles --- */
+/* --- Premium Card Base Styles (restored) --- */
 .premium-card {
   background-color: rgba(0, 0, 0, 0.85);
   border-radius: 20px;
@@ -1350,119 +2041,137 @@ body {
   position: relative;
   border: 1px solid rgba(235, 186, 47, 0.5);
   box-shadow: 0 0 25px rgba(235, 186, 47, 0.3), 0 0 40px rgba(255, 152, 0, 0.2);
-  opacity: 0; 
+  opacity: 0;
   animation: fadeInCard 0.6s ease-out forwards;
 }
 
-/* --- "Icon Pop" Intro Animation --- */
+/* Centers the card and matches the non‑premium pricing card width */
+.premium-card.pricing-card {
+  animation-delay: 0.2s;
+  grid-column: 1 / -1;
+  justify-self: center;
+  width: 100%;
+  max-width: 535px; /* keep same visual as non‑premium card */
+  text-align: center;
+}
+
 @keyframes fadeInCard {
   to { opacity: 1; }
 }
 
-@keyframes iconPop {
-  0% {
-    opacity: 0;
-    transform: scale(0.5);
-  }
-  50% {
-    transform: scale(1.2);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-/* Apply animation delays to the cards */
-.premium-card.pricing-card { 
-  animation-delay: 0.2s;
-  /* MODIFIED: Make the pricing card span both columns and center itself */
-  grid-column: 1 / -1;
-  justify-self: center;
-  width: 100%;
-  max-width: 535px; /* Keeps the original width */
-}
-.premium-card.perks-card { animation-delay: 0.8s; }
-.premium-card.bonus-perks-card { animation-delay: 0.8s; }
-
-/* NEW: Ensure the two bottom cards have the same height */
-.premium-card.perks-card,
-.premium-card.bonus-perks-card {
+/* === Premium Status Card (shown when user is already premium) === */
+.premium-status-card {
   display: flex;
   flex-direction: column;
+  gap: 18px;
+  max-width: 680px;
+  margin: 0 auto;
 }
 
-/* Apply pop animation to list items */
-.perks-list li {
-  opacity: 0; 
-  animation: iconPop 0.5s ease-out forwards;
+.premium-status-header {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
-/* Stagger the animation for each icon */
-.perks-card .perks-list li:nth-child(1) { animation-delay: 1.0s; }
-.perks-card .perks-list li:nth-child(2) { animation-delay: 1.1s; }
-.perks-card .perks-list li:nth-child(3) { animation-delay: 1.2s; }
-.perks-card .perks-list li:nth-child(4) { animation-delay: 1.3s; }
-
-.bonus-perks-card .perks-list li:nth-child(1) { animation-delay: 1.0s; }
-.bonus-perks-card .perks-list li:nth-child(2) { animation-delay: 1.1s; }
-.bonus-perks-card .perks-list li:nth-child(3) { animation-delay: 1.2s; }
-.bonus-perks-card .perks-list li:nth-child(4) { animation-delay: 1.3s; }
-
-
-/* --- Card Specific Styles --- */
-.pricing-card { text-align: center; }
-.card-title { font-size: 2.8em; font-weight: 700; color: #ebba2f; margin: 0 0 5px 0; }
-.card-subtitle { font-size: 1.2em; margin-bottom: 25px; }
-.price-display { margin-bottom: 25px; }
-.original-price { text-decoration: line-through; color: #888; font-size: 1.1em; display: block; }
-.current-price { font-size: 4em; font-weight: 800; color: #fff; line-height: 1; }
-.price-period { font-size: 1.2em; color: #b0b0b0; }
-.save-text { font-size: 1em; color: #ebba2f; font-weight: 500; }
-
-.get-premium-button {
+.status-chip {
   background: linear-gradient(90deg, #ffc107, #ff9800);
-  color: #1a1a1a;
-  padding: 15px 40px;
+  color: #111;
+  font-weight: 800;
+  border-radius: 9999px;
+  padding: 6px 14px;
+  font-size: 0.95rem;
+  box-shadow: 0 3px 10px rgba(255, 193, 7, 0.35);
+}
+
+.status-sub {
+  color: #b0b0b0;
+  font-weight: 600;
+}
+
+.status-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.status-metric .metric-label {
+  color: #b0b0b0;
+  font-size: 0.95rem;
+  margin-bottom: 6px;
+}
+
+.status-metric .metric-value {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.meter {
+  width: 100%;
+  height: 10px;
+  background: #2d2d2d;
+  border-radius: 9999px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.45);
+}
+.meter-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #e74c3c, #ebba2f);
+  width: 0%;
+  transition: width 420ms ease;
+}
+
+.status-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn {
   border: none;
-  border-radius: 30px;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 1.2em;
+  border-radius: 12px;
+  padding: 12px 18px;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 5px 15px rgba(255, 193, 7, 0.4);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  margin-bottom: 15px;
-  position: relative;
-  overflow: hidden;
-}
-.get-premium-button:hover {
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 8px 25px rgba(255, 193, 7, 0.6);
-}
-.get-premium-button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -75%;
-  width: 50%;
-  height: 100%;
-  background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0) 100%);
-  transform: skewX(-20deg);
-  animation: shine 2.5s infinite 1s;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
+  text-decoration: none;
 }
 
-.card-title-small { font-size: 2em; font-weight: 600; margin-bottom: 20px; text-align: center; color: #e0e0e0; }
+.btn-primary {
+  background: linear-gradient(90deg, #ffc107, #ff9800);
+  color: #111;
+  box-shadow: 0 5px 16px rgba(255, 193, 7, 0.35);
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(255, 193, 7, 0.55);
+}
+
+.btn-outline {
+  background: transparent;
+  color: #ebba2f;
+  border: 1px solid #ebba2f;
+}
+.btn-outline:hover {
+  background: rgba(235,186,47,0.12);
+  transform: translateY(-2px);
+}
+
+.status-footnote {
+  color: #9a9a9a;
+  font-size: 0.95rem;
+}
 .perks-list { 
   list-style: none; 
   padding: 0; 
   margin: 0; 
   font-size: 1.1em; 
-  /* NEW: This will make the list grow to fill available space, evening out card heights */
   flex-grow: 1; 
 }
 .perks-list li { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
-.perks-list li.many-more { font-style: italic; color: #888; justify-content: center; margin-top: 20px; }
 
 .glowing-icon {
   color: #ebba2f;
@@ -1470,35 +2179,1008 @@ body {
   flex-shrink: 0;
 }
 
-/* --- Header Premium Button Active State --- */
-.premium-button.premium-page-active {
-  background: #1a1a1a;
-  color: #ebba2f;
-  box-shadow: 0 0 15px rgba(235, 186, 47, 0.6);
-  border: 1px solid #ebba2f;
-}
-.premium-button.premium-page-active .premium-icon {
-  filter: brightness(0) saturate(100%) invert(80%) sepia(28%) saturate(1578%) hue-rotate(359deg) brightness(96%) contrast(93%);
-}
-
 /* Responsive adjustments for premium page */
 @media (max-width: 768px) {
   .premium-content-container {
-    /* MODIFIED: Change to a single column layout on mobile */
     grid-template-columns: 1fr;
-    /* MODIFIED: Reduced top padding for mobile as well */
-    padding-top: 150px; 
+    padding-top: 150px;
   }
   .premium-card.pricing-card {
-    /* MODIFIED: Ensure pricing card takes full width on mobile */
     max-width: 100%;
   }
   .card-title { font-size: 2.2em; }
   .current-price { font-size: 3em; }
 }
 
-/* Keyframes for shine effect */
-@keyframes shine {
+/* === Restore Premium page CTA button styles === */
+.get-premium-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  /* VARA yellow gradient */
+  background: linear-gradient(90deg, #ffc107, #ff9800);
+  color: #1a1a1a;
+
+  border: none;
+  border-radius: 30px;
+
+  /* sizing tuned to match your design */
+  min-width: 220px;
+  padding: 15px 40px;
+  height: 52px;
+
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 800;
+  font-size: 1.1rem;
+  letter-spacing: 0.3px;
+  text-transform: none;
+
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+
+  /* premium-like shadow and transitions */
+  box-shadow: 0 5px 15px rgba(255, 193, 7, 0.4);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
+}
+
+.get-premium-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(255, 193, 7, 0.55);
+  filter: brightness(1.02);
+}
+
+/* subtle shine sweep */
+.get-premium-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -75%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.35) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: skewX(-20deg);
+  animation: get-premium-shine 2.6s infinite 1.2s;
+  pointer-events: none;
+}
+
+@keyframes get-premium-shine {
   0% { left: -75%; }
   100% { left: 125%; }
 }
+
+.get-premium-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  filter: grayscale(8%);
+  transform: none;
+  box-shadow: 0 4px 10px rgba(255, 193, 7, 0.25);
+}
+
+.search-card-play-overlay-button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 50%;
+  height: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  /* Optionally darken background for better separation */
+  background: rgba(235,186,47,0.95); /* was #ebba2f */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease, transform 160ms ease;
+  /* Strengthen shadow for contrast */
+  box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+  border: none;
+  outline: none;
+  z-index: 3;
+}
+
+.search-card-play-overlay-button.active {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, -50%) scale(1.02);
+}
+.search-card-image-wrapper:hover .search-card-play-overlay-button,
+.search-card-play-overlay-button:focus-visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, -50%) scale(1.02);
+}
+.search-card-play-overlay-button svg {
+  width: 48px;
+  height: 48px;
+  color: #111; /* Black icon */
+}
+
+/* --- NEW: Terms Link Styles --- */
+.terms-link {
+  color: #FFD600; /* bright yellow */
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.terms-link:hover {
+  color: #FFC107; /* slightly darker yellow on hover */
+  text-decoration: underline;
+}
+
+/* License Verification hover helper */
+.lv-hover {
+  color: inherit;
+  text-decoration: none;
+  transition: color 140ms ease, filter 140ms ease;
+}
+
+.lv-hover:hover,
+.profile-menu-link.lv-hover:hover {
+  color: #f7c04a; /* VARA yellow */
+  filter: brightness(1.02);
+}
+
+.lv-hover:focus-visible {
+  outline: 2px solid #f7c04a;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* === Premium button: fixed tick + animated text/lotus swap (no layout shift) === */
+.premium-button {
+  position: relative; /* already present; reaffirm */
+  display: inline-flex;
+  align-items: center;
+  gap: 8px; /* space between fixed icon and swap-area */
+}
+
+/* Keep the tick/lotus icon fixed on the left */
+.premium-button .premium-icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto; /* never grow/shrink */
+}
+
+/* Swap area holds the text and the lotus row stacked in the same place */
+.premium-button .premium-swap-area {
+  display: grid;            /* stack layers */
+  place-items: center;      /* center layers */
+  position: relative;
+  /* Reserve enough width to prevent layout shift when swapping layers.
+     'PREMIUM' has 7 letters → 7ch plus small buffer. Adjust if your font differs. */
+  min-width: 7.5ch;
+}
+
+/* Both layers occupy the same grid cell */
+.premium-button .premium-text-layer,
+.premium-button .premium-lotus-layer {
+  grid-area: 1 / 1;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* Default: show text, hide lotus row */
+.premium-button .premium-text-layer {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition: opacity 180ms ease, transform 220ms cubic-bezier(0.2,0.7,0.3,1);
+}
+.premium-button .premium-lotus-layer {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  transform: translateY(6px) scale(0.98);
+  transition: opacity 220ms ease, transform 280ms cubic-bezier(0.2,0.7,0.3,1);
+  pointer-events: none; /* avoid intercepting clicks */
+}
+
+/* Icon sizes inside swap layer (match base 20px lotus/tick) */
+.premium-button .premium-lotus-layer .premium-icon,
+.premium-button .premium-lotus-layer .lotus-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Premium hover: fade text up and bring lotus row up with a small stagger */
+.premium-button.premium-active:hover .premium-text-layer {
+  opacity: 0;
+  transform: translateY(-6px) scale(0.98);
+}
+.premium-button.premium-active:hover .premium-lotus-layer {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* Subtle stagger for 3 lotus icons */
+.premium-button.premium-active:hover .premium-lotus-layer img:nth-child(1) {
+  transition-delay: 40ms;
+}
+.premium-button.premium-active:hover .premium-lotus-layer img:nth-child(2) {
+  transition-delay: 90ms;
+}
+.premium-button.premium-active:hover .premium-lotus-layer img:nth-child(3) {
+  transition-delay: 140ms;
+}
+
+/* Ensure the tick stroke remains bold and legible */
+.premium-button .tick-icon {
+  color: #1a1a1a; /* uses stroke=currentColor */
+}
+
+/* Ensure the premium status card uses the same visual box as non-premium pricing card */
+.premium-status-card.premium-card.pricing-card {
+  /* pricing-card already centers + sets max-width; this keeps consistency */
+  /* No extra styles needed for color/border since .premium-card handles that */
+  margin-bottom: 10px; /* small separation from history box */
+}
+
+/* Tighten inner spacing a bit for status layout */
+.premium-status-card .status-row { margin-top: 4px; }
+.premium-status-card .status-actions { margin-top: 6px; }
+
+/* === Pricing card content styles (free/not-logged users) === */
+.premium-card.pricing-card {
+  text-align: center;
+}
+
+.card-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 2.8em;
+  font-weight: 800;
+  color: #ebba2f;
+  margin: 0 0 6px 0;
+}
+
+.card-subtitle {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.1em;
+  color: #cfcfcf;
+  margin: 0 0 18px 0;
+}
+
+.price-display {
+  margin: 0 0 20px 0;
+}
+
+.original-price {
+  display: block;
+  color: #8f8f8f;
+  text-decoration: line-through;
+  font-size: 1.05rem;
+  margin-bottom: 8px;
+}
+
+.current-price {
+  display: inline-block;
+  font-size: 3.6rem;
+  font-weight: 900;
+  color: #ffffff;
+  line-height: 1;
+  letter-spacing: 0.5px;
+  margin-right: 6px;
+}
+
+.price-period {
+  display: inline-block;
+  font-size: 1.1rem;
+  color: #b0b0b0;
+  vertical-align: baseline;
+}
+
+.save-text {
+  font-size: 1rem;
+  color: #ebba2f;
+  font-weight: 600;
+  margin-top: 12px;
+}
+
+/* Mobile tuning for the card text */
+@media (max-width: 768px) {
+  .card-title { font-size: 2.2em; }
+  .current-price { font-size: 3rem; }
+}
+
+/* === 1) Fix tooltip clipping on song/trending cards === */
+/* Your song cards set overflow: hidden; which clips absolute-positioned tooltips.
+   Override to allow overflow so tooltips can render fully. */
+.song-card,
+.trending-song-card {
+  overflow: visible !important;
+}
+
+/* Ensure small indicator wrappers do not clip */
+.premium-indicator,
+.trending-premium-indicator {
+  overflow: visible;
+  z-index: 50; /* above image and card content */
+}
+
+/* Raise tooltip stacking to be above badges/images/cards */
+.tooltip {
+  z-index: 2000;
+}
+
+/* Extra safety: the tooltip wrapper and content grid should not clip */
+.tooltip-wrapper {
+  overflow: visible;
+}
+.content-grid {
+  overflow: visible;
+}
+
+/* === 2) Notification close button pinned top-right (no layout shift) === */
+/* Make common notification wrappers positioning contexts.
+   If your wrapper uses a different class, add it here. */
+.notification,
+.notification-card,
+.notification-banner,
+.notification-toast,
+.download-notification,
+[role="alert"] {
+  position: relative;
+}
+
+/* The actual close "X" button */
+.notification-close-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+
+  width: 24px;
+  height: 24px;
+  padding: 0;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  background: transparent;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+
+  z-index: 3; /* above content inside the notification */
+  transition: background 160ms ease, color 160ms ease, transform 120ms ease, box-shadow 160ms ease;
+}
+
+/* Hover/active feedback */
+.notification-close-btn:hover {
+  background: rgba(255,255,255,0.08);
+  color: #000000; /* VARA yellow */
+  transform: translateY(-1px);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+}
+.notification-close-btn:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* === Raw Library: overlay play button inside cover image === */
+.song-image-wrapper {
+  position: relative;           /* only for positioning the overlay button */
+  display: inline-block;
+  /* No width/height here — image sizing remains controlled by .song-card-image */
+}
+
+/* 48px circular button; inner icon 20px */
+.cover-play-button {
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 50%;
+  background-color: #ebba2f;
+  color: #1a1a1a;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+  cursor: pointer;
+  transition: background-color 160ms ease; /* simplified: no transform */
+}
+
+.cover-play-button:hover {
+  background-color: #d4a72a; /* simple color change only */
+  /* removed: transform */
+}
+
+.cover-play-button svg {
+  width: 20px;
+  height: 20px;
+  color: #1a1a1a;
+}
+
+/* Raw Library: increase equal spacing between the three info columns */
+.song-card .card-row {
+  gap: 28px; /* spread left/center/right equally; keeps equal widths */
+}
+
+/* 1) Match Raw Library column spacing on carousel cards */
+.trending-song-card .trending-card-row {
+  gap: 28px; /* same as .song-card .card-row */
+}
+
+/* 2) Remove the old reserved space on the right side under the image */
+.trending-song-card-bottom-row-final .trending-metadata-grid {
+  margin-right: 0; /* there is no right-side play button anymore */
+}
+
+/* 3) Ensure the overlay play button always renders above the image (no layout changes) */
+.cover-play-button {
+  z-index: 2; /* keep above img and content within wrapper */
+}
+
+/* Instrument pill helpers (used by inline style too) */
+.instrument-pill-container,
+.trending-instrument-pill-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.instrument-pill,
+.trending-instrument-pill {
+  padding: 5px 10px;
+  border-radius: 18px;
+  font-size: 0.8em;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  color: #ffffff;            /* white text */
+  background-color: #21c45d; /* green base */
+  transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+}
+
+.instrument-pill:hover,
+.trending-instrument-pill:hover {
+  background-color: #2bd56b;
+  transform: translateY(-1px);
+}
+
+/* ========= Carousel cards: mimic Raw Library layout with pure CSS ========= */
+/* Make each carousel card a 2‑column grid: [image | text column] */
+.trending-song-card {
+  display: grid !important;            /* force grid for carousels */
+  grid-template-columns: 180px 1fr;    /* image | text */
+  grid-template-rows: auto auto;       /* row1: info, row2: metadata */
+  column-gap: 15px;                    /* match Raw Library spacing */
+  row-gap: 4px;                        /* reduced from 8px or unset → tighter gap like Raw Library */
+  align-items: start;
+  padding: 25px;                       /* keep your card padding */
+}
+
+.trending-song-card > .song-image-wrapper {
+  grid-column: 1;
+  grid-row: 1 / -1;
+  align-self: center; /* was start */
+}
+
+.trending-song-card .trending-song-card-info {
+  grid-column: 2;
+  grid-row: 1;
+  width: 100%;
+}
+
+.trending-song-card .trending-song-card-bottom-row-final,
+.trending-song-card .trending-song-card-bottom-row_final {
+  grid-column: 2;
+  grid-row: 2;
+  display: block;
+  margin-top: 0 !important;   /* eliminate extra gap */
+  padding-top: 0 !important;  /* rely on row-gap above */
+}
+
+.trending-song-card .trending-metadata-grid {
+  width: 100%;
+  margin-right: 0;
+}
+
+/* Tighter spacing for pill containers inside carousels */
+.trending-song-card .trending-genre-scroll-wrapper > .trending-genre-pill-container,
+.trending-song-card .trending-genre-scroll-wrapper > .trending-subgenre-pill-container,
+.trending-song-card .trending-genre-scroll-wrapper > .trending-instrument-pill-container {
+  margin-bottom: 4px !important;   /* was 6px */
+}
+
+/* No trailing gap after the last pill container */
+.trending-song-card .trending-genre-scroll-wrapper > div:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* Remove extra top spacing on the metadata block; rely on row-gap above */
+.trending-song-card .trending-song-card-bottom-row-final,
+.trending-song-card .trending-song-card-bottom-row_final {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+/* === Hero logged-in additions (scoped, additive only) === */
+.hero-greeting {
+  max-width: 900px;
+  margin: 0 auto 24px auto; /* center above existing headline */
+  padding: 0 12px;
+}
+
+.hero-greeting-title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 800;
+  font-size: 1.35em;
+  color: #ffffff;
+  margin: 0 0 10px 0;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+
+/* NEW: add spacing below subtitle to separate from actions */
+.hero-greeting-subtitle {
+  margin: 0 0 18px 0;
+}
+
+.hero-greeting-actions {
+  margin: 0 0 14px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.feedback-btn {
+  background-color: #ebba2f;   /* VARA yellow */
+  color: #1a1a1a;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 800;
+  font-size: 1rem;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 28px;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(235,186,47,0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+.feedback-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px rgba(235,186,47,0.45);
+  background-color: #d4a72a;
+}
+
+.hero-tips {
+  max-width: 900px;
+  margin: 0 auto 40px auto;      /* add larger bottom space to mimic old copy height */
+  padding: 12px 16px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(235,186,47,0.25);
+  border-radius: 12px;
+  margin-top: 20px;
+}
+.hero-tips-heading {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  color: #ebba2f;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 8px;
+}
+.hero-tip-text {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 1.05rem;
+  color: #d9d9d9;
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* Responsive tuning */
+@media (max-width: 768px) {
+  .hero-greeting { padding: 0 10px; }
+  .hero-greeting-title-large { font-size: 2.4em; }
+  .hero-greeting-subtitle {
+    font-size: 1.2em;
+    margin-bottom: 50px;
+  }
+  .hero-tips { margin-bottom: 50px; padding: 10px 12px; }
+  .hero-tip-text { font-size: 0.98rem; }
+}
+
+/* === VARA OVERRIDES: Large cover image for Genre/Instrument/Sub‑Genre cards === */
+
+/* The image wrapper should take full width and hide any overflow for clean rounded corners */
+.genre-card-image-wrap {
+  display: block;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  border-radius: 14px;       /* slightly round like your design */
+  margin-bottom: 18px;       /* tighter spacing before the title */
+}
+
+/* Make the cover image very large: full card width, keep it square */
+.genre-card-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1 / 1;       /* square cover that scales with card width */
+  object-fit: cover;
+  border-radius: 14px;        /* match wrapper to avoid edge mismatch */
+  /* keep hover scale smooth (defined earlier), no layout shift */
+}
+
+/* Floating circular play/explore button (appears on hover, bottom-right) */
+.browse-card-play {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: #ebba2f;            /* VARA yellow */
+  color: #1a1a1a;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 26px rgba(0,0,0,0.45);
+  opacity: 0;
+  transform: translateY(10px) scale(0.96);
+  transition: opacity 160ms ease, transform 200ms ease, background-color 160ms ease;
+  z-index: 3;
+}
+.genre-card:hover .browse-card-play,
+.genre-card:focus-within .browse-card-play {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+.browse-card-play:hover {
+  background: #d4a72a;
+}
+
+/* Red parent-genre pill (sub-genre only) — bottom edge flush with image */
+.subgenre-parent-pill {
+  position: absolute !important;
+  left: 50% !important;
+  bottom: 0 !important;                 /* flush with image bottom */
+  transform: translateX(-50%) !important;
+  background-color: #e74c3c !important;
+  color: #fff !important;
+  padding: 6px 14px !important;
+  border-radius: 9999px !important;
+  font-size: 0.9rem !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.6px !important;
+  white-space: nowrap !important;
+  z-index: 2 !important;
+  line-height: 1 !important;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.35) !important;
+}
+
+/* Title under image — tight spacing and clear hierarchy */
+.genre-card-content {
+  padding: 0 2px 6px !important;
+}
+.genre-card-name {
+  font-family: 'Montserrat', sans-serif !important;
+  font-weight: 800 !important;
+  font-size: 1.05rem !important;
+  color: #fff !important;
+  margin: 6px 0 2px 0 !important;        /* tight Spotify-ish spacing */
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Optional helper: subtle description (if used anywhere) */
+.genre-card-description {
+  color: #bdbdbd;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+/* Ensure no old “transparent” card overrides leak through */
+.genre-card-image-wrap::after { background: transparent !important; }
+
+/* === VARA OVERRIDES: Image-forward genre/instrument/sub-genre cards === */
+
+/* 1) Remove grey card background/padding; keep card width/dimensions intact */
+.genre-card {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  align-items: stretch;
+}
+
+/* 2) Full-width square cover image */
+.genre-card-image-wrap {
+  display: block;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  border-radius: 14px;            /* rounded corners, matches your design */
+  margin-bottom: 14px;            /* spacing before the title */
+  border: 2px solid rgba(255,255,255,0); /* base border (transparent) */
+  transition: border-color 200ms ease, box-shadow 220ms ease;
+}
+.genre-card-image-wrap::after {
+  /* subtle white glow overlay that fades in on hover */
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: rgba(255,255,255,0);
+  transition: background 200ms ease;
+  pointer-events: none;
+}
+.genre-card-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1 / 1;           /* square cover that scales with card width */
+  object-fit: cover;
+  border-radius: 14px;
+  transition: transform 220ms ease;
+}
+
+/* 3) Hover: white border + soft white glow, smooth fade */
+.genre-card.clickable:hover .genre-card-image-wrap,
+.genre-card.clickable:focus-visible .genre-card-image-wrap {
+  border-color: rgba(255,255,255,0.95);
+  box-shadow: 0 10px 26px rgba(255,255,255,0.12);
+}
+.genre-card.clickable:hover .genre-card-image-wrap::after,
+.genre-card.clickable:focus-visible .genre-card-image-wrap::after {
+  background: rgba(255,255,255,0.06);
+}
+.genre-card.clickable:hover .genre-card-image,
+.genre-card.clickable:focus-visible .genre-card-image {
+  transform: scale(1.02);
+}
+
+/* 4) Red parent-genre pill still overlaps the image bottom */
+.subgenre-parent-pill {
+  position: absolute;
+  left: 50%;
+  bottom: 0 !important;                   /* align pill bottom with image bottom */
+  transform: translateX(-50%);            /* centered horizontally */
+  background-color: #e74c3c;              /* red */
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 0.9rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  white-space: nowrap;
+  z-index: 2;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.35);
+}
+
+/* 5) Card title spacing since description is removed */
+.genre-card-content {
+  padding: 0 4px 6px;
+  text-align: center;
+}
+
+
+/* 6) Collapse any old spacer we added when removing EXPLORE */
+.genre-card.clickable::after {
+  height: 0 !important;
+}
+
+/* 7) Make skeleton cover match the larger image */
+.skeleton-genre-image {
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 1 / 1;
+  border-radius: 14px !important;
+}
+
+/* === VARA CARD OUTLINE + SPACING OVERRIDES (global for genre/sub-genre/instrument) === */
+.genre-card {
+  position: relative;
+  border-radius: 16px; /* matches image radius */
+  /* Faint constant border using inset shadow (no layout shift) */
+  box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.16) !important;
+  transition: box-shadow 200ms ease, transform 200ms ease;
+}
+
+.genre-card:hover,
+.genre-card:focus-visible {
+  /* Stronger border on hover/focus */
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,0.85) !important;
+}
+
+.genre-card.clickable {
+  cursor: pointer; /* pointer over the whole card */
+
+}
+
+/* Tighten the spacing between the image and the title for better visual association */
+.genre-card-image-wrap {
+  margin-bottom: 8px !important; /* was larger; now Spotify-like tight spacing */
+}
+
+/* On hover, keep the image glow but avoid a second thick border on the image itself */
+.genre-card.clickable:hover .genre-card-image-wrap,
+.genre-card.clickable:focus-visible .genre-card-image-wrap {
+  border-color: transparent !important; /* let the card-level outline carry the emphasis */
+  box-shadow: 0 10px 26px rgba(255,255,255,0.12); /* keep the soft glow if present */
+}
+
+/* Parent-genre pill inside sub-genre cards: bottom edge flush with the image bottom */
+.subgenre-parent-pill {
+  position: absolute;
+  left: 50%;
+  bottom: 0 !important;                   /* align pill bottom with image bottom */
+  transform: translateX(-50%);            /* centered horizontally */
+  background-color: #e74c3c;              /* red */
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 0.9rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  white-space: nowrap;
+  z-index: 2;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.35);
+}
+
+/* Ensure title spacing remains tight under the cover */
+.genre-card-content {
+  padding: 0 4px 6px;
+  text-align: center;
+}
+
+
+/* === VARA “Spotify-style” Browse Cards (Genre/Sub-Genre/Instrument) === */
+
+/* Grid tuning: 5-up on wide, responsive down to 2/1 */
+@media (min-width: 1400px) {
+  .content-grid.genres-grid {
+    grid-template-columns: repeat(5, 1fr) !important;
+  }
+}
+@media (max-width: 1024px) {
+  .content-grid.genres-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+@media (max-width: 680px) {
+  .content-grid.genres-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* Card container: theme background, faint outline always on */
+.genre-card {
+  background: #282929 !important;         /* theme background */
+  border-radius: 16px !important;
+  padding: 12px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  text-align: left !important;            /* Spotify-style left text */
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08) !important;  /* faint outline */
+  transition: transform 180ms ease, box-shadow 200ms ease !important;
+}
+.genre-card.clickable { cursor: pointer; }
+.genre-card:hover,
+.genre-card:focus-visible {
+ 
+  box-shadow:
+    inset 0 0 0 2px rgba(255,255,255,0.85),
+    0 12px 30px rgba(0,0,0,0.45) !important;  /* stronger outline + lift */
+}
+
+/* Cover image: square, rounded, subtle zoom on hover */
+.genre-card-image-wrap {
+  position: relative !important;
+  display: block !important;
+  width: 100% !important;
+  overflow: hidden !important;
+  border-radius: 12px !important;
+  margin-bottom: 10px !important;          /* tight spacing (Spotify-like) */
+  background: #111;                         /* fallback bg */
+  box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+}
+.genre-card-image {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 1 / 1 !important;          /* square cover */
+  object-fit: cover !important;
+  border-radius: 12px !important;
+  transition: transform 200ms ease !important;
+}
+.genre-card:hover .genre-card-image,
+.genre-card:focus-visible .genre-card-image {
+  transform: scale(1.02);
+}
+
+/* Floating circular play/explore button (appears on hover, bottom-right) */
+.browse-card-play {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: #ebba2f;            /* VARA yellow */
+  color: #1a1a1a;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 26px rgba(0,0,0,0.45);
+  opacity: 0;
+  transform: translateY(10px) scale(0.96);
+  transition: opacity 160ms ease, transform 200ms ease, background-color 160ms ease;
+  z-index: 3;
+}
+.genre-card:hover .browse-card-play,
+.genre-card:focus-within .browse-card-play {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+.browse-card-play:hover {
+  background: #d4a72a;
+}
+
+/* Red parent-genre pill (sub-genre only) — bottom edge flush with image */
+.subgenre-parent-pill {
+  position: absolute !important;
+  left: 50% !important;
+  bottom: 0 !important;                 /* flush with image bottom */
+  transform: translateX(-50%) !important;
+  background-color: #e74c3c !important;
+  color: #fff !important;
+  padding: 6px 14px !important;
+  border-radius: 9999px !important;
+  font-size: 0.9rem !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.6px !important;
+  white-space: nowrap !important;
+  z-index: 2 !important;
+  line-height: 1 !important;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.35) !important;
+}
+
+/* Title under image — tight spacing and clear hierarchy */
+.genre-card-content {
+  padding: 0 2px 6px !important;
+}
+.genre-card-name {
+  font-family: 'Montserrat', sans-serif !important;
+  font-weight: 800 !important;
+  font-size: 1.5rem !important;
+  color: #fff !important;
+  margin: 6px 0 2px 0 !important;        /* tight Spotify-ish spacing */
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Optional helper: subtle description (if used anywhere) */
+.genre-card-description {
+  color: #bdbdbd;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+/* Ensure no old “transparent” card overrides leak through */
+.genre-card-image-wrap::after { background: transparent !important; }

@@ -1,0 +1,373 @@
+/* Profile Dropdown Styles */
+.profile-section {
+  position: relative;
+  display: inline-block;
+}
+
+.profile-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 350px;
+  background-color: rgba(40, 40, 40, 0.95);
+  border-radius: 15px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(235, 186, 47, 0.3);
+  z-index: 1000;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: dropdownFadeIn 0.3s ease-out forwards;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Profile Header Section */
+.profile-dropdown-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.profile-picture {
+  flex-shrink: 0;
+  width: 50px;
+  height: 50px;
+  position: relative;
+}
+
+.profile-img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ebba2f;
+}
+
+/* FIXED: Profile placeholder with visible initials */
+.profile-placeholder {
+  width: 50px !important;
+  height: 50px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, #ebba2f, #d4a72a) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 1.5em !important;
+  font-weight: 900 !important;
+  color: #000000 !important;
+  border: 2px solid rgba(235, 186, 47, 0.3) !important;
+  font-family: 'Arial', sans-serif !important;
+  text-transform: uppercase !important;
+  line-height: 1 !important;
+  letter-spacing: 1px !important;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3) !important;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.2) !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.profile-placeholder::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  z-index: -1;
+}
+
+.profile-info {
+  flex-grow: 1;
+}
+
+.profile-greeting {
+  font-size: 1.2em;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0 0 5px 0;
+}
+
+.profile-privacy {
+  font-size: 0.9em;
+  color: #b0b0b0;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* YouTube Section */
+.youtube-section {
+  padding: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.youtube-section-header {
+  margin-bottom: 12px;
+}
+
+.youtube-section-title {
+  font-size: 1em;
+  font-weight: 500;
+  color: #ffffff;
+  margin: 0;
+  text-transform: none;
+}
+
+.youtube-link-display {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 15px;
+  background-color: rgba(235, 186, 47, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(235, 186, 47, 0.3);
+}
+
+.youtube-channel-name {
+  color: #ebba2f;
+  font-weight: 500;
+  font-size: 1em;
+  flex-grow: 1;
+  max-width: 250px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.edit-youtube-btn {
+  background: none;
+  border: none;
+  color: #b0b0b0;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 4px;
+  transition: color 0.2s ease, background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.edit-youtube-btn:hover {
+  color: #ebba2f;
+  background-color: rgba(235, 186, 47, 0.1);
+}
+
+.youtube-input-section {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.youtube-input {
+  flex-grow: 1;
+  padding: 12px 15px;
+  border: 1px solid #555;
+  background-color: #1a1a1a;
+  color: #e0e0e0;
+  border-radius: 8px;
+  font-size: 0.95em;
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.youtube-input::placeholder {
+  color: #888;
+}
+
+.youtube-input:focus {
+  border-color: #ebba2f;
+  box-shadow: 0 0 0 2px rgba(235, 186, 47, 0.2);
+}
+
+.add-youtube-btn {
+  background-color: #ebba2f;
+  color: #1a1a1a;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  white-space: nowrap;
+}
+
+.add-youtube-btn:hover {
+  background-color: #d4a72a;
+  transform: translateY(-1px);
+}
+
+.add-youtube-btn:disabled {
+  background-color: #666;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Message styles */
+.youtube-message {
+  margin-top: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.9em;
+  font-weight: 500;
+}
+
+.youtube-message.success {
+  background-color: rgba(76, 175, 80, 0.1);
+  color: #4caf50;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.youtube-message.error {
+  background-color: rgba(244, 67, 54, 0.1);
+  color: #f44336;
+  border: 1px solid rgba(244, 67, 54, 0.3);
+}
+
+/* Warning Section */
+.warning-section {
+  padding: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.warning-content {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.warning-icon {
+  font-size: 1.2em;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.warning-text {
+  flex-grow: 1;
+}
+
+.warning-text p {
+  margin: 0 0 8px 0;
+  font-size: 0.9em;
+  color: #ff6b6b;
+  line-height: 1.4;
+}
+
+.warning-text p:last-child {
+  margin-bottom: 0;
+}
+
+.premium-suggestion {
+  color: #4caf50 !important;
+  font-weight: 500;
+}
+
+.learn-more-link {
+  color: #FFD600; /* bright yellow */
+  text-decoration: underline;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.learn-more-link:hover {
+  color: #FFC107; /* slightly darker yellow on hover */
+  text-decoration: underline;
+}
+
+/* Logout Section */
+.logout-section {
+  padding: 20px;
+}
+
+.logout-btn {
+  width: 100%;
+  background-color: #dc3545;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.logout-btn:hover {
+  background-color: #c82333;
+  transform: translateY(-1px);
+}
+
+/* Visual feedback for profile active state */
+.nav-link.profile-active {
+  color: #ebba2f !important;
+}
+
+.nav-link.profile-active::after {
+  width: 100% !important;
+}
+
+/* License Verification row (centered link with divider) */
+.license-verify-section {
+  padding: 16px 20px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* same line style */
+}
+
+.license-verify-link {
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s ease, filter 0.2s ease, transform 0.1s ease;
+}
+
+.license-verify-link:hover {
+  color: #ebba2f; /* VARA yellow on hover */
+  filter: brightness(1.02);
+  text-decoration: none;
+}
+
+.license-verify-link:focus-visible {
+  outline: 2px solid #ebba2f;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .profile-dropdown {
+    width: 320px;
+    right: -10px;
+  }
+  
+  .profile-dropdown-header {
+    padding: 15px;
+  }
+  
+  .youtube-section,
+  .warning-section,
+  .logout-section {
+    padding: 15px;
+  }
+  
+  .youtube-input-section {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .add-youtube-btn {
+    width: 100%;
+  }
+}

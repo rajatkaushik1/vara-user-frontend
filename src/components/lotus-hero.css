@@ -1,0 +1,126 @@
+/* Hero section with background: full viewport and centered content */
+.hero-section--with-bg {
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;           /* match the standalone demo height */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Content fades in after intro */
+.hero-section--with-bg .hero-content {
+  position: relative;
+  z-index: 2;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 400ms ease, transform 400ms ease;
+  pointer-events: none;
+}
+.hero-section--with-bg .hero-content.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* Background root layer (non-interactive) */
+.vara-hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Ambient golden glow behind everything */
+.vara-hero-bg .bg-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 80% at 50% 0%, rgba(255,193,7,0.12), rgba(255,152,0,0.0) 50%),
+              linear-gradient(135deg, rgba(255,193,7,0.12), rgba(0,0,0,0) 40%, rgba(255,152,0,0.12));
+  filter: blur(6px);
+  z-index: 0;
+}
+
+/* Star field and stars */
+.vara-hero-bg .star-field {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 1;
+}
+.vara-hero-bg .star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: radial-gradient(circle, #ffc107, #ff9800);
+  border-radius: 50%;
+  box-shadow: 0 0 6px #ffc107;
+  opacity: 0;
+}
+@keyframes vara-starMove {
+  0%   { transform: translateY(0);       opacity: 0; }
+  10%  {                           opacity: 1; }
+  90%  {                           opacity: 1; }
+  100% { transform: translateY(-120vh); opacity: 0; } /* viewport travel */
+}
+
+/* Center glow (intro only) */
+.vara-hero-bg .lotus-center {
+  position: absolute;
+  left: 50vw;
+  top: 60vh;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffc107, #ff9800);
+  box-shadow: 0 0 40px #ffc107, 0 0 80px #ffc107;
+  opacity: 0;
+  animation: vara-centerGlow 3s ease-out forwards;
+}
+@keyframes vara-centerGlow {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0);   }
+  15%  { opacity: 1; transform: translate(-50%, -50%) scale(1);   }
+  30%  { opacity: 1; transform: translate(-50%, -50%) scale(1.5); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(2);   }
+}
+
+/* Particles (intro only) */
+.vara-hero-bg .particles {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+.vara-hero-bg .particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: #ffc107;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+}
+@keyframes vara-particleFloat {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--dx), var(--dy)) scale(0);
+  }
+}
+
+/* Vignette around edges */
+.vara-hero-bg .vignette {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, #040604, rgba(4,6,4,0) 40%, rgba(4,6,4,0) 70%, rgba(4,6,4,0.8) 100%);
+  z-index: 3;
+  pointer-events: none;
+}

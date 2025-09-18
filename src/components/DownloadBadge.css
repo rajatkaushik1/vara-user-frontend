@@ -1,0 +1,62 @@
+.download-badge {
+  /* Compact fixed size so it does not shift header height */
+  width: 38px;
+  height: 38px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 24px;   /* pushes badge to the right */
+  margin-right: -8px;  /* slightly overlaps search bar’s left margin */
+  position: relative;
+  user-select: none;
+  cursor: default;
+  
+
+  /* Subtle, premium-like gradient and shadow */
+  background: linear-gradient(135deg, #f7c04a 0%, #f2a91f 100%);
+  box-shadow:
+    0 2px 10px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.download-badge__count {
+  font-weight: 800;
+  font-size: 16px;
+  line-height: 1;
+  color: #111; /* strong contrast for readability on gold */
+  font-variant-numeric: tabular-nums;
+  transform: translateY(-1px);
+}
+
+.download-badge__note {
+  position: absolute;
+  right: -3px;
+  top: -3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 9999px;
+  background: #111;
+  color: #fff;
+  font-size: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.45);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.download-badge:hover {
+  filter: brightness(1.02);
+  transform: translateY(-0.5px);
+  transition: transform 120ms ease, filter 120ms ease;
+}
+
+/* High DPI crispness */
+@media (min-resolution: 2dppx) {
+  .download-badge__count {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
