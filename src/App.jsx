@@ -1,5 +1,5 @@
 // src/App.jsx
-
+import { Navigate } from 'react-router-dom';
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { API_BASE_URL, TASTE_ENDPOINTS } from './config';
 import { CONTENT_VERSION_URL, withVersion } from './config';
