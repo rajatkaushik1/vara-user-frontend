@@ -1,8 +1,9 @@
 import React from 'react';
 import { Linkedin, Instagram, Twitter, CheckCircle2 } from 'lucide-react';
-import { SonicWaveformBackground } from '@/components/ui/sonic-waveform';
+// import { SonicWaveformBackground } from '@/components/ui/sonic-waveform'; // Removed - this component doesn't exist in vara-user-frontend
+import './TeamPage.css'; // <-- ADD THIS LINE
 
-export default function Team() {
+export default function TeamPage() { // Renamed function to TeamPage
   // Updated roles and descriptions with distinct apply links
   const roles = [
     {
@@ -40,15 +41,17 @@ export default function Team() {
   ];
 
   return (
-    <main className="relative min-h-screen w-full overflow-hidden bg-black text-white">
-      {/* Sonic waveform background (fixed, sits behind content) */}
-      <SonicWaveformBackground gradient={true} />
-
-      {/* Logo */}
-      <img src="/logo.png" alt="VARA" className="absolute left-6 top-6 z-20 h-8 w-auto" />
+    // Use a simple div container. App.jsx will handle the 'main' layout
+    // The 'team-page-container' class will be defined in TeamPage.css
+    <div className="team-page-container text-white"> 
+      
+      {/* REMOVED: <SonicWaveformBackground /> - This component is not in your project.
+        REMOVED: <img src="/logo.png" ... /> - App.jsx Header already has a logo.
+      */}
 
       {/* Content */}
-      <header className="relative z-10 mx-auto mt-28 max-w-6xl px-6 text-center">
+      {/* Added padding (py-16) to create space from the main header */}
+      <header className="relative z-10 mx-auto max-w-6xl px-6 pt-16 text-center">
         <h1 className="mb-3 font-montserrat text-3xl tracking-[0.18em] text-white/90 md:text-4xl">
           JOIN OUR GROWING TEAM
         </h1>
@@ -110,7 +113,7 @@ export default function Team() {
           ))}
         </section>
 
-        {/* Benefits — glass rectangle (ABOVE the "Know more about VARA" section) */}
+        {/* Benefits — glass rectangle */}
         <section className="mx-auto mt-10 max-w-5xl px-3">
           <div className="relative isolate overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-6 shadow-card backdrop-blur-md md:p-8">
             <div className="pointer-events-none absolute -inset-px rounded-2xl bg-gradient-to-br from-amber-500/10 via-amber-400/5 to-transparent opacity-40" />
@@ -132,7 +135,8 @@ export default function Team() {
         </section>
 
         {/* Know more about VARA — glass rectangle */}
-        <section className="mx-auto mt-10 max-w-5xl px-3">
+        {/* Added padding-bottom (pb-16) to create space from the main footer */}
+        <section className="mx-auto mt-10 max-w-5xl px-3 pb-16">
           <div className="relative isolate overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-6 shadow-card backdrop-blur-md md:p-8">
             {/* subtle gradient sheen */}
             <div className="pointer-events-none absolute -inset-px rounded-2xl bg-gradient-to-br from-amber-500/10 via-amber-400/5 to-transparent opacity-40" />
@@ -163,51 +167,10 @@ export default function Team() {
           </div>
         </section>
 
-        {/* Footer-like area */}
-        <div className="mx-auto mt-16 flex max-w-5xl flex-col items-center gap-4 pb-24">
-          <span className="text-sm font-medium tracking-wider text-white/70">FOLLOW US</span>
-          <div className="flex items-center gap-4">
-            <a
-              href="https://www.linkedin.com/in/varamusic"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="LinkedIn"
-              className="rounded-full border border-amber-500/30 p-2 text-amber-400 transition-colors hover:bg-amber-500/10"
-            >
-              <Linkedin className="h-5 w-5" />
-            </a>
-            <a
-              href="https://www.instagram.com/varamusicofficial/"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Instagram"
-              className="rounded-full border border-amber-500/30 p-2 text-amber-400 transition-colors hover:bg-amber-500/10"
-            >
-              <Instagram className="h-5 w-5" />
-            </a>
-            <a
-              href="https://x.com/Varasound"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Twitter"
-              className="rounded-full border border-amber-500/30 p-2 text-amber-400 transition-colors hover:bg-amber-500/10"
-            >
-              <Twitter className="h-5 w-5" />
-            </a>
-          </div>
-          <a
-            href="https://varamusic.com"
-            target="_blank"
-            className="text-xs text-white/60 hover:text-white/80"
-          >
-            VISIT VARAMUSIC.COM
-          </a>
-        </div>
+        {/* REMOVED: Footer-like area (social links) - App.jsx Footer already has this.
+          REMOVED: <footer> (All rights reserved) - App.jsx Footer already has this.
+        */}
       </header>
-
-      <footer className="absolute bottom-4 right-6 z-10">
-        <span className="text-xs text-white/30">All rights are reserved to varamusic.com</span>
-      </footer>
-    </main>
+    </div>
   );
 }
