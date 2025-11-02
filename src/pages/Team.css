@@ -105,3 +105,8 @@
 @media (prefers-reduced-motion: reduce) {
   .hero-section--with-bg .hero-content { transition: none; transform: none; opacity: 1; }
 }
+.team-page-container {
+  background-color: #050405; /* Sets the dark background */
+  width: 100%;
+  min-height: 100vh; /* Ensures it fills the screen */
+}
