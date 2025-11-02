@@ -1,0 +1,107 @@
+:root {
+  --bg: #050405;
+  --text: #e0e0e0;
+  --text-strong: #ffffff;
+  --text-muted: #b0b0b0;
+  --gold: #ebba2f;
+  --gold-hover: #d4a2a2; /* unused here but left for consistency */
+}
+
+/* Page baseline */
+.team-page {
+  height: 100svh;
+  overflow: hidden;
+  overflow-x: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, sans-serif;
+  line-height: 1.6;
+  position: relative;
+}
+
+/* Hero centers content */
+.team-hero {
+  position: relative;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 0 16px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* Content fade-in after intro */
+.hero-section--with-bg .hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 420ms ease, transform 420ms ease;
+  pointer-events: none;
+}
+.hero-section--with-bg .hero-content.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* Logo + text */
+.hero-logo {
+  width: clamp(120px, 18vw, 200px);
+  height: auto;
+  display: block;
+  margin: 0 auto 16px;
+  filter: drop-shadow(0 8px 24px rgba(0,0,0,0.45));
+}
+.uc-title {
+  margin: 8px 0 10px;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 800;
+  font-size: clamp(28px, 4.6vw, 56px);
+  color: var(--text-strong);
+  letter-spacing: 0.3px;
+  text-shadow: 0 3px 10px rgba(0,0,0,0.45);
+}
+.uc-sub {
+  margin: 0 auto;
+  max-width: 780px;
+  color: var(--text-muted);
+  font-size: clamp(16px, 2.2vw, 20px);
+  line-height: 1.6;
+}
+
+/* Simple grey footer */
+.site-footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  background: #2b2b2b;
+  border-top: 1px solid #3a3a3a;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.footer-text {
+  margin: 0;
+  color: #d0d0d0;
+  font-size: 0.95rem;
+  text-align: center;
+}
+.footer-link {
+  color: #e0e0e0;
+  text-decoration: underline;
+  font-weight: 600;
+}
+.footer-link:hover {
+  color: #ffffff;
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .hero-section--with-bg .hero-content { transition: none; transform: none; opacity: 1; }
+}
