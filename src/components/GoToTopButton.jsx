@@ -112,7 +112,12 @@ const GoToTopButton = ({
   }), [rightOffset, bottomOffset, zIndex, visible]);
 
   return (
-    <div style={styles.wrapper} aria-hidden={!visible}>
+    <div
+      className="go-to-top-wrapper"
+      id="vara-go-to-top"
+      style={styles.wrapper}
+      aria-hidden={!visible}
+    >
       <button
         type="button"
         onClick={handleClick}

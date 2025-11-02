@@ -27,6 +27,18 @@ const ScrollLeftIcon = () => (
   </svg>
 );
 
+// Safe id + stable key builder for pills
+const getSafeId = (item, idx) => {
+  if (item && (item._id || item.id)) return item._id || item.id;
+  if (typeof item === 'string') return item;
+  return String(idx);
+};
+const makePillKey = (song, prefix, item, idx) => {
+  const sid = song?._id || song?.id || 's';
+  const iid = getSafeId(item, idx);
+  return `${sid}-${prefix}-${iid}-${idx}`;
+};
+
 // --- Reusable Carousel Component ---
 const Carousel = ({ title, children, isLoading, skeletonType }) => { 
   const scrollRef = useRef(null); 
@@ -543,136 +555,152 @@ const SearchPage = ({
               || 'https://placehold.co/200x200/333/FFF?text=VARA';
 
             return (
-              <div key={`song-${song._id}`} className="trending-song-card">
-                {(song.collectionType === 'premium' || song.collectionType === 'paid') && (
-                  <div className="trending-premium-indicator">
-                    <Tooltip text={<span>Premium<br />song</span>}>
-                      <img src={premiumLotusIcon} alt="Premium" className="trending-premium-indicator-icon" />
-                    </Tooltip>
+              <div key={`song-${song._id}`} style={{ flex: '0 0 450px', width: '450px' }}>
+                <div className="song-card">
+                  {/* Image + overlay play */}
+                  <div className="song-image-wrapper" style={{ position: 'relative', display: 'inline-block' }}>
+                    <img
+                      src={coverSrc}
+                      alt={song.title}
+                      className="song-card-image"
+                      onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = 'https://placehold.co/200x200/333/FFF?text=VARA'; }}
+                      draggable={false}
+                    />
+                    <button
+                      className="cover-play-button"
+                      onClick={() => handlePlayPause && handlePlayPause(song, searchResults.music)}
+                      aria-label="Play/Pause"
+                      style={{ position: 'absolute', left: 10, bottom: 10 }}
+                    >
+                      {currentPlayingSong?._id === song._id && isPlaying ? <PauseIcon /> : <PlayIcon />}
+                    </button>
                   </div>
-                )}
 
-                {/* Direct child #1: image wrapper with overlay play button (same as home) */}
-                <div className="song-image-wrapper" style={{ position: 'relative', display: 'inline-block' }}>
-                  <img
-                    src={coverSrc}
-                    alt={song.title}
-                    className="trending-song-card-image"
-                    onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/200x200/333/FFF?text=VARA'; }}
-                    draggable={false}
-                  />
-                  <button
-                    className="cover-play-button"
-                    onClick={() => handlePlayPause(song, searchResults.music)}
-                    aria-label="Play/Pause"
-                    style={{ position: 'absolute', left: 10, bottom: 10 }}
-                  >
-                    {currentPlayingSong?._id === song._id && isPlaying ? <PauseIcon /> : <PlayIcon />}
-                  </button>
-                </div>
+                  {/* Premium badge (same class as grid) */}
+                  {(song.collectionType === 'premium' || song.collectionType === 'paid') && (
+                    <div className="premium-indicator">
+                      <Tooltip text={<span>Premium<br />song</span>}>
+                        <img src={premiumLotusIcon} alt="Premium" className="premium-indicator-icon" />
+                      </Tooltip>
+                    </div>
+                  )}
 
-                {/* Direct child #2: text/info column (title + pills) */}
-                <div className="trending-song-card-info">
-                  <h4>{song.title}</h4>
-                  <div className="trending-genre-scroll-wrapper">
-                    {song.genres?.length > 0 && (
-                      <div className="trending-genre-pill-container">
-                        {song.genres.map(g => (
-                          <span key={g._id} className="trending-genre-pill" onClick={() => onExplore('genre', g._id)}>
-                            {g.name}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                    {song.subGenres?.length > 0 && (
-                      <div className="trending-subgenre-pill-container">
-                        {song.subGenres.map(sg => (
-                          <span key={sg._id} className="trending-subgenre-pill" onClick={() => onExplore('subGenre', sg._id)}>
-                            {sg.name}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                    {song.instruments?.length > 0 && (
-                      <div className="trending-instrument-pill-container">
-                        {song.instruments.map(ins => (
-                          <span
-                            key={ins._id || ins}
-                            className="trending-instrument-pill"
-                            onClick={() => onExplore('instrument', ins._id || ins)}
-                          >
-                            {ins.name || String(ins)}
-                          </span>
-                        ))}
-                      </div>
-                    )}
+                  {/* Text + pills + actions (SongCard layout) */}
+                  <div className="song-text-and-button-wrapper">
+                    <div className="song-card-info">
+                      <h4>{song.title}</h4>
 
-                    {/* NEW: Mood pills moved inside the scroll wrapper, right after instruments */}
-                    {Array.isArray(song.moods) && song.moods.length > 0 && (
-                      <div className="trending-instrument-pill-container">
-                        {song.moods.map((m) => (
-                          <span
-                            key={m._id}
-                            className="trending-genre-pill"
-                            style={MOOD_PILL_STYLE}
-                            onClick={() => onExplore && onExplore('mood', m._id)}
-                          >
-                            {m.name}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
+                      <div className="genre-scroll-wrapper">
+                        {Array.isArray(song.genres) && song.genres.length > 0 && (
+                          <div className="genre-pill-container">
+                            {song.genres.map((g, gi) => (
+                              <span
+                                key={makePillKey(song, 'g', g, gi)}
+                                className="genre-pill"
+                                onClick={() => onExplore && onExplore('genre', getSafeId(g, gi))}
+                              >
+                                {g?.name || (typeof g === 'string' ? g : 'Genre')}
+                              </span>
+                            ))}
+                          </div>
+                        )}
 
-                {/* Direct child #3: bottom rows (metadata/actions), use hyphen version to match CSS */}
-                <div className="trending-song-card-bottom-row_final">
-                  <div className="trending-metadata-grid">
-                    <div className="trending-card-row">
-                      <div className="trending-card-column left">
-                        <Tooltip text="Beats Per Minute">
-                          <span className="trending-metadata-item">{song.bpm || ''}</span>
-                        </Tooltip>
-                      </div>
-                      <div className="trending-card-column center">
-                        <Tooltip text="Download this song">
-                          <button className="trending-icon-button" onClick={() => handleDownload(song)}>
-                            <DownloadIcon />
-                          </button>
-                        </Tooltip>
-                      </div>
-                      <div className="trending-card-column right">
-                        <Tooltip text="Musical key">
-                          <span className="trending-metadata-item">{song.key || ''}</span>
-                        </Tooltip>
+                        {Array.isArray(song.subGenres) && song.subGenres.length > 0 && (
+                          <div className="subgenre-pill-container">
+                            {song.subGenres.map((sg, sgi) => (
+                              <span
+                                key={makePillKey(song, 'sg', sg, sgi)}
+                                className="subgenre-pill"
+                                onClick={() => onExplore && onExplore('subGenre', getSafeId(sg, sgi))}
+                              >
+                                {sg?.name || (typeof sg === 'string' ? sg : 'Sub-genre')}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+
+                        {Array.isArray(song.instruments) && song.instruments.length > 0 && (
+                          <div className="instrument-pill-container">
+                            {song.instruments.map((ins, ii) => (
+                              <span
+                                key={makePillKey(song, 'ins', ins, ii)}
+                                className="subgenre-pill"
+                                style={{ backgroundColor: '#21c45d', color: '#ffffff' }}
+                                onClick={() => onExplore && onExplore('instrument', getSafeId(ins, ii))}
+                              >
+                                {ins?.name || (typeof ins === 'string' ? String(ins) : 'Instrument')}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+
+                        {Array.isArray(song.moods) && song.moods.length > 0 && (
+                          <div className="instrument-pill-container">
+                            {song.moods.map((m, mi) => (
+                              <span
+                                key={makePillKey(song, 'm', m, mi)}
+                                className="subgenre-pill"
+                                style={{ backgroundColor: '#8e44ad', color: '#ffffff' }}
+                                onClick={() => onExplore && onExplore('mood', getSafeId(m, mi))}
+                              >
+                                {m?.name || (typeof m === 'string' ? String(m) : 'Mood')}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
 
-                    <div className="trending-card-row">
-                      <div className="trending-card-column left">
-                        <Tooltip text="Song length">
-                          <span className="trending-song-timestamp">{formatTime(song.duration)}</span>
-                        </Tooltip>
-                      </div>
-                      <div className="trending-card-column center">
-                        <Tooltip text={favouriteSongs.has(song._id) ? "Remove from favorites" : "Add to favorites"}>
-                          <button className="trending-icon-button" onClick={() => handleToggleFavourite(song._id)}>
-                            <HeartIcon filled={favouriteSongs.has(song._id)} />
-                          </button>
-                        </Tooltip>
-                      </div>
-                      <div className="trending-card-column right">
-                        {song.hasVocals && (
-                          <Tooltip text="Contains vocals">
-                            <img src="/vocal-icon.png" alt="Vocals" className="trending-vocal-icon" />
-                          </Tooltip>
-                        )}
+                    {/* Bottom metadata/actions (same as SongCard) */}
+                    <div className="song-card-bottom-row_final">
+                      <div className="metadata-grid">
+                        <div className="card-row">
+                          <div className="card-column left">
+                            <Tooltip text="Beats Per Minute">
+                              <span className="metadata-item">{song.bpm || ''}</span>
+                            </Tooltip>
+                          </div>
+                          <div className="card-column center">
+                            <Tooltip text="Download this song">
+                              <button className="icon-button" onClick={() => handleDownload && handleDownload(song)} aria-label="Download song">
+                                <DownloadIcon />
+                              </button>
+                            </Tooltip>
+                          </div>
+                          <div className="card-column right">
+                            <Tooltip text="Musical key">
+                              <span className="metadata-item">{song.key || ''}</span>
+                            </Tooltip>
+                          </div>
+                        </div>
+
+                        <div className="card-row">
+                          <div className="card-column left">
+                            <Tooltip text="Song length">
+                              <span className="song-timestamp">{formatTime ? formatTime(song.duration) : ''}</span>
+                            </Tooltip>
+                          </div>
+                          <div className="card-column center">
+                            <Tooltip text={favouriteSongs?.has(song._id) ? "Remove from favorites" : "Add to favorites"}>
+                              <button className="icon-button" onClick={() => handleToggleFavourite && handleToggleFavourite(song._id)} aria-label="Add to favourites">
+                                <HeartIcon filled={favouriteSongs?.has(song._id)} />
+                              </button>
+                            </Tooltip>
+                          </div>
+                          <div className="card-column right">
+                            {song.hasVocals && (
+                              <Tooltip text="Contains vocals">
+                                <img src="/vocal-icon.png" alt="Vocals" className="vocal-icon" title="This song contains vocals" />
+                              </Tooltip>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-            )
+            );
           })} 
         </Carousel>
       )}

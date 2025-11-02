@@ -27,7 +27,7 @@ export default function LicenseModal({ open, onClose, data }) {
   const remaining = typeof data?.remaining === 'number' ? data.remaining : '—';
 
   const yellowBlockText = `This video contains music from varamusic.com
-License ID: ${licenseId}`;
+Certificate ID: ${licenseId}`;
 
   const copyYellowBlock = async () => {
     try {
@@ -66,7 +66,7 @@ License ID: ${licenseId}`;
             <div className="license-modal-yellow-text">
               <div>This video contains music from</div>
               <div className="license-modal-domain">varamusic.com</div>
-              <div className="license-modal-license-line">License ID: <b>{licenseId}</b></div>
+              <div className="license-modal-license-line">Certificate ID: <b>{licenseId}</b></div>
             </div>
             <button className="license-modal-copy" onClick={copyYellowBlock} aria-label="Copy license text">
               <span className="copy-squares" aria-hidden="true"></span>
@@ -78,7 +78,7 @@ License ID: ${licenseId}`;
         {/* More Details */}
         <div className="license-modal-details-title">More Details:</div>
         <div className="license-modal-details">
-          <div><b>License ID:</b> {licenseId}</div>
+          <div><b>Certificate ID:</b> {licenseId}</div>
           <div><b>Issued To:</b> {issuedToEmail}</div>
           <div><b>Subscription Status:</b> {subscriptionStatus}</div>
           <div><b>Valid For:</b> {validFor}</div>
@@ -93,7 +93,7 @@ License ID: ${licenseId}`;
 
         {/* Disclaimer */}
         <div className="license-modal-disclaimer">
-          Each License ID is valid for one video/project only. Reusing the same ID across multiple projects is strictly prohibited.
+          Each Certificate ID is valid for one video/project only. Reusing the same ID across multiple projects is strictly prohibited.
         </div>
       </div>
     </div>

@@ -20,8 +20,10 @@ import TermsOfService from './pages/Footer/TermsOfService.jsx';
 import LicenseAgreement from './pages/Footer/LicenseAgreement.jsx';
 import LicenseVerificationPage from './pages/LicenseVerificationPage.jsx';
 import FeedbackPage from './pages/FeedbackPage.jsx';
+import AssistantPage from './pages/AssistantPage.jsx';
 import LicenseModal from './components/LicenseModal';
 import GoToTopButton from './components/GoToTopButton';
+import GlobalLoaderOverlay from './components/GlobalLoaderOverlay';
 
 // Updated Notification Component with Yellow Theme
 const Notification = ({ message, type, onClose }) => {
@@ -115,6 +117,10 @@ const initialNavigationState = {
 function App() {
   const navigate = useNavigate();
   const location = useLocation();
+  // Loader helpers (global overlay events)
+  const showLoader = (timeoutMs) => window.dispatchEvent(new CustomEvent('vara:loader:show', { detail: { timeoutMs } }));
+  const hideLoader = () => window.dispatchEvent(new CustomEvent('vara:loader:hide'));
+  const flashLoader = (ms = 550) => window.dispatchEvent(new CustomEvent('vara:loader:flash', { detail: { ms } }));
   // --- Data & Loading States ---
   const [genres, setGenres] = useState([]);
   const [subGenres, setSubGenres] = useState([]);
@@ -718,6 +724,7 @@ function App() {
   }, [navigationHistory.length]);
 
   const handleTabClick = useCallback((viewType) => {
+    flashLoader(550);
     let newInitialState;
     let newActiveTab;
     switch (viewType) {
@@ -761,6 +768,7 @@ function App() {
   }, [scrollToSection]);
 
   const handleExploreGenre = useCallback((genreId, fromExplore = false) => {
+    flashLoader(550);
     console.log('🔍 Exploring genre:', genreId);
     const genre = genres.find(g => g._id === genreId);
     if (genre) {
@@ -774,6 +782,7 @@ function App() {
   }, [genres, navigateTo]);
 
   const handleExploreSubgenre = useCallback((subGenreId, fromExplore = false) => {
+    flashLoader(550);
     console.log('🔍 Exploring subgenre:', subGenreId);
     const subGenre = subGenres.find(sg => sg._id === subGenreId);
     if (subGenre) {
@@ -788,6 +797,7 @@ function App() {
 
   // --- Explore instrument handler ---
   const handleExploreInstrument = useCallback((instrumentId, fromExplore = false) => {
+    flashLoader(550);
     console.log('🔍 Exploring instrument:', instrumentId);
     const inst = instruments.find(i => i._id === instrumentId);
     if (inst) {
@@ -802,6 +812,7 @@ function App() {
 
   // NEW: Explore mood handler
   const handleExploreMood = useCallback((moodId, fromExplore = false) => {
+    flashLoader(550);
     console.log('🔍 Exploring mood:', moodId);
     const m = moods.find(i => i._id === moodId);
     if (m) {
@@ -815,6 +826,7 @@ function App() {
   }, [moods, navigateTo]);
 
   const handleNavLinkClick = useCallback((tabName, sectionId, fromExplore = false) => {
+    flashLoader(550);
     if (tabName === 'login' || tabName === 'premium') {
       setCurrentPage(tabName);
       setActiveTab(tabName);
@@ -850,6 +862,7 @@ function App() {
       setActiveTab('login');
       setCameFromPremium(true);
       setNotification({ message: 'Please log in to access premium features and unlock your music journey! 🎵', type: 'warning' });
+      navigate('/login?from=premium');
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return false; // Indicate that premium access was denied
     }
@@ -905,6 +918,7 @@ function App() {
   }, [navigate]);
 
   const handleExploreFromSearch = useCallback((type, id) => {
+    flashLoader(550);
     // Set suppression flag so the /home URL→state effect does NOT reset to "For You" once.
     suppressHomeResetRef.current = true;
     handleBackToMainApp(); // this will navigate('/home') and close the search UI
@@ -1176,6 +1190,7 @@ function App() {
       }
 
       // 4) Track the download on the server (authoritative)
+      showLoader(15000);
       const trackRes = await fetch(`${authRoot}/api/user/track-download`, {
         method: 'POST',
         credentials: 'include',
@@ -1192,10 +1207,12 @@ function App() {
           : 'You’ve reached your monthly download limit on the Free plan. Upgrade to Premium to unlock up to 50 downloads per month.';
         setNotification({ message: msg, type: 'warning' });
         window.dispatchEvent(new CustomEvent('vara:download-recorded', { detail: { remaining: typeof body?.remaining === 'number' ? body.remaining : undefined } }));
+        hideLoader();
         return;
       }
       if (!trackRes.ok) {
         setNotification({ message: 'We couldn’t verify your download. Please try again in a moment.', type: 'error' });
+        hideLoader();
         return;
       }
 
@@ -1222,6 +1239,7 @@ function App() {
         remaining: typeof payload?.remaining === 'number' ? payload.remaining : undefined
       });
       setLicenseModalOpen(true);
+      hideLoader();
 
       // Enrich with verify call (to get issuedAt)
       try {
@@ -1242,7 +1260,7 @@ function App() {
       // Keep badge in sync
       window.dispatchEvent(new CustomEvent('vara:download-recorded'));
 
-      // 5) Now actually download the file
+      // 5) Now actually download the file via backend proxy (no CORS issues)
       if (!songUrl) {
         setNotification({ message: '❌ Download link is missing for this track.', type: 'error' });
         return;
@@ -1250,29 +1268,43 @@ function App() {
 
       setNotification({ message: `⬇️ Preparing "${safeTitle}" for download...`, type: 'success' });
 
-      const response = await fetch(songUrl, {
-        method: 'GET',
-        headers: { Accept: 'audio/*' }
-      });
-      if (!response.ok) throw new Error(`Failed to fetch audio file: ${response.status}`);
-
-      const blob = await response.blob();
-      const blobUrl = window.URL.createObjectURL(blob);
-
-      // Build filename
+      // Build a safe custom filename
       const sanitizedTitle = safeTitle.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '-').toUpperCase();
       const customFilename = `${sanitizedTitle}-VARAMUSIC.COM.mp3`;
 
-      const downloadLink = document.createElement('a');
-      downloadLink.href = blobUrl;
-      downloadLink.download = customFilename;
-      downloadLink.style.display = 'none';
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
-      document.body.removeChild(downloadLink);
-      setTimeout(() => window.URL.revokeObjectURL(blobUrl), 1000);
+      // Build proxy URL on AUTH backend
+      const proxyUrl = `${authRoot}/api/files/song/${encodeURIComponent(safeSongId)}?filename=${encodeURIComponent(customFilename)}`;
 
-      setNotification({ message: `✅ "${safeTitle}" downloaded successfully!`, type: 'success' });
+      try {
+        const resp = await fetch(proxyUrl, {
+          method: 'GET',
+          mode: 'cors',
+          credentials: 'include',
+          headers: { Accept: 'audio/*' },
+          cache: 'no-store'
+        });
+
+        if (!resp.ok) {
+          setNotification({ message: `❌ Download failed (${resp.status}). Please try again.`, type: 'error' });
+        } else {
+          const blob = await resp.blob();
+          const blobUrl = window.URL.createObjectURL(blob);
+
+          const a = document.createElement('a');
+          a.href = blobUrl;
+          a.download = customFilename;
+          a.style.display = 'none';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          setTimeout(() => window.URL.revokeObjectURL(blobUrl), 1000);
+
+          setNotification({ message: `✅ "${safeTitle}" downloaded successfully!`, type: 'success' });
+        }
+      } catch (e) {
+        console.error('❌ Proxy download error:', e);
+        setNotification({ message: '❌ Download failed. Please try again.', type: 'error' });
+      }
 
       // Optional analytics/taste tracking (non-blocking)
       try {
@@ -1282,6 +1314,7 @@ function App() {
 
     } catch (error) {
       console.error('❌ Download error:', error);
+      hideLoader();
       setNotification({ message: '❌ Download failed. Please try again.', type: 'error' });
     }
   }, [currentUser, isPremiumSong, trackSongInteraction, trackTasteInteraction, getAuthBackendUrl]);
@@ -1306,6 +1339,7 @@ function App() {
     }
 
     try {
+        showLoader(6000);
       const response = await fetch(`${getAuthBackendUrl()}/api/user/favorites${isCurrentlyFavorite ? `/${songId}` : ''}`, {
         method: isCurrentlyFavorite ? 'DELETE' : 'POST',
         headers: {
@@ -1326,11 +1360,14 @@ function App() {
           }
           return newFavs;
         });
+          hideLoader();
       } else {
+          hideLoader();
         throw new Error('Failed to update favorites');
       }
     } catch (error) {
       console.error('Error updating favorites:', error);
+        hideLoader();
       setNotification({ message: '❌ Failed to update favorites', type: 'error' });
     }
   }, [currentUser, favouriteSongs, songs, trackSongInteraction, trackTasteInteraction, getAuthBackendUrl]);
@@ -1438,6 +1475,13 @@ function App() {
       setActiveTab('premium');
       setShowSearchPage(false);
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (path === '/ai') {
+      // Ensure AI tab is active, search hidden, and scroll to top
+      setCurrentPage('ai');
+      setActiveTab('ai');
+      setShowSearchPage(false);
+      setSearchTerm('');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [location.pathname]);
 
@@ -1489,6 +1533,7 @@ function App() {
                 setCurrentUser={setCurrentUser}
                 onUserUpdate={refreshUserData} // ✅ Pass the refresh function
               />
+              <GlobalLoaderOverlay />
               {/* Notification component with yellow theme */}
               <Notification 
                 message={notification.message}
@@ -1528,6 +1573,22 @@ function App() {
                     />
                   }
                 />
+                <Route
+                  path="/ai"
+                  element={
+                    <AssistantPage
+                      currentUser={currentUser}
+                      handlePlayPause={handlePlayPause}
+                      currentPlayingSong={currentPlayingSong}
+                      isPlaying={isPlaying}
+                      formatTime={formatTime}
+                      favouriteSongs={favouriteSongs}
+                      handleToggleFavourite={handleToggleFavourite}
+                      handleDownload={handleDownload}
+                      currentSongId={currentSongId}
+                    />
+                  }
+                />
                 <Route path="/login" element={<LoginPage onLoginSuccess={handleLoginSuccess} />} />
                 <Route path="/premium" element={<PremiumPage currentUser={currentUser} onPremiumAccess={handlePremiumAccess} />} />
                 <Route path="/feedback" element={<FeedbackPage currentUser={currentUser} />} />
@@ -1556,6 +1617,7 @@ function App() {
               />
               <Footer
                 onPremiumClick={() => {
+                  flashLoader(550);
                   setCurrentPage('premium');
                   setActiveTab('premium');
                   navigate('/premium');

@@ -24,7 +24,7 @@ export default function LicenseVerificationPage() {
   const [copied, setCopied] = useState(false);
 
   const description = useMemo(
-    () => 'Enter your VARA License ID (e.g., VARA-58B2-1297) to verify validity.',
+    () => 'Enter your VARA certificate ID (e.g., VARA-58B2-1297) to verify validity.',
     []
   );
 
@@ -36,7 +36,7 @@ export default function LicenseVerificationPage() {
 
     const trimmed = (id || '').trim().toUpperCase();
     if (!trimmed) {
-      setError('Please enter a License ID.');
+      setError('Please enter a Certificate ID.');
       return;
     }
 
@@ -53,7 +53,7 @@ export default function LicenseVerificationPage() {
       });
       const json = await res.json();
       if (!res.ok) {
-        setError(json?.message || 'Invalid License ID.');
+        setError(json?.message || 'Invalid Certificate ID.');
         setResult(null);
       } else {
         setResult(json);
@@ -63,7 +63,7 @@ export default function LicenseVerificationPage() {
       if (err && (err.name === 'AbortError' || String(err).includes('AbortError'))) {
         setError('The verification request timed out. Please try again.');
       } else {
-        setError('Could not verify the license. Please try again.');
+        setError('Could not verify the certificate. Please try again.');
       }
       setResult(null);
     } finally {
@@ -84,7 +84,7 @@ export default function LicenseVerificationPage() {
 
   return (
     <div style={{ maxWidth: 760, margin: '64px auto', padding: '0 16px' }}>
-      <h1 style={{ marginBottom: 12 }}>License Verification</h1>
+      <h1 style={{ marginBottom: 12 }}>certificate Verification</h1>
       <p style={{ opacity: 0.85, marginBottom: 20 }}>{description}</p>
 
       <form onSubmit={onSubmit} style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
@@ -92,7 +92,7 @@ export default function LicenseVerificationPage() {
           value={id}
           onChange={(e) => setId(e.target.value)}
           placeholder="VARA-XXXX-XXXX"
-          aria-label="License ID"
+          aria-label="Certificate ID"
           style={{
             flex: 1,
             padding: '12px 14px',
@@ -143,11 +143,11 @@ export default function LicenseVerificationPage() {
           }}
         >
           <div style={{ marginBottom: 10, fontWeight: 700 }}>
-            {result.message || '✅ License Found'}
+            {result.message || '✅ Certificate Found'}
           </div>
           <div style={{ lineHeight: 1.9 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <strong>License ID:</strong> <span>{result.licenseId}</span>
+              <strong>Certificate ID:</strong> <span>{result.licenseId}</span>
               <button
                 onClick={onCopy}
                 type="button"

@@ -17,7 +17,7 @@ const TermsOfService = () => (
       <h2><span className="gold-number">1.</span> About Vara Music</h2>
       <p>
         Vara Music provides AI-generated royalty-free music under our proprietary
-        license for creators, businesses, and individuals. Users can stream music
+        certificate for creators, businesses, and individuals. Users can stream music
         for free, and depending on their subscription, download and use tracks under
         specific terms.
       </p>
@@ -48,14 +48,14 @@ const TermsOfService = () => (
           song multiple times still counts towards your limit.
         </li>
       </ul>
-      <h2><span className="gold-number">4.</span> Usage License</h2>
+      <h2><span className="gold-number">4.</span> Usage Certificate</h2>
       <ul>
         <li>
           When you download a song, you are granted a non-exclusive or exclusive
-          license (depending on your purchase or subscription).
+          certificate (depending on your purchase or subscription).
         </li>
         <li>Each download grants one-time use of that song in a single project/video.</li>
-        <li>For offline use, the license is unlimited for that specific project.</li>
+        <li>For offline use, the Certificate is unlimited for that specific project.</li>
         <li>Redistribution, resale, or re-upload of full tracks is strictly prohibited.</li>
         <li>Screen recording of music streams is prohibited.</li>
       </ul>
@@ -69,7 +69,7 @@ const TermsOfService = () => (
       <h2><span className="gold-number">6.</span> Warnings & Enforcement</h2>
       <p>
         ⚠ All music on varamusic.com is AI-generated and distributed under Vara’s
-        proprietary license. Use without a valid license may result in third-party
+        proprietary certificate. Use without a valid certificate may result in third-party
         claims, for which Vara is not responsible.
       </p>
       <p>

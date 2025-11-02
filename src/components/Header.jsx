@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import HeaderSkeleton from '../skeletons/HeaderSkeleton';
 import './ProfileDropdown.css'; 
+import './Header.css';
 import logo from '/logo.png'; 
 import premiumLotusIcon from '/premium-lotus-icon.png';
 import { API_BASE_URL } from '../config.js';
@@ -38,6 +39,35 @@ const ProfileDropdown = ({ currentUser, onLogout, setCurrentUser }) => {
   const [message, setMessage] = useState({ text: '', type: '' });
   const [imageLoadError, setImageLoadError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
+
+  const normalizeProfileImageUrl = (url) => {
+    if (!url || typeof url !== 'string') return null;
+    let s = url.trim();
+
+    // Ensure https://
+    if (!/^https?:\/\//i.test(s)) s = 'https://' + s.replace(/^\/+/, '');
+
+    try {
+      const u = new URL(s);
+
+      // Google avatar domain tweak: ensure a sensible size param
+      if (u.hostname.includes('googleusercontent.com')) {
+        // If no size param present, add one
+        if (!u.search || (!u.searchParams.has('sz') && !/s\d+-c/.test(u.search))) {
+          u.searchParams.set('sz', '128');
+        }
+        return u.toString();
+      }
+
+      // Any other host — just return normalized URL
+      return u.toString();
+    } catch {
+      return null;
+    }
+  };
+
+  // Compute normalized profile image URL
+  const profileImageUrl = normalizeProfileImageUrl(currentUser?.picture);
 
   // ✅ FIX: Better YouTube username extraction with debugging
   const extractYouTubeUsername = (url) => {
@@ -88,7 +118,7 @@ const ProfileDropdown = ({ currentUser, onLogout, setCurrentUser }) => {
         }
         
         console.log('No matching pattern found, using fallback'); // Debug log
-        return '@Channel'; // Fallback
+        return '@Channel' // Fallback
       }
       
       console.log('Not a YouTube URL'); // Debug log
@@ -269,16 +299,19 @@ const ProfileDropdown = ({ currentUser, onLogout, setCurrentUser }) => {
       {/* User Profile Section */}
       <div className="profile-dropdown-header">
         <div className="profile-picture">
-          {currentUser?.picture && !imageLoadError ? (
-            <img 
-              src={currentUser.picture} 
-              alt="Profile" 
+          {profileImageUrl && !imageLoadError ? (
+            <img
+              src={profileImageUrl}
+              alt="Profile"
               className="profile-img"
+              referrerPolicy="no-referrer"
               onLoad={handleImageLoad}
-              onError={handleImageError}
-              style={{
-                display: imageLoading ? 'none' : 'block'
+              onError={() => {
+                // Quietly fall back to initials without console noise
+                setImageLoading(false);
+                setImageLoadError(true);
               }}
+              style={{ display: imageLoading ? 'none' : 'block' }}
             />
           ) : null}
           
@@ -349,7 +382,7 @@ const ProfileDropdown = ({ currentUser, onLogout, setCurrentUser }) => {
           target="_blank"
           rel="noopener noreferrer"
         >
-          License Verification
+          Certificate Verification
         </a>
       </div>
 
@@ -360,7 +393,7 @@ const ProfileDropdown = ({ currentUser, onLogout, setCurrentUser }) => {
             <span className="warning-icon">⚠️</span>
             <div className="warning-text">
               <p><strong>Important:</strong> You can only use free Vara songs on your YouTube channel — and only for one video per song.</p>
-              <p>Using songs without a valid Vara license may lead to video flags or copyright issues.</p>
+              <p>Using songs without a valid Vara Certificate ID may lead to video flags or copyright issues.</p>
               <p className="premium-suggestion">✅ To use music safely and legally, get Vara Premium.</p>
               <a
                 href="/terms"
@@ -410,6 +443,37 @@ const Header = ({
 }) => {
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const profileRef = useRef(null);
+  const [showMobileSearchBar, setShowMobileSearchBar] = useState(false);
+  // Guard to prevent search bar from bouncing back open after a close
+  const closingSearchRef = useRef(false);
+  const mobileMenuRef = useRef(null);
+  const drawerCloseRef = useRef(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Helper to get initials for avatar
+  const getInitialsForAvatar = (nameOrEmail) => {
+    const s = (nameOrEmail || '').trim();
+    if (!s) return 'U';
+    const parts = s.split(' ').filter(Boolean);
+    if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    return s[0].toUpperCase();
+  };
+
+  // Minimal safe URL normalizer (kept simple for avatar)
+  const safeProfileImg = (url) => {
+    if (!url || typeof url !== 'string') return null;
+    const s = url.trim();
+    if (!s) return null;
+    try {
+      const u = new URL(s.startsWith('http') ? s : `https://${s}`);
+      if (u.hostname.includes('googleusercontent.com') && !u.searchParams.has('sz')) {
+        u.searchParams.set('sz', '128');
+      }
+      return u.toString();
+    } catch {
+      return null;
+    }
+  };
 
   // Click outside to close dropdown
   useEffect(() => {
@@ -443,8 +507,13 @@ const Header = ({
 
       // If clicked outside both the input container and the overlay, close the overlay
       if (!clickedInsideContainer && !clickedInsideOverlay) {
-        if (typeof setIsSearchFocused === 'function') {
-          setIsSearchFocused(false);
+        if (typeof setIsSearchFocused === 'function') setIsSearchFocused(false);
+        // If the mobile search bar is open, also close and blur it, and guard against races
+        if (showMobileSearchBar) {
+          setShowMobileSearchBar(false);
+          try { if (searchInputRef?.current) searchInputRef.current.blur(); } catch {}
+          closingSearchRef.current = true;
+          setTimeout(() => { closingSearchRef.current = false; }, 180);
         }
       }
     }
@@ -457,7 +526,61 @@ const Header = ({
       document.removeEventListener('mousedown', handleDocumentPointerDown);
       document.removeEventListener('touchstart', handleDocumentPointerDown);
     };
-  }, [searchInputRef, quickSearchOverlayRef, setIsSearchFocused]);
+  }, [searchInputRef, quickSearchOverlayRef, setIsSearchFocused, showMobileSearchBar]);
+
+  // Keep focus off when the bar closes (safety)
+  useEffect(() => {
+    if (!showMobileSearchBar) {
+      if (typeof setIsSearchFocused === 'function') setIsSearchFocused(false);
+      try { if (searchInputRef?.current) searchInputRef.current.blur(); } catch {}
+    }
+  }, [showMobileSearchBar, setIsSearchFocused]);
+
+  useEffect(() => {
+    function onKeyDown(e) {
+      if (e.key === 'Escape') {
+        setShowProfileDropdown(false);
+        setIsMobileMenuOpen(false);
+        if (typeof setIsSearchFocused === 'function') setIsSearchFocused(false);
+        setShowMobileSearchBar(false);
+      }
+    }
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [setIsSearchFocused]);
+
+  // NEW: Auto-close the mobile search bar when focus/overlay closes
+  useEffect(() => {
+    if (showMobileSearchBar && !isSearchFocused) {
+      setShowMobileSearchBar(false);
+    }
+  }, [showMobileSearchBar, isSearchFocused]);
+
+  // Auto-close mobile search on Login page
+  useEffect(() => {
+    if (currentPage === 'login' && showMobileSearchBar) {
+      setShowMobileSearchBar(false);
+      if (typeof setIsSearchFocused === 'function') setIsSearchFocused(false);
+    }
+  }, [currentPage, showMobileSearchBar, setIsSearchFocused]);
+
+  // NEW: Ensure focus is reset and input blurred whenever bar closes (prevents re-open race)
+  useEffect(() => {
+    if (!showMobileSearchBar) {
+      // Ensure focus state is off when bar is closed
+      if (typeof setIsSearchFocused === 'function') setIsSearchFocused(false);
+      try { if (searchInputRef?.current) searchInputRef.current.blur(); } catch {}
+    }
+  }, [showMobileSearchBar, setIsSearchFocused]);
+
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = prev; };
+    }
+    return undefined;
+  }, [isMobileMenuOpen]);
 
   if (loadingHeader) {
     return <HeaderSkeleton />;
@@ -470,21 +593,360 @@ const Header = ({
   const isPremiumActive = (() => {
     if (!currentUser) return false;
     const typeOk = currentUser.subscription_type === 'premium' || currentUser.is_premium === true;
-    // If premium_expires_at exists, require it to be in the future. If missing, treat as active (dev).
     const expires = currentUser.premium_expires_at ? new Date(currentUser.premium_expires_at) : null;
     const timeOk = !expires || expires > new Date();
     return typeOk && timeOk;
   })();
 
+  // Treat "Favourites" as part of HOME for header highlight
+  const isHomeNavActive = (currentPage === 'main') && (activeTab === 'home' || activeTab === 'favourites');
+
   return (
-    <header className={headerClass}>
-      <div className="header-left">
-        <img src={logo} alt="VARA Logo" className="logo" onClick={() => handleNavLinkClick('home', 'hero-section')} style={{cursor: 'pointer'}} />
-        <DownloadBadge isLoggedIn={!!currentUser} />
-      </div>
-      <div className="header-right">
-        
-        {currentPage === 'main' && (
+    <>
+      <header className={headerClass}>
+        <div className="header-left">
+          <img src={logo} alt="VARA Logo" className="logo" onClick={() => handleNavLinkClick('home', 'hero-section')} style={{cursor: 'pointer'}} />
+          <DownloadBadge isLoggedIn={!!currentUser} />
+        </div>
+        <div className="header-right">
+          {currentPage !== 'login' && (
+            <button
+              type="button"
+              className="mobile-search-btn"
+              aria-label={showMobileSearchBar ? 'Close search' : 'Open search'}
+              onClick={() => {
+                const willOpen = !showMobileSearchBar;
+
+                // If we just closed, ignore any re-open race for a short time
+                if (willOpen && closingSearchRef.current) return;
+
+                setShowMobileSearchBar(willOpen);
+                if (typeof setIsSearchFocused === 'function') setIsSearchFocused(willOpen);
+
+                if (willOpen) {
+                  // Opening: focus next tick
+                  setTimeout(() => {
+                    try { if (searchInputRef?.current) searchInputRef.current.focus(); } catch {}
+                  }, 0);
+                } else {
+                  // Closing: blur immediately and activate the closing guard briefly
+                  try { if (searchInputRef?.current) searchInputRef.current.blur(); } catch {}
+                  closingSearchRef.current = true;
+                  setTimeout(() => { closingSearchRef.current = false; }, 180);
+                }
+              }}
+            >
+              {showMobileSearchBar ? (
+                <span aria-hidden="true" style={{ fontWeight: 900, fontSize: 18, lineHeight: 1 }}>×</span>
+              ) : (
+                <SearchIcon />
+              )}
+            </button>
+          )}
+
+          <button
+            type="button"
+            className="hamburger-btn"
+            aria-label="Open menu"
+            aria-haspopup="dialog"
+            aria-expanded={isMobileMenuOpen ? 'true' : 'false'}
+            aria-controls="vara-mobile-drawer"
+            onClick={() => setIsMobileMenuOpen(true)}
+          >
+            <span className="hamburger-lines" aria-hidden="true"></span>
+          </button>
+
+          {currentPage === 'main' && (
+            <div className="search-container" ref={searchInputRef}>
+              <input
+                type="text"
+                className="search-input"
+                placeholder="Search for music, genres, mood..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onFocus={handleSearchFocus} // Use the new handler
+                onKeyDown={handleSearchKeyDown}
+              />
+              
+              {/* New: clear "X" button (inserted immediately before the existing search button) */}
+              {Boolean(searchTerm && String(searchTerm).length > 0) && (
+                <button
+                  type="button"
+                  className="search-clear-button"
+                  aria-label="Clear search"
+                  title="Clear"
+                  onClick={() => {
+                    if (typeof setSearchTerm === 'function') setSearchTerm('');
+                  }}
+                >
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              )}
+
+              <button className="search-button" onClick={() => handleSearchSubmit()} aria-label="Search">
+                <SearchIcon />
+              </button>
+              {isSearchFocused && (
+                <div className="quick-search-overlay" ref={quickSearchOverlayRef}>
+                  <button
+                    type="button"
+                    className="mobile-search-close"
+                    aria-label="Close search"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (typeof setIsSearchFocused === 'function') setIsSearchFocused(false);
+                      setShowMobileSearchBar(false);
+                      try { if (searchInputRef?.current) searchInputRef.current.blur(); } catch {}
+                      closingSearchRef.current = true;
+                      setTimeout(() => { closingSearchRef.current = false; }, 180);
+                    }}
+                  >
+                    ×
+                  </button>
+                  <h4 className="quick-search-title">
+                    {searchTerm.trim() ? 'Suggestions' : 'Quick Searches'}
+                  </h4>
+                  <ul className="suggestion-list">
+                    {(searchTerm.trim() ? filteredSuggestions : quickSearchSuggestions).length > 0 ? (
+                      (searchTerm.trim() ? filteredSuggestions : quickSearchSuggestions).map((item, index) => (
+                        <li 
+                          key={index} 
+                          className={`suggestion-item ${index === activeSuggestionIndex ? 'active' : ''}`} 
+                          onClick={() => handleSuggestionClick(item)}
+                        >
+                          {item}
+                        </li>
+                      ))
+                    ) : (
+                      <li className="suggestion-item no-results">No results found.</li>
+                    )}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+
+          <nav className="nav-links">
+            <a
+              href="#"
+              className={`nav-link ${isHomeNavActive ? 'active' : ''}`}
+              onClick={() => handleNavLinkClick('home', 'hero-section')}
+            >
+              HOME
+            </a>
+            <a
+              href="/ai"
+              className={`nav-link ai-link ${typeof window !== 'undefined' && window.location && window.location.pathname.startsWith('/ai') ? 'active' : ''}`}
+              onClick={(e) => {
+                window.dispatchEvent(new CustomEvent('vara:loader:flash', { detail: { ms: 550 } }));
+                e.preventDefault();
+                window.history.pushState({}, '', '/ai');
+                window.dispatchEvent(new PopStateEvent('popstate'));
+              }}
+            >
+              AI
+            </a>
+            {currentUser ? (
+              <div className="profile-section" ref={profileRef}>
+                {/* Mobile avatar toggle (desktop unaffected; CSS hides this on desktop) */}
+                <button
+                  type="button"
+                  className="mobile-avatar-btn"
+                  aria-label="Account menu"
+                  onClick={() => setShowProfileDropdown((v) => !v)}
+                >
+                  {safeProfileImg(currentUser?.picture) ? (
+                    <img src={safeProfileImg(currentUser.picture)} alt="" referrerPolicy="no-referrer" />
+                  ) : (
+                    <span className="avatar-initials">
+                      {getInitialsForAvatar(currentUser?.name || currentUser?.email || 'U')}
+                    </span>
+                  )}
+                </button>
+
+                <a 
+                  href="#" 
+                  className={`nav-link profile-link ${activeTab === 'profile' ? 'active' : ''} ${showProfileDropdown ? 'profile-active' : ''}`}
+                  onClick={toggleProfileDropdown}
+                >
+                  PROFILE
+                </a>
+                {showProfileDropdown && (
+                  <ProfileDropdown 
+                    currentUser={currentUser} 
+                    onLogout={onLogout}
+                    setCurrentUser={setCurrentUser}
+                  />
+                )}
+              </div>
+            ) : (
+              <div className="profile-section" ref={profileRef}>
+                {/* Desktop LOGIN text (hidden on mobile via CSS) */}
+                <a
+                  href="#"
+                  className={`nav-link profile-link ${activeTab === 'login' ? 'active' : ''}`}
+                  onClick={(e) => { e.preventDefault(); handleNavLinkClick('login'); }}
+                >
+                  LOGIN
+                </a>
+                {/* Mobile-only circular login button (shown via CSS at <= 972px) */}
+                <button
+                  type="button"
+                  className="mobile-login-btn"
+                  aria-label="Login"
+                  onClick={(e) => { e.preventDefault(); handleNavLinkClick('login'); }}
+                  title="Login"
+                >
+                  {/* Simple user silhouette (keeps bundle small) */}
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M20 21a8 8 0 0 0-16 0"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                  </svg>
+                </button>
+              </div>
+            )}
+          </nav>
+
+          {/* --- REPLACE PREMIUM BUTTON JSX ONLY --- */}
+          <button
+            className={`${premiumButtonClass} ${isPremiumActive ? 'premium-active' : ''}`}
+            onClick={() => handleNavLinkClick('premium')}
+          >
+            {/* Left: tick/lotus icon — remains fixed and never moves */}
+            <span className="premium-icon-wrap">
+              {isPremiumActive ? (
+                <TickIcon className="premium-icon" />
+              ) : (
+                <img src={premiumLotusIcon} alt="Premium Icon" className="premium-icon" />
+              )}
+            </span>
+
+            {/* Right: swap-area that holds text (default) and lotus row (on hover) */}
+            <span className="premium-swap-area">
+              {/* Layer 1: label (default) */}
+              <span className="premium-text-layer">PREMIUM</span>
+
+              {/* Layer 2: lotus row (visible on hover when premium is active) */}
+              {isPremiumActive && (
+                <span className="premium-lotus-layer" aria-hidden="true">
+                  {/* Use three lotus icons; same size as base lotus/tick area */}
+                  <img src={premiumLotusIcon} alt="" className="premium-icon lotus-icon" />
+                  <img src={premiumLotusIcon} alt="" className="premium-icon lotus-icon" />
+                  <img src={premiumLotusIcon} alt="" className="premium-icon lotus-icon" />
+                </span>
+              )}
+            </span>
+          </button>
+        </div>
+
+        {/* Mobile Drawer Backdrop */}
+        <div
+          className={`mobile-drawer-backdrop ${isMobileMenuOpen ? 'open' : ''}`}
+          onClick={() => setIsMobileMenuOpen(false)}
+          aria-hidden={isMobileMenuOpen ? 'false' : 'true'}
+        />
+
+        {/* Mobile Drawer Panel */}
+        <aside
+          id="vara-mobile-drawer"
+          className={`mobile-drawer ${isMobileMenuOpen ? 'open' : ''}`}
+          ref={mobileMenuRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Main menu"
+        >
+          <div className="drawer-header">
+            <div className="drawer-title">
+              <img src={logo} alt="VARA" style={{ height: 28, width: 'auto', borderRadius: 6 }} />
+              <span>Menu</span>
+            </div>
+            <button
+              type="button"
+              className="drawer-close-btn"
+              ref={drawerCloseRef}
+              aria-label="Close menu"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              ×
+            </button>
+          </div>
+
+          {/* Drawer content (links & premium only) */}
+          <div className="drawer-content">
+            {/* HOME (drawer) */}
+            <a
+              href="#"
+              className={`drawer-link ${isHomeNavActive ? 'active' : ''}`}
+              onClick={(e) => {
+                e.preventDefault();
+                setIsMobileMenuOpen(false);
+                handleNavLinkClick('home', 'hero-section');
+              }}
+            >
+              HOME
+            </a>
+
+            {/* AI (drawer) */}
+            <a
+              href="/ai"
+              className={`drawer-link ${currentPage === 'ai' ? 'active' : ''}`}
+              onClick={(e) => {
+                e.preventDefault();
+                window.dispatchEvent(new CustomEvent('vara:loader:flash', { detail: { ms: 550 } }));
+                window.history.pushState({}, '', '/ai');
+                window.dispatchEvent(new PopStateEvent('popstate'));
+                setIsMobileMenuOpen(false);
+              }}
+            >
+              AI
+            </a>
+
+            {/* Premium CTA (drawer) */}
+            <button
+              type="button"
+              className={`${premiumButtonClass} ${isPremiumActive ? 'premium-active' : ''}`}
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                handleNavLinkClick('premium');
+              }}
+            >
+              <span className="premium-icon-wrap">
+                {isPremiumActive ? (
+                  <TickIcon className="premium-icon" />
+                ) : (
+                  <img src={premiumLotusIcon} alt="Premium Icon" className="premium-icon" />
+                )}
+              </span>
+              <span className="premium-swap-area">
+                <span className="premium-text-layer">PREMIUM</span>
+                {isPremiumActive && (
+                  <span className="premium-lotus-layer" aria-hidden="true">
+                    <img src={premiumLotusIcon} alt="" className="premium-icon lotus-icon" />
+                    <img src={premiumLotusIcon} alt="" className="premium-icon lotus-icon" />
+                    <img src={premiumLotusIcon} alt="" className="premium-icon lotus-icon" />
+                  </span>
+                )}
+              </span>
+            </button>
+
+            {/* Removed LOGIN/PROFILE entries from drawer to keep header-only for auth access */}
+          </div>
+
+          {/* Drawer footer: pinned at bottom (sibling to drawer-content) */}
+          <div className="drawer-footer">
+            <div className="footer-note">
+              Made with <span aria-hidden="true">❤️</span> and a little bit of <span aria-hidden="true">🎵</span> magic for creators everywhere.
+            </div>
+            <div className="footer-copy">
+              © 2025 Vara. All rights reserved.
+            </div>
+          </div>
+        </aside>
+      </header>
+
+      {showMobileSearchBar && (
+        <div className="mobile-search-bar-container">
           <div className="search-container" ref={searchInputRef}>
             <input
               type="text"
@@ -492,25 +954,20 @@ const Header = ({
               placeholder="Search for music, genres, mood..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              onFocus={handleSearchFocus} // Use the new handler
+              onFocus={handleSearchFocus}
               onKeyDown={handleSearchKeyDown}
             />
-            
-            {/* New: clear "X" button (inserted immediately before the existing search button) */}
             {Boolean(searchTerm && String(searchTerm).length > 0) && (
               <button
                 type="button"
                 className="search-clear-button"
                 aria-label="Clear search"
                 title="Clear"
-                onClick={() => {
-                  if (typeof setSearchTerm === 'function') setSearchTerm('');
-                }}
+                onClick={() => { if (typeof setSearchTerm === 'function') setSearchTerm(''); }}
               >
                 <span aria-hidden="true">&times;</span>
               </button>
             )}
-
             <button className="search-button" onClick={() => handleSearchSubmit()} aria-label="Search">
               <SearchIcon />
             </button>
@@ -522,9 +979,9 @@ const Header = ({
                 <ul className="suggestion-list">
                   {(searchTerm.trim() ? filteredSuggestions : quickSearchSuggestions).length > 0 ? (
                     (searchTerm.trim() ? filteredSuggestions : quickSearchSuggestions).map((item, index) => (
-                      <li 
-                        key={index} 
-                        className={`suggestion-item ${index === activeSuggestionIndex ? 'active' : ''}`} 
+                      <li
+                        key={index}
+                        className={`suggestion-item ${index === activeSuggestionIndex ? 'active' : ''}`}
                         onClick={() => handleSuggestionClick(item)}
                       >
                         {item}
@@ -537,65 +994,9 @@ const Header = ({
               </div>
             )}
           </div>
-        )}
-
-        <nav className="nav-links">
-          <a href="#" className={`nav-link ${activeTab === 'home' ? 'active' : ''}`} onClick={() => handleNavLinkClick('home', 'hero-section')}>HOME</a>
-          {/* FAVOURITES anchor removed as requested */}
-          {currentUser ? (
-            <div className="profile-section" ref={profileRef}>
-              <a 
-                href="#" 
-                className={`nav-link ${activeTab === 'profile' ? 'active' : ''} ${showProfileDropdown ? 'profile-active' : ''}`}
-                onClick={toggleProfileDropdown}
-              >
-                PROFILE
-              </a>
-              {showProfileDropdown && (
-                <ProfileDropdown 
-                  currentUser={currentUser} 
-                  onLogout={onLogout}
-                  setCurrentUser={setCurrentUser}
-                />
-              )}
-            </div>
-          ) : (
-            <a href="#" className={`nav-link ${activeTab === 'login' ? 'active' : ''}`} onClick={() => handleNavLinkClick('login')}>LOGIN</a>
-          )}
-        </nav>
-
-        {/* --- REPLACE PREMIUM BUTTON JSX ONLY --- */}
-        <button
-          className={`${premiumButtonClass} ${isPremiumActive ? 'premium-active' : ''}`}
-          onClick={() => handleNavLinkClick('premium')}
-        >
-          {/* Left: tick/lotus icon — remains fixed and never moves */}
-          <span className="premium-icon-wrap">
-            {isPremiumActive ? (
-              <TickIcon className="premium-icon" />
-            ) : (
-              <img src={premiumLotusIcon} alt="Premium Icon" className="premium-icon" />
-            )}
-          </span>
-
-          {/* Right: swap-area that holds text (default) and lotus row (on hover) */}
-          <span className="premium-swap-area">
-            {/* Layer 1: label (default) */}
-            <span className="premium-text-layer">PREMIUM</span>
-
-            {/* Layer 2: lotus row (visible on hover when premium is active) */}
-            {isPremiumActive && (
-              <span className="premium-lotus-layer" aria-hidden="true">
-                {/* Use three lotus icons; same size as base lotus/tick area */}
-                <img src={premiumLotusIcon} alt="" className="premium-icon lotus-icon" />
-                <img src={premiumLotusIcon} alt="" className="premium-icon lotus-icon" />
-                <img src={premiumLotusIcon} alt="" className="premium-icon lotus-icon" />
-              </span>
-            )}
-          </span>
-        </button>
-      </div>
-    </header>
+        </div>
+      )}
+    </>
   );
 };
 

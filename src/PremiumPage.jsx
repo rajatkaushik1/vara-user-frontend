@@ -2,6 +2,7 @@
 
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { AUTH_BASE_URL } from './config';
+import './pages/PremiumPage.css';
 
 // --- Icons (reused) ---
 const CheckmarkIcon = () => (
@@ -65,6 +66,7 @@ const PremiumPage = ({ currentUser, onPremiumAccess }) => {
   const [history, setHistory] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
   const [copiedIdx, setCopiedIdx] = useState(null);
+  const [billingCycle, setBillingCycle] = useState('monthly'); // 'monthly' | 'annual'
 
   const isPremiumActive = useMemo(() => {
     if (!currentUser) return false;
@@ -134,21 +136,25 @@ const PremiumPage = ({ currentUser, onPremiumAccess }) => {
     }
   };
 
-  const handleGetPremiumClick = useCallback(async () => {
+  const handleBuyPlan = useCallback(async (plan) => {
     const canAccess = onPremiumAccess();
     if (!canAccess) return;
-
     setBusy(true);
     try {
+      // 1) Check billing config (decide Razorpay vs simulate)
       const cfgRes = await fetch(`${AUTH_BASE_URL}/api/billing/config`, { credentials: 'include' });
       const cfg = await cfgRes.json();
       const hasRazorpay = Boolean(cfg?.hasRazorpay);
 
+      const cycle = billingCycle === 'annual' ? 'annual' : 'monthly';
       if (hasRazorpay) {
+        // Razorpay flow (plan-aware & billingCycle-aware)
         await loadRazorpayScript();
         const orderRes = await fetch(`${AUTH_BASE_URL}/api/billing/create-order`, {
           method: 'POST',
-          credentials: 'include'
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ plan, billingCycle: cycle })
         });
         const order = await orderRes.json();
         if (!orderRes.ok || !order?.orderId) {
@@ -161,25 +167,13 @@ const PremiumPage = ({ currentUser, onPremiumAccess }) => {
           key: order.keyId,
           amount: order.amount,
           currency: order.currency,
-          name: 'VARA Premium',
-          description: '30-day pass',
+          name: `VARA ${plan.toUpperCase()}`,
+          description: cycle === 'annual' ? 'Annual plan' : 'Monthly plan',
           order_id: order.orderId,
           theme: { color: '#f2a91f' },
           prefill: {
             name: (currentUser && currentUser.name) || '',
             email: (currentUser && currentUser.email) || ''
-          },
-          retry: { enabled: true, max_count: 1 },
-          config: {
-            display: {
-              blocks: {
-                nb: { name: 'Pay using Netbanking', instruments: [{ method: 'netbanking' }] },
-                cards: { name: 'Pay using Cards', instruments: [{ method: 'card' }] },
-                wallets: { name: 'Pay using Wallets', instruments: [{ method: 'wallet' }] }
-              },
-              sequence: ['block.nb', 'block.cards', 'block.wallets'],
-              preferences: { show_default_blocks: true }
-            }
           },
           handler: async (resp) => {
             try {
@@ -190,7 +184,8 @@ const PremiumPage = ({ currentUser, onPremiumAccess }) => {
                 body: JSON.stringify({
                   orderId: resp.razorpay_order_id,
                   paymentId: resp.razorpay_payment_id,
-                  signature: resp.razorpay_signature
+                  signature: resp.razorpay_signature,
+                  plan // send plan for good measure
                 })
               });
               const out = await verify.json();
@@ -199,7 +194,8 @@ const PremiumPage = ({ currentUser, onPremiumAccess }) => {
                 alert('Payment verification failed. Please contact support.');
                 return;
               }
-              alert('Premium activated! Enjoy 50 downloads/month.');
+              // Fresh counters handled by backend — reload to reflect plan + usage
+              alert(`Plan activated! Enjoy your ${plan.toUpperCase()} benefits.`);
               window.location.reload();
             } catch (e) {
               console.error('Verify error:', e);
@@ -207,35 +203,34 @@ const PremiumPage = ({ currentUser, onPremiumAccess }) => {
             }
           }
         });
-
         rzp.open();
         return;
       }
 
-      if (import.meta.env.MODE === 'development') {
-        const url = new URL(`${AUTH_BASE_URL}/api/billing/dev/simulate-purchase`);
-        url.searchParams.set('token', DEV_TOKEN);
-        const sim = await fetch(url.toString(), { method: 'POST', credentials: 'include' });
-        const result = await sim.json();
-        if (!sim.ok || !result?.ok) {
-          console.error('Dev simulate failed:', result);
-          alert('Dev simulate failed. Check console for details.');
-          return;
-        }
-        alert('Premium activated (dev simulate). Enjoy 50 downloads/month.');
-        window.location.reload();
+      // 3) Dev simulate for Starter (when no Razorpay) and for Pro/Pro+ always
+      const url = new URL(`${AUTH_BASE_URL}/api/billing/dev/simulate-purchase`);
+      url.searchParams.set('plan', plan);
+      url.searchParams.set('token', DEV_TOKEN);
+      const sim = await fetch(url.toString(), { method: 'POST', credentials: 'include' });
+      const result = await sim.json();
+      if (!sim.ok || !result?.ok) {
+        console.error('Dev simulate failed:', result);
+        alert('Dev simulate failed. Check console for details.');
         return;
       }
-
-      alert('Payment is not configured yet. Please try again later.');
-
+      alert(`Plan '${plan.toUpperCase()}' activated (dev). Counters refreshed.`);
+      window.location.reload();
     } catch (err) {
       console.error('Premium purchase error:', err);
       alert('Something went wrong. Please try again.');
     } finally {
       setBusy(false);
     }
-  }, [onPremiumAccess, currentUser]);
+  }, [onPremiumAccess, currentUser, billingCycle]);
+
+  const handleGetPremiumClick = useCallback(async () => {
+    await handleBuyPlan('starter');
+  }, [handleBuyPlan]);
 
   // --- UI when Premium is ACTIVE ---
   if (isPremiumActive) {
@@ -246,92 +241,94 @@ const PremiumPage = ({ currentUser, onPremiumAccess }) => {
 
     return (
       <div className="premium-page">
-        <div className="premium-content-container" style={{ gridTemplateColumns: '1fr' }}>
-          {/* Black status box (same style as non-premium pricing card) */}
-          <div className="premium-card pricing-card premium-status-card">
-            <div className="premium-status-header">
-              <span className="status-chip">You’re Premium</span>
-              {daysLeft > 0 && (
-                <span className="status-sub">
-                  Expires in {daysLeft} day{daysLeft === 1 ? '' : 's'}
-                  {expiresAt ? ` • ${expiresAt.toDateString()}` : ''}
-                </span>
-              )}
-            </div>
+        <div className="premium-content-container">
+          <div className="premium-active-grid">
+            {/* Black status box (same style as non-premium pricing card) */}
+            <div className="premium-card pricing-card premium-status-card">
+              <div className="premium-status-header">
+                <span className="status-chip">You’re Premium</span>
+                {daysLeft > 0 && (
+                  <span className="status-sub">
+                    Expires in {daysLeft} day{daysLeft === 1 ? '' : 's'}
+                    {expiresAt ? ` • ${expiresAt.toDateString()}` : ''}
+                  </span>
+                )}
+              </div>
 
-            <div className="status-row">
-              <div className="status-metric">
-                <div className="metric-label">Downloads remaining this month</div>
-                <div className="metric-value">{remaining} / {limit}</div>
-                <div className="meter"><div className="meter-fill" style={{ width: `${percent}%` }} /></div>
+              <div className="status-row">
+                <div className="status-metric">
+                  <div className="metric-label">Downloads remaining this month</div>
+                  <div className="metric-value">{remaining} / {limit}</div>
+                  <div className="meter"><div className="meter-fill" style={{ width: `${percent}%` }} /></div>
+                </div>
+              </div>
+
+              <div className="status-actions">
+                {/* Removed renew button as requested */}
+                <a className="btn btn-outline" href="/" onClick={(e) => { e.preventDefault(); window.location.href = '/'; }}>
+                  BROWSE MUSIC
+                </a>
+                <a className="btn btn-outline" href="/license-verification" target="_blank" rel="noopener noreferrer">
+                  CERTIFICATE VERIFICATION
+                </a>
+              </div>
+
+              <div className="status-footnote">
+                Your premium pass gives you up to 50 downloads per month across Free + Paid songs. Usage resets monthly.
               </div>
             </div>
 
-            <div className="status-actions">
-              {/* Removed renew button as requested */}
-              <a className="btn btn-outline" href="/" onClick={(e) => { e.preventDefault(); window.location.href = '/'; }}>
-                BROWSE MUSIC
-              </a>
-              <a className="btn btn-outline" href="/license-verification" target="_blank" rel="noopener noreferrer">
-                LICENSE VERIFICATION
-              </a>
-            </div>
-
-            <div className="status-footnote">
-              Your premium pass gives you up to 50 downloads per month across Free + Paid songs. Usage resets monthly.
-            </div>
-          </div>
-
-          {/* License history list with scroll (second black box) */}
-          <div className="premium-card" style={{ marginTop: 20 }}>
-            <div style={styles.historyHeader}>
-              <div style={styles.historyTitle}>Download & License History</div>
-              <div style={{ color: '#b0b0b0', fontWeight: 600 }}>
-                {loadingHistory ? 'Loading…' : `${history.length} record${history.length === 1 ? '' : 's'}`}
+            {/* License history list with scroll (second black box) */}
+            <div className="premium-card premium-history-card">
+              <div style={styles.historyHeader}>
+                <div style={styles.historyTitle}>Download & Certificate History</div>
+                <div style={{ color: '#b0b0b0', fontWeight: 600 }}>
+                  {loadingHistory ? 'Loading…' : `${history.length} record${history.length === 1 ? '' : 's'}`}
+                </div>
               </div>
-            </div>
 
-            <div style={styles.historyScroll}>
-              <table style={styles.table}>
-                <thead>
-                  <tr>
-                    <th style={styles.th}>S. No.</th>
-                    <th style={styles.th}>Song name</th>
-                    <th style={styles.th}>License ID</th>
-                    <th style={styles.th}>Copy</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {loadingHistory ? (
-                    <tr><td style={styles.td} colSpan={4}>Loading…</td></tr>
-                  ) : history.length === 0 ? (
-                    <tr><td style={styles.td} colSpan={4}>No downloads yet.</td></tr>
-                  ) : (
-                    history.map((item, idx) => (
-                      <tr key={`${item.licenseId}-${idx}`}>
-                        <td style={styles.td}>{idx + 1}</td>
-                        <td style={styles.td}>{item.songTitle || '-'}</td>
-                        <td style={{ ...styles.td, ...styles.mono }}>{item.licenseId || '-'}</td>
-                        <td style={styles.td}>
-                          {item.licenseId ? (
-                            <button
-                              style={styles.copyBtn}
-                              onClick={() => copyLicense(item.licenseId, idx)}
-                              title="Copy license ID"
-                            >
-                              {copiedIdx === idx ? 'COPIED' : 'COPY'}
-                            </button>
-                          ) : '—'}
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
+              <div style={styles.historyScroll}>
+                <table style={styles.table}>
+                  <thead>
+                    <tr>
+                      <th style={styles.th}>S. No.</th>
+                      <th style={styles.th}>Song name</th>
+                      <th style={styles.th}>certificate ID</th>
+                      <th style={styles.th}>Copy</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {loadingHistory ? (
+                      <tr><td style={styles.td} colSpan={4}>Loading…</td></tr>
+                    ) : history.length === 0 ? (
+                      <tr><td style={styles.td} colSpan={4}>No downloads yet.</td></tr>
+                    ) : (
+                      history.map((item, idx) => (
+                        <tr key={`${item.licenseId}-${idx}`}>
+                          <td style={styles.td}>{idx + 1}</td>
+                          <td style={styles.td}>{item.songTitle || '-'}</td>
+                          <td style={{ ...styles.td, ...styles.mono }}>{item.licenseId || '-'}</td>
+                          <td style={styles.td}>
+                            {item.licenseId ? (
+                              <button
+                                style={styles.copyBtn}
+                                onClick={() => copyLicense(item.licenseId, idx)}
+                                title="Copy license ID"
+                              >
+                                {copiedIdx === idx ? 'COPIED' : 'COPY'}
+                              </button>
+                            ) : '—'}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
 
-            <div style={styles.smallNote}>
-              Tip: Click “License Verification” to validate a license ID publicly.
+              <div style={styles.smallNote}>
+                Tip: Click “certificate Verification” to validate a certificate ID publicly.
+              </div>
             </div>
           </div>
         </div>
@@ -339,46 +336,272 @@ const PremiumPage = ({ currentUser, onPremiumAccess }) => {
     );
   }
 
-  // --- UI when FREE: keep your original pricing/perks ---
+  // --- UI when FREE: new pricing grid with monthly/annual toggle ---
+  const isAnnual = billingCycle === 'annual';
+
   return (
     <div className="premium-page">
-      <div className="premium-content-container">
-        <div className="premium-card pricing-card">
-          <h2 className="card-title">Pricing</h2>
-          <p className="card-subtitle">For YouTube Creators</p>
-          <div className="price-display">
-            <span className="original-price">₹399/per month</span>
-            <span className="current-price">₹59</span>
-            <span className="price-period">/per month</span>
+      <div className="premium-content-container" style={{ gridTemplateColumns: '1fr' }}>
+        {/* Header + Toggle */}
+        <div className="pricing-page-header">
+          <div className="pricing-header-box">
+            <h1 className="pricing-title">Choose your Premium plan</h1>
+            <p className="pricing-subtitle">Unlock downloads, premium tracks, and more — built for creators.</p>
           </div>
-          <button
-            className="get-premium-button"
-            onClick={busy ? undefined : handleGetPremiumClick}
-            disabled={busy}
-          >
-            {busy ? 'PROCESSING...' : (currentUser ? 'GET PREMIUM' : 'LOGIN & GET PREMIUM')}
-          </button>
-          <p className="save-text">Save ₹4080 each year</p>
         </div>
 
-        <div className="premium-card perks-card">
-          <h3 className="card-title-small">Perks</h3>
-          <ul className="perks-list">
-            <li><CheckmarkIcon /> Unlimited Music Downloads</li>
-            <li><CheckmarkIcon /> Exclusive Premium Music Collection Access</li>
-            <li><CheckmarkIcon /> Ad-Free Experience</li>
-            <li><CheckmarkIcon /> High-Quality Audio Files</li>
-          </ul>
+        <div className="pricing-controls">
+          <div className="billing-toggle" role="tablist" aria-label="Billing Cycle">
+            <button
+              className={`toggle-btn ${!isAnnual ? 'active' : ''}`}
+              role="tab"
+              aria-selected={!isAnnual}
+              onClick={() => setBillingCycle('monthly')}
+            >
+              Monthly
+            </button>
+            <button
+              className={`toggle-btn ${isAnnual ? 'active' : ''}`}
+              role="tab"
+              aria-selected={isAnnual}
+              onClick={() => setBillingCycle('annual')}
+            >
+              Annual <span className="save-badge">Save</span>
+            </button>
+          </div>
         </div>
 
-        <div className="premium-card bonus-perks-card">
-          <h3 className="card-title-small">BONUS Perks</h3>
-          <ul className="perks-list">
-            <li><MusicNoteIcon /> Early Access to New Releases</li>
-            <li><YouTubeSafeIcon /> YouTube-Safe</li>
-            <li><StarIcon /> Exclusive Playlists</li>
-            <li className="many-more">and many more......</li>
-          </ul>
+        {/* Pricing Grid */}
+        <div className="pricing-grid">
+          {/* Free */}
+            <div className="plan-card free">
+              <div className="plan-head">
+                <div className="plan-name">Free</div>
+              </div>
+
+              <div className="original-price">₹9 / month</div>
+              <div className="plan-price">
+                <div className="price-amount">₹0</div>
+                <div className="price-period">/month</div>
+              </div>
+
+              <ul className="feature-list">
+                <li className="feature-item">
+                  <span className="icon"><CheckmarkIcon /></span>
+                  3 downloads/month (Free collection only)
+                </li>
+                <li className="feature-item">
+                  <span className="icon"><CheckmarkIcon /></span>
+                  Ad‑Free Music Discovery
+                </li>
+                <li className="feature-item">
+                  <span className="icon"><CheckmarkIcon /></span>
+                  High‑Quality Audio Files
+                </li>
+                <li className="feature-item">
+                  <span className="icon"><CheckmarkIcon /></span>
+                  Browse the full Premium collection (downloads excluded)
+                </li>
+                <li className="feature-item">
+                  <span className="icon"><CheckmarkIcon /></span>
+                  5 VARA‑AI queries per month
+                </li>
+                <li className="feature-item">
+                  <span className="icon"><CheckmarkIcon /></span>
+                  Certificate for YouTube & Social Media
+                </li>
+                <li className="feature-item">
+                  <span className="icon"><CheckmarkIcon /></span>
+                  Coverage for Unlimited Channels
+                </li>
+              </ul>
+
+              <div className="plan-cta">
+                <button
+                  className="cta-btn cta-ghost"
+                  onClick={() => { window.location.assign('/home'); }}
+                  aria-label="Start for Free"
+                >
+                  START FOR FREE
+                </button>
+              </div>
+            </div>
+
+            {/* Starter (Most Popular) */}
+            <div className="plan-card starter">
+              <div className="plan-head">
+                <div className="plan-name">Starter</div>
+              </div>
+
+              <div className="original-price">₹119 / month</div>
+              <div className="plan-price">
+                <div className="price-amount">{isAnnual ? '₹39' : '₹59'}</div>
+                <div className="price-period">/month</div>
+              </div>
+              <div className="annual-note">
+                {isAnnual ? 'Billed annually at ₹39/month' : 'or ₹39/month, billed annually'}
+              </div>
+
+              <ul className="feature-list">
+                <li className="feature-item">
+                  <span className="icon"><CheckmarkIcon /></span>
+                  50 downloads/month (Free + Premium)
+                </li>
+                <li className="feature-item">
+                  <span className="icon"><CheckmarkIcon /></span>
+                  Full download access to the Premium collection
+                </li>
+                <li className="feature-item">
+                  <span className="icon"><CheckmarkIcon /></span>
+                  200 VARA‑AI queries per month
+                </li>
+                <li className="feature-item">
+                  <span className="icon"><CheckmarkIcon /></span>
+                  Safelist Unlimited YouTube Channels
+                </li>
+                <li className="feature-item">
+                  <span className="icon"><CheckmarkIcon /></span>
+                  Ad‑Free Music Discovery
+                </li>
+                <li className="feature-item">
+                  <span className="icon"><CheckmarkIcon /></span>
+                  High‑Quality Audio Files
+                </li>
+                <li className="feature-item">
+                  <span className="icon"><CheckmarkIcon /></span>
+                  Certificate for YouTube & Social Media
+                </li>
+              </ul>
+
+              <div className="plan-cta">
+                <button
+                  className="cta-btn cta-primary"
+                  onClick={busy ? undefined : handleGetPremiumClick}
+                  disabled={busy}
+                  aria-label="Get Premium Starter plan"
+                >
+                  {busy ? 'PROCESSING…' : (currentUser ? 'GET PREMIUM' : 'LOGIN & GET PREMIUM')}
+                </button>
+              </div>
+            </div>
+
+            {/* Pro */}
+            <div className="plan-card pro">
+              <div className="plan-head">
+                <div className="plan-name">Pro</div>
+                <div className="popular-badge">Most Popular</div>
+              </div>
+
+              <div className="original-price">₹189 / month</div>
+              <div className="plan-price">
+                <div className="price-amount">{isAnnual ? '₹79' : '₹99'}</div>
+                <div className="price-period">/month</div>
+              </div>
+              <div className="annual-note">
+                {isAnnual ? 'Billed annually at ₹79/month' : 'or ₹79/month, billed annually'}
+              </div>
+
+              <ul className="feature-list">
+                <li className="feature-item">
+                  <span className="icon"><CheckmarkIcon /></span>
+                  150 downloads/month (Free + Premium)
+                </li>
+                <li className="feature-item">
+                  <span className="icon"><CheckmarkIcon /></span>
+                  Full download access to the Premium collection
+                </li>
+                <li className="feature-item">
+                  <span className="icon"><CheckmarkIcon /></span>
+                  500 VARA‑AI queries per month
+                </li>
+                <li className="feature-item">
+                  <span className="icon"><CheckmarkIcon /></span>
+                  Safelist Unlimited YouTube Channels
+                </li>
+                <li className="feature-item">
+                  <span className="icon"><CheckmarkIcon /></span>
+                  Ad‑Free Music Discovery
+                </li>
+                <li className="feature-item">
+                  <span className="icon"><CheckmarkIcon /></span>
+                  High‑Quality Audio Files 
+                </li>
+                <li className="feature-item">
+                  <span className="icon"><CheckmarkIcon /></span>
+                  Certificate for YouTube & Social Media
+                </li>
+              </ul>
+
+              <div className="plan-cta">
+                <button
+                  className="cta-btn cta-primary"
+                  onClick={busy ? undefined : () => handleBuyPlan('pro')}
+                  disabled={busy}
+                  aria-label="Get Pro plan"
+                >
+                  {busy ? 'PROCESSING…' : (currentUser ? 'GET PRO' : 'LOGIN & GET PRO')}
+                </button>
+              </div>
+            </div>
+
+            {/* Pro+ */}
+            <div className="plan-card proplus">
+              <div className="plan-head">
+                <div className="plan-name">Pro+</div>
+                <div className="value-badge">Best Value</div>
+              </div>
+
+              <div className="original-price">₹379 / month</div>
+              <div className="plan-price">
+                <div className="price-amount">{isAnnual ? '₹179' : '₹199'}</div>
+                <div className="price-period">/month</div>
+              </div>
+              <div className="annual-note">
+                {isAnnual ? 'Billed annually at ₹179/month' : 'or ₹179/month, billed annually'}
+              </div>
+
+              <ul className="feature-list">
+                <li className="feature-item">
+                  <span className="icon"><CheckmarkIcon /></span>
+                  400 downloads/month (Free + Premium)
+                </li>
+                <li className="feature-item">
+                  <span className="icon"><CheckmarkIcon /></span>
+                  Full download access to the Premium collection
+                </li>
+                <li className="feature-item">
+                  <span className="icon"><CheckmarkIcon /></span>
+                  2,000 VARA‑AI queries per month
+                </li>
+                <li className="feature-item">
+                  <span className="icon"><CheckmarkIcon /></span>
+                  Safelist Unlimited YouTube Channels
+                </li>
+                <li className="feature-item">
+                  <span className="icon"><CheckmarkIcon /></span>
+                  Ad‑Free Music Discovery
+                </li>
+                <li className="feature-item">
+                  <span className="icon"><CheckmarkIcon /></span>
+                  High‑Quality Audio Files 
+                </li>
+                <li className="feature-item">
+                  <span className="icon"><CheckmarkIcon /></span>
+                  certificate for YouTube & Social Media
+                </li>
+              </ul>
+
+              <div className="plan-cta">
+                <button
+                  className="cta-btn cta-primary"
+                  onClick={busy ? undefined : () => handleBuyPlan('pro_plus')}
+                  disabled={busy}
+                  aria-label="Get Pro Plus plan"
+                >
+                  {busy ? 'PROCESSING…' : (currentUser ? 'GET PRO+' : 'LOGIN & GET PRO+')}
+                </button>
+              </div>
+            </div>
         </div>
       </div>
     </div>

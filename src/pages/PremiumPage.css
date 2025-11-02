@@ -1,0 +1,184 @@
+/* Scoped styles for new Premium pricing grid */
+
+.pricing-page-header { text-align: center; margin-bottom: 2.5rem; }
+.pricing-title { font-size: clamp(1.9rem, 3vw, 2.75rem); font-weight: 800; background: linear-gradient(95deg,#ffe6a3,#ffcb47,#ffae00); -webkit-background-clip: text; background-clip: text; color: transparent; letter-spacing: .5px; }
+.pricing-subtitle { color: #c8c8c8; font-size: 1rem; max-width: 760px; margin: .75rem auto 0; line-height: 1.5; }
+
+.pricing-controls { display: flex; justify-content: center; margin-bottom: 2rem; }
+.billing-toggle { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); padding: .35rem; border-radius: 60px; display: inline-flex; gap: .35rem; box-shadow: 0 4px 18px -8px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,0.06) inset; backdrop-filter: blur(8px); }
+.toggle-btn { background: transparent; color: #f5f5f5; font-weight: 600; font-size: .9rem; padding: .65rem 1.25rem; border: none; border-radius: 50px; cursor: pointer; letter-spacing: .5px; position: relative; transition: all .35s cubic-bezier(.4,0,.2,1); text-shadow: 0 1px 0 rgba(0,0,0,0.35); }
+.toggle-btn.active { background: linear-gradient(90deg,#ffcc53,#ffb325,#ff9900); color: #111; font-weight: 700; box-shadow: 0 4px 14px -4px rgba(255,160,0,.55); }
+.toggle-btn:not(.active):hover { color: #ffffff; }
+
+/* Transparent black rectangle behind pricing header */
+.pricing-header-box {
+  display: inline-block; /* shrink-wrap to content width */
+  background: rgba(0, 0, 0, 0.84);
+  border: 1px solid rgba(235,186,47,0.38);
+  border-radius: 16px;
+  padding: 14px 20px;
+  box-shadow: 0 0 22px rgba(235,186,47,0.25), 0 0 30px rgba(255,152,0,0.15);
+}
+
+/* Best Value badge (mirrors popular-badge styling intent) */
+.popular-badge,
+.value-badge {
+  background: linear-gradient(90deg, #ffc107, #ff9800);
+  color: #111;
+  font-weight: 900;
+  border-radius: 9999px;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  box-shadow: 0 3px 10px rgba(255, 193, 7, 0.35);
+  text-transform: none; /* leave text casing as in JSX */
+}
+.toggle-btn:focus-visible { outline: 2px solid #ffb325; outline-offset: 2px; }
+.save-badge { background: #111; color: #ffcc53; font-size: .65rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-left: 6px; letter-spacing: .5px; position: relative; top: -1px; }
+
+.pricing-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap: 1.75rem; width: 100%; max-width: 1250px; margin: 0 auto 3rem; }
+.plan-card { position: relative; background: linear-gradient(180deg,#1c1c1c 0%,#121212 100%); border: 1px solid rgba(255,255,255,0.08); border-radius: 22px; padding: 1.65rem 1.4rem 1.9rem; display: flex; flex-direction: column; box-shadow: 0 10px 28px -12px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,0.04) inset; transition: transform .45s cubic-bezier(.34,1.56,.64,1), border-color .35s, background .4s; overflow: hidden; }
+.plan-card::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 60% -10%,rgba(255,193,59,.25),transparent 60%); opacity: 0; transition: opacity .5s; pointer-events: none; }
+.plan-card:hover { transform: translateY(-6px); border-color: rgba(255,200,90,0.4); }
+.plan-card:hover::before { opacity: 1; }
+.plan-card.free { background: linear-gradient(180deg,#181818,#111); }
+.plan-card.starter { border: 1px solid rgba(255,181,44,0.55); }
+.plan-card.starter .popular-badge { background: linear-gradient(90deg,#ffd276,#ffb937,#ff9d00); color: #2d1b00; font-weight: 800; font-size: .6rem; letter-spacing: 1px; padding: 4px 8px; border-radius: 30px; margin-left: auto; text-transform: uppercase; box-shadow: 0 4px 12px -4px rgba(255,168,0,.55); }
+.plan-card.pro { border: 1px solid rgba(255,255,255,0.18); }
+.plan-card.proplus { border: 1px solid rgba(255,255,255,0.18); }
+.plan-head { display: flex; align-items: center; margin-bottom: .85rem; gap: .65rem; }
+.plan-name { font-size: 1.2rem; font-weight: 700; letter-spacing: .5px; color: #fff; }
+
+.plan-price { display: flex; align-items: flex-end; gap: .4rem; margin-bottom: .4rem; }
+.price-amount { font-size: 2.2rem; font-weight: 800; background: linear-gradient(92deg,#ffe29a,#ffc14a,#ff9e00); -webkit-background-clip: text; background-clip: text; color: transparent; letter-spacing: 1px; }
+.price-period { color: #b3b3b3; font-weight: 500; font-size: .85rem; letter-spacing: .5px; }
+.annual-note { font-size: .7rem; font-weight: 600; letter-spacing: .75px; color: #ffca5c; margin-bottom: 1rem; min-height: 14px; }
+
+.feature-list { list-style: none; margin: 0 0 1.4rem; padding: 0; display: flex; flex-direction: column; gap: .55rem; }
+.feature-item { display: flex; align-items: flex-start; gap: .55rem; font-size: .8rem; line-height: 1.25rem; color: #dfdfdf; font-weight: 500; }
+.feature-item .icon { width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; color: #ffc04c; flex-shrink: 0; }
+
+.plan-cta { margin-top: auto; }
+.cta-btn { width: 100%; border: none; border-radius: 14px; font-weight: 700; letter-spacing: .75px; cursor: pointer; padding: .9rem 1rem; font-size: .8rem; transition: all .4s; position: relative; overflow: hidden; }
+.cta-btn:focus-visible { outline: 2px solid #ffb325; outline-offset: 2px; }
+.cta-primary { background: linear-gradient(90deg,#ffd276,#ffb937,#ff9d00); color: #2d1600; box-shadow: 0 6px 18px -6px rgba(255,166,0,.6); }
+.cta-primary:hover:not(:disabled) { filter: brightness(1.08); transform: translateY(-2px); }
+.cta-ghost { background: rgba(255,255,255,0.06); color: #e2e2e2; }
+.cta-ghost:hover { background: rgba(255,255,255,0.12); }
+.cta-disabled { background: linear-gradient(120deg,#3a3a3a,#2a2a2a); color: #9a9a9a; cursor: not-allowed; }
+.cta-disabled::after { content: "Soon"; position: absolute; top: 6px; right: 10px; font-size: .55rem; font-weight: 800; letter-spacing: 1px; background: #111; padding: 2px 6px; border-radius: 6px; color: #ffce63; }
+
+/* ===== Premium page responsive wrappers ===== */
+.premium-page {
+  padding-left: 40px;
+  padding-right: 40px;
+}
+
+/* Ensure the outer container centers and provides consistent spacing */
+.premium-content-container {
+  display: grid;
+  gap: 24px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Active-premium: 2-col on desktop, stacked on small screens */
+.premium-active-grid {
+  display: grid;
+  grid-template-columns: 1fr;     /* default stacked */
+  gap: 24px;
+  align-items: start;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* Remove any leftover top margins on cards inside active grid */
+.premium-active-grid .premium-card {
+  margin-top: 0 !important;
+}
+
+/* Desktop: place status + history side-by-side */
+@media (min-width: 1024px) {
+  .premium-active-grid {
+    grid-template-columns: 1.05fr 1fr;   /* slight emphasis to status card */
+  }
+}
+
+/* Gutters: smoothly reduce padding on smaller screens */
+@media (max-width: 1024px) {
+  .premium-page { padding-left: 28px; padding-right: 28px; }
+}
+@media (max-width: 768px) {
+  .premium-page { padding-left: 20px; padding-right: 20px; }
+}
+@media (max-width: 480px) {
+  .premium-page { padding-left: 14px; padding-right: 14px; }
+}
+
+/* === VARA Premium: explicit responsive grid for pricing cards (mobile-first) === */
+/* Default: 1 column on phones */
+.premium-page .pricing-grid {
+  display: grid;
+  grid-template-columns: 1fr;     /* force single column baseline */
+  gap: 1.75rem;                   /* keep existing gap */
+  width: 100%;
+  max-width: 1250px;
+  margin: 0 auto 3rem;
+}
+
+/* ≥640px: 2 columns */
+@media (min-width: 640px) {
+  .premium-page .pricing-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ≥1024px: 3 columns */
+@media (min-width: 1024px) {
+  .premium-page .pricing-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* ≥1280px: 4 columns */
+@media (min-width: 1280px) {
+  .premium-page .pricing-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* Safety: ensure no horizontal scroll and keep gutters consistent */
+.premium-page {
+  overflow-x: hidden;             /* prevent accidental horizontal scroll on narrow viewports */
+}
+
+/* Slightly tighter gutters on very small screens (this complements the earlier gutter rules you added) */
+@media (max-width: 480px) {
+  .premium-page { padding-left: 14px; padding-right: 14px; }
+}
+
+/* ===== Light responsive refinements for plan cards ===== */
+@media (max-width: 1024px) {
+  .plan-card { padding: 1.4rem 1.15rem 1.6rem; }
+  .plan-price .price-amount { font-size: 2.0rem; }
+  .feature-item { font-size: 0.78rem; }
+  .cta-btn { font-size: 0.82rem; }
+}
+@media (max-width: 640px) {
+  .plan-card { padding: 1.25rem 1rem 1.5rem; }
+  .plan-price .price-amount { font-size: 1.9rem; }
+  .feature-item { font-size: 0.76rem; line-height: 1.2rem; }
+  .pricing-grid { gap: 1.2rem; }
+}
+
+/* Keep pricing grid neat up to large desktops */
+@media (min-width: 1280px) {
+  .pricing-grid { max-width: 1250px; }
+}
+
+/* History table small tweaks on narrow screens */
+@media (max-width: 640px) {
+  .premium-history-card thead th { font-size: 0.8rem; }
+  .premium-history-card td { font-size: 0.85rem; }
+}

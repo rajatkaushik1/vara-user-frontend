@@ -8,7 +8,7 @@ const HERO_TIPS = [
   'Every song card shows a vocal icon. If you see it, the track has vocals. If it’s missing, that track is instrumental only.',
   'Premium songs are marked. A lotus icon in the top-right corner of a card means it’s part of the Premium library. You’ll need a Premium plan to download those.',
   'Unsure what something does? Just hover your mouse over any button or icon. A short description will appear to explain the feature.',
-  'Verify licenses anytime. Every track comes with a license. You can confirm it directly through the License Verification page in your profile or at the bottom footer.',
+  'Verify Certifiacte ID anytime. Every track comes with a Certificate ID. You can confirm it directly through the Certificate Verification page in your profile or at the bottom footer.',
   'Go to the GENRE or SUB-GENRE tabs and click Explore to see all songs related to that category in one place.',
   'Find songs by instruments. Our newest feature lets you see which instruments are used in a track — great if you’re looking for a specific sound.',
   'All free songs in one tab. Don’t want Premium? Head to the FREE SONGS tab, where we’ve collected every free track so you don’t waste time searching.',
@@ -16,7 +16,7 @@ const HERO_TIPS = [
   'Not sure what to play? Try the FOR YOU section. It has 🔥 Trending tracks, 🆕 New uploads, 🔁 Listen Again, and 💡 Based on Your Taste playlists.',
   'For pro editors. Every track shows its musical key and BPM. Use these details to sync perfectly with cuts, transitions, and pacing in your videos.',
   'Preview Premium for free. You can always listen to Premium songs before deciding. Downloading them, however, requires a Premium plan.',
-  'Set up your profile once. Add your YouTube info in your profile settings to enable downloads — this makes your licenses valid for your channel.',
+  'Set up your profile once. Add your YouTube info in your profile settings to enable downloads — this makes your Certificate valid for your channel.',
   'Slide the info section on each song card to quickly view its Genre, Sub-Genre, and Instruments.'
 ];
 

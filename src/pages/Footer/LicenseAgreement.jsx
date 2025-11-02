@@ -7,12 +7,12 @@ const LicenseAgreement = () => (
       <img src="/logo.png" alt="VARA Logo" className="footer-page-logo" />
     </div>
     <div className="footer-page-content">
-      <h1 className="footer-page-title">Vara Music – License Agreement</h1>
+      <h1 className="footer-page-title">Vara Music – Certificate Agreement</h1>
       <p className="footer-page-date">Effective Date: 14:09:2025</p>
       <section>
-        <h2><span className="gold-number">1.</span> License Grant</h2>
+        <h2><span className="gold-number">1.</span> Certificate Grant</h2>
         <p>
-          Vara Music grants you a non-exclusive, non-transferable license to use AI-generated music tracks downloaded from varamusic.com in your creative projects, subject to the terms below.
+          Vara Music grants you a non-exclusive, non-transferable certificate to use AI-generated music tracks downloaded from varamusic.com in your creative projects, subject to the terms below.
         </p>
       </section>
       <section>
@@ -33,21 +33,21 @@ const LicenseAgreement = () => (
         </ul>
       </section>
       <section>
-        <h2><span className="gold-number">4.</span> License ID & Verification</h2>
+        <h2><span className="gold-number">4.</span> Certificate ID & Verification</h2>
         <p>
-          Each download is tagged to your account and assigned a license ID. Use this ID for license verification on platforms like YouTube.
+          Each download is tagged to your account and assigned a certificate ID. Use this ID for certificate verification on platforms like YouTube.
         </p>
       </section>
       <section>
         <h2><span className="gold-number">5.</span> Termination</h2>
         <p>
-          Vara reserves the right to terminate your license and account for violations of these terms.
+          Vara reserves the right to terminate your certificate and account for violations of these terms.
         </p>
       </section>
       <section>
         <h2><span className="gold-number">6.</span> Contact</h2>
         <p>
-          For license questions:<br />
+          For certificate questions:<br />
           📧 rajatrajkaushik1@gmail.com<br />
           🌐 varamusic.com
         </p>

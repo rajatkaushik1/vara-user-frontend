@@ -6,6 +6,7 @@ body {
   color: #e0e0e0;
   line-height: 1.6;
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 #root {
@@ -31,6 +32,7 @@ body {
   margin: 25px 20px 0 20px;
   border-radius: 15px;
   width: calc(100% - 40px);
+  box-sizing: border-box;
 }
 
 .header-left {
@@ -1265,11 +1267,12 @@ body {
   background-repeat: no-repeat;
 }
 /* -------- collapse empty full-width sections (used by MusicContent carousels) -------- */
-.full-width-section {
-  grid-column: 1 / -1;       /* same as inline gridColumn before */
-  margin-bottom: 0rem;      /* keep same spacing when content exists */
-  padding: 0;               /* default */
-  min-height: 0;            /* important to allow collapse */
+
+ .full-width-section {
+  grid-column: 1 / -1;
+  margin: 0 !important;  /* Zero margin on all sides */
+  padding: 0 !important;
+  min-height: 0;
 }
 
 /* If the wrapper has no children (child returned null), hide it completely */
@@ -1470,14 +1473,15 @@ body {
 
 /* --- TRENDING CAROUSEL STYLES --- */
 .trending-carousel-container {
-    margin-bottom: 0px;
+    margin-bottom: 0px !important;
+    padding-bottom: 0px !important;
 }
 
 .trending-carousel-title {
     font-size: 1.4em;
     font-weight: 600;
     color: #e0e0e0;
-    margin-bottom: 20px;
+    margin: 0 0 10px 0;
     text-transform: capitalize;
     padding: 0 40px;
 }
@@ -1491,11 +1495,14 @@ body {
     gap: 25px;
     overflow-x: auto;
     /* Add padding to show partial cards and make space for buttons */
-    padding: 0 60px 20px 80px; /* Extra left padding to show partial card */
+   
+    padding: 0 0 0 0;
+     /* Extra left padding to show partial card */
     scrollbar-width: none;
     -ms-overflow-style: none;
     -webkit-overflow-scrolling: touch;
     scroll-snap-type: x mandatory;
+     scroll-padding-left: 0;
 }
 
 .trending-carousel-scroll-area > * {
@@ -1736,7 +1743,7 @@ body {
 /* Responsive adjustments for trending carousel */
 @media (max-width: 1024px) {
     .trending-carousel-scroll-area {
-        padding: 0 15px 20px 40px;
+        padding: 0 15px 0 40px;
         gap: 15px;
     }
     .trending-song-card {
@@ -1750,7 +1757,7 @@ body {
         padding: 0 15px;
     }
     .trending-carousel-scroll-area {
-        padding: 0 15px 20px 15px;
+        padding: 0 15px 0 15px;
         gap: 15px;
     }
     .trending-song-card {
@@ -2634,6 +2641,7 @@ body {
   flex-wrap: wrap;
   gap: 6px;
   margin-bottom: 6px;
+  flex-shrink: 0;
 }
 
 .instrument-pill,
@@ -3000,28 +3008,66 @@ body {
 
 .genre-card:hover,
 .genre-card:focus-visible {
-  /* Stronger border on hover/focus */
-  box-shadow: inset 0 0 0 2px rgba(255,255,255,0.85) !important;
+ 
+  box-shadow:
+    inset 0 0 0 2px rgba(255,255,255,0.85),
+    0 12px 30px rgba(0,0,0,0.45) !important;  /* stronger outline + lift */
 }
 
-.genre-card.clickable {
-  cursor: pointer; /* pointer over the whole card */
-
-}
-
-/* Tighten the spacing between the image and the title for better visual association */
+/* Cover image: square, rounded, subtle zoom on hover */
 .genre-card-image-wrap {
-  margin-bottom: 8px !important; /* was larger; now Spotify-like tight spacing */
+  position: relative !important;
+  display: block !important;
+  width: 100% !important;
+  overflow: hidden !important;
+  border-radius: 12px !important;
+  margin-bottom: 10px !important;          /* tight spacing (Spotify-like) */
+  background: #111;                         /* fallback bg */
+  box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+}
+.genre-card-image {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 1 / 1 !important;          /* square cover */
+  object-fit: cover !important;
+  border-radius: 12px !important;
+  transition: transform 200ms ease !important;
+}
+.genre-card:hover .genre-card-image,
+.genre-card:focus-visible .genre-card-image {
+  transform: scale(1.02);
 }
 
-/* On hover, keep the image glow but avoid a second thick border on the image itself */
-.genre-card.clickable:hover .genre-card-image-wrap,
-.genre-card.clickable:focus-visible .genre-card-image-wrap {
-  border-color: transparent !important; /* let the card-level outline carry the emphasis */
-  box-shadow: 0 10px 26px rgba(255,255,255,0.12); /* keep the soft glow if present */
+/* Floating circular play/explore button (appears on hover, bottom-right) */
+.browse-card-play {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: #ebba2f;            /* VARA yellow */
+  color: #1a1a1a;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 26px rgba(0,0,0,0.45);
+  opacity: 0;
+  transform: translateY(10px) scale(0.96);
+  transition: opacity 160ms ease, transform 200ms ease, background-color 160ms ease;
+  z-index: 3;
+}
+.genre-card:hover .browse-card-play,
+.genre-card:focus-within .browse-card-play {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+.browse-card-play:hover {
+  background: #d4a72a;
 }
 
-/* Parent-genre pill inside sub-genre cards: bottom edge flush with the image bottom */
+/* Red parent-genre pill (sub-genre only) — bottom edge flush with image */
 .subgenre-parent-pill {
   position: absolute;
   left: 50%;
@@ -3142,45 +3188,619 @@ body {
 
 /* Red parent-genre pill (sub-genre only) — bottom edge flush with image */
 .subgenre-parent-pill {
-  position: absolute !important;
-  left: 50% !important;
-  bottom: 0 !important;                 /* flush with image bottom */
-  transform: translateX(-50%) !important;
-  background-color: #e74c3c !important;
-  color: #fff !important;
-  padding: 6px 14px !important;
-  border-radius: 9999px !important;
-  font-size: 0.9rem !important;
-  font-weight: 800 !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.6px !important;
-  white-space: nowrap !important;
-  z-index: 2 !important;
-  line-height: 1 !important;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.35) !important;
-}
-
-/* Title under image — tight spacing and clear hierarchy */
-.genre-card-content {
-  padding: 0 2px 6px !important;
-}
-.genre-card-name {
-  font-family: 'Montserrat', sans-serif !important;
-  font-weight: 800 !important;
-  font-size: 1.5rem !important;
-  color: #fff !important;
-  margin: 6px 0 2px 0 !important;        /* tight Spotify-ish spacing */
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
-
-/* Optional helper: subtle description (if used anywhere) */
-.genre-card-description {
-  color: #bdbdbd;
+  position: absolute;
+  left: 50%;
+  bottom: 0 !important;                   /* align pill bottom with image bottom */
+  transform: translateX(-50%);            /* centered horizontally */
+  background-color: #e74c3c;              /* red */
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 9999px;
   font-size: 0.9rem;
-  line-height: 1.4;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  white-space: nowrap;
+  z-index: 2;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.35);
 }
 
-/* Ensure no old “transparent” card overrides leak through */
-.genre-card-image-wrap::after { background: transparent !important; }
+/* Ensure title spacing remains tight under the cover */
+.genre-card-content {
+  padding: 0 4px 6px;
+  text-align: center;
+}
+
+.content-tabs {
+  justify-content: flex-start !important;
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  gap: 24px !important;
+  padding-left: 16px !important;
+  padding-right: 16px !important;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.content-tabs::-webkit-scrollbar { display: none; }
+
+.tab-button {
+  flex: 0 0 auto !important;
+  white-space: nowrap !important;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+.tab-button:focus-visible {
+  outline: 2px solid #ebba2f;
+  outline-offset: 4px;
+  border-radius: 8px;
+}
+
+@media (max-width: 1024px) {
+  .content-tabs {
+    gap: 20px !important;
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+  .tab-button {
+    font-size: 1.1em;
+  }
+}
+
+@media (max-width: 680px) {
+  .content-tabs {
+    gap: 16px !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+  .tab-button {
+    font-size: 1em;
+  }
+  .content-grid {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+}
+/* ===== END VARA: Responsive Content Tabs ===== */
+@media (min-width: 1024px) {
+  .content-tabs {
+    /* Center the tab strip when there's extra space on desktop */
+    justify-content: center !important;
+
+    /* Restore comfortable desktop spacing between tabs */
+    gap: 30px !important;
+
+    /* Remove the small mobile gutters so centering is visually exact */
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+
+    /* Keep existing horizontal scroll behavior intact if items overflow.
+       (No change needed to overflow: auto from earlier block) */
+  }
+}
+@media (max-width: 1024px) {
+  .content-tabs::before {
+    content: '';
+    display: block;          /* make it a real flex item */
+    flex: 0 0 22px;          /* gutter width; tweak 18–28px to taste */
+    min-width: 22px;         /* ensure it doesn’t collapse */
+  }
+}
+@media (max-width: 1024px) {
+  .content-tabs {
+    justify-content: flex-start !important; /* enforce left alignment on smaller screens */
+  }
+  .content-tabs > .tab-button:first-child {
+    margin-left: 22px !important;          /* reliable left gutter */
+    scroll-margin-left: 22px;               /* plays nice with scroll-snap */
+  }
+}
+
+/* Slightly smaller gutter on very small phones */
+@media (max-width: 480px) {
+  .content-tabs > .tab-button:first-child {
+    margin-left: 18px !important;
+    scroll-margin-left: 18px;
+  }
+}
+.collection-hero {
+  display: grid;
+  grid-template-columns: auto 1fr; /* image | text */
+  align-items: center;
+  column-gap: 24px;
+  row-gap: 8px;
+
+  /* Align with the rest of the page gutters (matches titles/carousels using 40px) */
+  padding: 0 40px;
+  margin: 8px 0 18px 0;
+}
+
+/* Image wrapper: rounded, subtle glow, prevents edge clipping */
+.collection-hero-image-wrap {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #111;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+}
+
+/* Square, responsive cover image */
+.collection-hero-image {
+  display: block;
+  width: clamp(160px, 22vw, 240px); /* scales with viewport, capped for balance */
+  height: auto;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 14px;
+}
+
+/* Text column */
+.collection-hero-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0; /* allow text to shrink gracefully */
+}
+
+/* Strong, clean title with yellow underline */
+.collection-hero-title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 800;
+  font-size: clamp(1.6rem, 1.2rem + 1.2vw, 2.2rem);
+  color: #ffffff;
+  line-height: 1.15;
+  letter-spacing: 0.2px;
+  margin: 0;
+  position: relative;
+  padding-bottom: 8px;
+}
+
+/* Accent underline (VARA yellow) */
+.collection-hero-title::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  width: 68px;                     /* underline length */
+  background: #ebba2f;             /* VARA yellow */
+  box-shadow: 0 0 10px rgba(235,186,47,0.35);
+  border-radius: 3px;
+}
+
+/* Supporting copy */
+.collection-hero-desc {
+  font-family: 'Inter', sans-serif;
+  color: #cfcfcf;
+  font-weight: 500;
+  font-size: clamp(0.98rem, 0.92rem + 0.2vw, 1.05rem);
+  line-height: 1.55;
+  margin: 0;
+  max-width: 68ch; /* comfortable reading width on desktop */
+  text-wrap: pretty;
+}
+
+/* --- Responsive behavior --- */
+@media (max-width: 1024px) {
+  .collection-hero {
+    column-gap: 18px;
+    padding: 0 24px; /* slightly tighter gutters on tablet */
+  }
+  .collection-hero-image {
+    width: clamp(150px, 28vw, 220px);
+  }
+}
+
+@media (max-width: 820px) {
+  .collection-hero {
+    grid-template-columns: 1fr;       /* stack: image above text */
+    justify-items: center;
+    text-align: center;
+    row-gap: 14px;
+    padding: 0 20px;
+  }
+  .collection-hero-body {
+    align-items: center;               /* center text block */
+  }
+  .collection-hero-title::after {
+    left: 50%;                         /* center the underline */
+    transform: translateX(-50%);
+  }
+  .collection-hero-desc {
+    max-width: 60ch;                   /* keep text readable when centered */
+  }
+  .collection-hero-image {
+    width: clamp(160px, 52vw, 320px);  /* larger image on phones */
+  }
+}
+
+@media (max-width: 520px) {
+  .collection-hero {
+    padding: 0 16px;
+    row-gap: 12px;
+  }
+  .collection-hero-title {
+    font-size: clamp(1.35rem, 1.1rem + 1.8vw, 1.7rem);
+  }
+  .collection-hero-image {
+    width: clamp(150px, 64vw, 300px);
+  }
+}
+.hero-section {
+  /* Fluid vertical rhythm: scales from mobile to desktop */
+  padding-top: clamp(48px, 6vw + 18px, 110px);
+  padding-bottom: clamp(40px, 5vw + 10px, 90px);
+  padding-left: 20px;
+  padding-right: 20px;
+
+  /* Keep content centered and readable */
+  text-align: center;
+  background-color: #040604;
+  color: #e0e0e0;
+}
+
+/* Sub-heading: crisp accent with fluid size */
+.hero-sub-heading {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  color: #ebba2f;
+  letter-spacing: 0.4px;
+  margin-bottom: clamp(6px, 1vw, 12px);
+  font-size: clamp(1rem, 0.8rem + 0.6vw, 1.25rem);
+}
+
+/* Main headline: fluid, bold, and readable */
+.hero-section h1 {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 clamp(12px, 2vw, 22px) 0;
+  line-height: 1.15;
+  /* Fluid font-size from phone → desktop */
+  font-size: clamp(1.9rem, 1.2rem + 4.2vw, 3.4rem);
+  text-wrap: balance;         /* modern browsers: balanced lines */
+  -webkit-hyphens: auto;
+  hyphens: auto;
+  text-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Description: comfortable line-length and subtle tone */
+.hero-description {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  color: #cfcfcf;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: clamp(22px, 3.2vw, 40px);
+  line-height: 1.6;
+  /* Fluid size; narrower max-width for better readability */
+  font-size: clamp(0.98rem, 0.9rem + 0.4vw, 1.15rem);
+  max-width: clamp(46ch, 68ch, 72ch);
+  text-wrap: pretty;
+}
+
+/* Optional impact line: prominent but not overpowering */
+.impact-text {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 800;
+  color: #efbb2d;
+  margin-top: clamp(22px, 3vw, 34px);
+  margin-bottom: clamp(16px, 2.6vw, 28px);
+  line-height: 1.35;
+  font-size: clamp(1.2rem, 0.9rem + 1.5vw, 1.8rem);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* CTA button: fluid sizing, comfortable touch target */
+.try-audio-button {
+  min-width: clamp(180px, 40vw, 260px);
+  height: clamp(44px, 6.2vw, 56px);
+  padding: 12px clamp(22px, 6vw, 36px);
+  font-size: clamp(1rem, 0.9rem + 0.4vw, 1.2rem);
+  border-radius: 32px;
+  box-shadow: 0 8px 25px rgba(255, 193, 7, 0.45);
+}
+
+/* Tablet refinements */
+@media (max-width: 1024px) {
+  .hero-section { padding-left: 24px; padding-right: 24px; }
+}
+
+/* Phone refinements */
+@media (max-width: 768px) {
+  .hero-section { padding-left: 18px; padding-right: 18px; }
+  .hero-description { max-width: 60ch; }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .hero-section { padding-left: 14px; padding-right: 14px; }
+  .try-audio-button { min-width: 70%; }
+}
+/* Base constants: original design size — 25% smaller by default
+   Fix: DO NOT hard‑set heights on the wrapper or the .song-card.
+   Reserve vertical space with aspect-ratio and scale the inner card only.
+   This prevents “elements coming out” while keeping the whole card proportional. */
+.trending-carousel-scroll-area > div {
+  --cardW: 450px;
+  --cardH: 230px;
+  --cardScale: 0.75;
+
+  width: calc(var(--cardW) * var(--cardScale)) !important;
+  flex: 0 0 calc(var(--cardW) * var(--cardScale)) !important;
+
+  aspect-ratio: calc(var(--cardW) / var(--cardH));
+  height: calc(var(--cardH) * var(--cardScale)) !important;  /* ← ADD THIS LINE */
+  display: block;
+  position: relative;
+}
+
+/* Scale the inner card so all children scale uniformly; let height be auto */
+.trending-carousel-scroll-area > div > .song-card {
+  width: var(--cardW);            /* base canvas for scaling */
+  /* height stays auto to avoid clipping/overflow of internal content */
+  transform: scale(var(--cardScale));
+  transform-origin: top left;     /* anchor scaling */
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* Breakpoints: keep the same visual scale targets, but without forcing fixed heights */
+@media (max-width: 1120px) {
+  .trending-carousel-scroll-area > div { --cardScale: 0.69; }   /* 0.92 × 0.75 */
+}
+@media (max-width: 980px) {
+  .trending-carousel-scroll-area > div { --cardScale: 0.66; }   /* 0.88 × 0.75 */
+}
+@media (max-width: 860px) {
+  .trending-carousel-scroll-area > div { --cardScale: 0.64; }   /* ~0.6375 */
+}
+/* Phones: readable while showing a hint of the next card */
+@media (max-width: 720px) {
+  .trending-carousel-scroll-area > div { --cardScale: 0.615; }
+}
+@media (max-width: 580px) {
+  .trending-carousel-scroll-area > div { --cardScale: 0.585; }
+}
+
+/* === RAW LIBRARY GRID LAYOUT (NEW) — keep visuals identical to carousel cards === */
+.raw-library-grid {
+  /* Make this section span the full content grid width */
+  grid-column: 1 / -1;
+
+  /* Center the set of columns and keep gaps consistent */
+  display: grid;
+  justify-content: center;     /* center the fixed-width columns */
+  align-content: start;
+  gap: 25px;
+
+  /* Respect the parent .content-grid paddings (40px). No extra horizontal padding here. */
+  padding-left: 0;
+  padding-right: 0;
+
+  /* Card base canvas and scale (matches carousel) */
+  --cardW: 450px;
+  --cardH: 230px;
+  --cardScale: 0.75;
+
+  /* Row height tracks the scaled card height to prevent overlap/jumps */
+  grid-auto-rows: calc(var(--cardH) * var(--cardScale));
+
+  /* Default: 4 fixed-width columns on very wide screens */
+  grid-template-columns: repeat(4, calc(var(--cardW) * var(--cardScale)));
+}
+
+/* Column count breakpoints (exact as requested) */
+@media (max-width: 1499px) {
+  .raw-library-grid {
+    grid-template-columns: repeat(3, calc(var(--cardW) * var(--cardScale)));
+  }
+}
+@media (max-width: 1013px) {
+  .raw-library-grid {
+    grid-template-columns: repeat(2, calc(var(--cardW) * var(--cardScale)));
+  }
+}
+@media (max-width: 599px) {
+  .raw-library-grid {
+    grid-template-columns: repeat(1, calc(var(--cardW) * var(--cardScale)));
+  }
+}
+
+/* Scale values mirrored from carousel so Raw Library cards look identical */
+@media (max-width: 1120px) {
+  .raw-library-grid { --cardScale: 0.69; }
+}
+@media (max-width: 980px) {
+  .raw-library-grid { --cardScale: 0.66; }
+}
+@media (max-width: 860px) {
+  .raw-library-grid { --cardScale: 0.64; }
+}
+@media (max-width: 720px) {
+  .raw-library-grid { --cardScale: 0.615; }
+}
+@media (max-width: 580px) {
+  .raw-library-grid { --cardScale: 0.585; }
+}
+
+/* Sizing wrapper for each Raw Library card (copies the carousel “scaled inner card” trick) */
+.raw-card-sizer {
+  width: calc(var(--cardW) * var(--cardScale));
+  height: calc(var(--cardH) * var(--cardScale));
+  display: block;
+  position: relative;
+}
+
+/* Scale the inner song card uniformly without altering its internal layout */
+.raw-card-sizer > .song-card {
+  width: var(--cardW);                 /* base canvas */
+  transform: scale(var(--cardScale));
+  transform-origin: top left;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+
+/* Hide lotus footer image on <= 900px */
+@media (max-width: 900px) {
+  .footer-lotus-image {
+    display: none !important;
+  }
+}
+
+
+
+/* === VARA: Responsive bottom music player (CSS-only) === */
+
+/* 0) Safe-area support so the bar never sits under iOS home indicator */
+.music-player-bar {
+  padding-bottom: calc(15px + env(safe-area-inset-bottom, 0px));
+}
+
+/* 1) Desktop niceties (no layout changes, ensure stable widths) */
+.music-player-bar {
+  flex-wrap: wrap;
+}
+.player-progress {
+  flex: 1 1 420px;    /* let progress expand on wider viewports */
+  min-width: 300px;
+}
+
+/* 2) Tablet and below: reflow with flex order, bigger progress area */
+@media (max-width: 1024px) {
+  .music-player-bar {
+    gap: 14px;
+  }
+
+  /* Smaller cover + text */
+  .player-song-image {
+    width: 52px;
+    height: 52px;
+  }
+  .player-song-title {
+    font-size: 1rem;
+  }
+  .player-song-artist {
+    font-size: 0.88rem;
+  }
+
+  /* Reflow order: info (1), controls (2), progress (3), fav/dl (4), close (5) */
+  .player-song-info { order: 1; flex: 1 1 260px; min-width: 200px; }
+  .player-controls  { order: 2; }
+  .player-progress  { order: 3; flex: 1 1 100%; min-width: 100%; padding-top: 6px; }
+  .player-fav-dl-controls { order: 4; }
+  .player-extra-controls  { order: 5; margin-left: auto; }
+
+  /* Tighten time + progress sizing a bit */
+  .time-display { font-size: 0.9em; }
+  .progress-bar { height: 5px; }
+}
+
+/* 3) Phones: more compact; progress takes full width */
+@media (max-width: 768px) {
+  .music-player-bar {
+    gap: 12px;
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .player-song-image { width: 48px; height: 48px; }
+  .player-song-title { font-size: 0.98rem; }
+  .player-song-artist { font-size: 0.84rem; }
+
+  .player-controls .player-control-button {
+    padding: 6px;          /* slightly smaller hit area */
+  }
+  .play-pause-button {
+    width: 46px;
+    height: 46px;
+    font-size: 1.4em;
+  }
+
+  .player-progress { padding-top: 4px; }
+  .time-display { font-size: 0.86em; }
+}
+
+/* 4) Hide the vertical volume slider on touch devices (icon still works) */
+@media (pointer: coarse) {
+  .player-volume input.volume-bar,
+  .player-volume input[type="range"].volume-bar {
+    display: none !important;
+  }
+}
+
+/* 5) Very small phones: hide prev/next to keep layout clean */
+@media (max-width: 360px) {
+  .player-controls .player-control-button:not(.play-pause-button) {
+    display: none !important;
+  }
+  .play-pause-button {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* 6) Prevent text wrapping jank; ensure titles truncate gracefully */
+.player-song-details {
+  min-width: 0; /* allow ellipsis to apply */
+}
+.player-song-title,
+.player-song-artist {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 7) Safety: no horizontal scroll introduced by player */
+
+/* Lift Go To Top button above the player on <= 1110px */
+@media (max-width: 1110px) {
+  #vara-go-to-top,
+  .go-to-top-wrapper {
+    /* Raise the button a bit more than the player height and respect safe area */
+    bottom: calc(170px + env(safe-area-inset-bottom, 0px)) !important;
+    /* Optional safety: ensure it stays tappable above the player */
+    z-index: 1400;
+  }
+}
+/* Raw Library: “Show more” button */
+.raw-library-showmore {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  padding: 8px 0 4px;
+}
+
+.raw-show-more-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid rgba(235,186,47,0.65);
+  background: linear-gradient(90deg, #ffc107, #ff9800);
+  color: #111;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  padding: 10px 18px;
+  border-radius: 9999px;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.05) inset;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.15s ease;
+}
+.raw-show-more-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.45);
+}
+.raw-show-more-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+}
+.raw-show-more-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(235,186,47,0.85);
+  border-color: #ebba2f;
+}

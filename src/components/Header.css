@@ -1,0 +1,1335 @@
+/* Header-specific responsive styles for mobile drawer + search overlay */
+
+:root {
+  --vara-header-z: 1200;           /* base layer for header */
+  --vara-drawer-z: 2600;           /* drawer above header */
+  --vara-drawer-backdrop-z: 2500;  /* backdrop below drawer */
+  --vara-overlay-z: 3000;          /* mobile search overlay layer */
+}
+
+/* Base: hide drawer/backdrop on desktop and larger screens */
+.mobile-drawer-backdrop,
+.mobile-drawer {
+  display: none !important;
+}
+
+/* Hide mobile-only controls by default */
+.hamburger-btn,
+.mobile-search-btn {
+  display: none;
+}
+
+/* Mobile controls styling (<= 768px) */
+@media (max-width: 768px) {
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: var(--vara-header-z);
+  }
+
+  /* Re-enable drawer/backdrop on small screens */
+  .mobile-drawer-backdrop { display: block !important; }
+  .mobile-drawer { display: flex !important; }
+
+  /* Logo can be slightly smaller on mobile to save space */
+  .header .logo {
+    height: 38px;
+  }
+
+  /* Hide the full search input on mobile; we'll show a small search button instead */
+  .header .search-container {
+    display: none;
+  }
+
+  /* Show compact buttons */
+  .mobile-search-btn,
+  .hamburger-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 9999px;
+    background: #282828;
+    color: #e0e0e0;
+    border: 1px solid #333;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.35);
+    transition: background 160ms ease, transform 120ms ease, box-shadow 160ms ease;
+  }
+  .mobile-search-btn:hover,
+  .hamburger-btn:hover {
+    background: #333333;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.45);
+  }
+
+  /* The Premium button is moved into the drawer on mobile */
+  .premium-button {
+    display: none;
+  }
+
+  /* Keep only AI and PROFILE visible on mobile; hide other nav links */
+  .nav-links .nav-link {
+    display: none;
+  }
+  .nav-links .nav-link.ai-link,
+  .nav-links .nav-link.profile-link {
+    display: inline-block;
+  }
+
+  /* Full-screen quick-search overlay on mobile */
+  .header .quick-search-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100% !important;
+    max-height: none !important;
+    border-radius: 0 !important;
+    border: none !important;
+    background-color: rgba(20, 20, 20, 0.98) !important;
+    z-index: var(--vara-overlay-z) !important;
+    padding-top: 72px; /* room for header area */
+    box-sizing: border-box;
+  }
+
+  /* Mobile close button for search overlay */
+  .quick-search-overlay .mobile-search-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: #282828;
+    color: #fff;
+    border: 1px solid #444;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.45);
+    transition: background 160ms ease, transform 120ms ease, box-shadow 160ms ease;
+  }
+  .quick-search-overlay .mobile-search-close:hover {
+    background: #333333;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.55);
+  }
+
+  /* Mobile drawer backdrop */
+  .mobile-drawer-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: var(--vara-drawer-backdrop-z);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 180ms ease;
+  }
+  .mobile-drawer-backdrop.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Slide-in drawer from the right */
+  .mobile-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: min(84vw, 360px);
+    background: #111111;
+    color: #e0e0e0;
+    z-index: var(--vara-drawer-z);
+    transform: translateX(100%);
+    transition: transform 260ms ease;
+    box-shadow: -8px 0 26px rgba(0,0,0,0.45);
+    border-left: 1px solid rgba(235,186,47,0.25);
+    display: flex;
+    flex-direction: column;
+  }
+  .mobile-drawer.open {
+    transform: translateX(0%);
+  }
+
+  .mobile-drawer .drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid #222;
+  }
+  .mobile-drawer .drawer-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 800;
+    color: #fff;
+  }
+  .mobile-drawer .drawer-close-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: #282828;
+    color: #fff;
+    border: 1px solid #444;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.45);
+    transition: background 160ms ease, transform 120ms ease, box-shadow 160ms ease;
+  }
+  .mobile-drawer .drawer-close-btn:hover {
+    background: #333333;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.55);
+  }
+
+  .mobile-drawer .drawer-content {
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+  }
+
+  /* Drawer nav links styled larger for touch comfort */
+  .mobile-drawer .drawer-link {
+    display: block;
+    padding: 12px 10px;
+    border-radius: 10px;
+    color: #ddd;
+    font-weight: 700;
+    border: 1px solid #222;
+    background: #151515;
+    transition: background 160ms ease, transform 120ms ease, color 160ms ease, border-color 160ms ease;
+  }
+  .mobile-drawer .drawer-link:hover {
+    background: #202020;
+    color: #fff;
+    transform: translateY(-1px);
+    border-color: #333;
+  }
+
+  /* Premium CTA inside drawer uses existing premium-button styles, but full width */
+  .mobile-drawer .premium-button {
+    display: inline-flex !important;
+    width: 100% !important;
+    justify-content: center;
+  }
+
+  /* === VARA: Force single-line header on small screens (no wrapping) === */
+  /* Reduce padding and prevent wrapping */
+  .header {
+    padding: 12px 16px !important;
+    gap: 12px !important;
+    flex-wrap: nowrap !important;   /* prevent header from breaking into a new row */
+  }
+
+  .header-left {
+    flex: 0 0 auto !important;
+    min-width: 0 !important;
+  }
+
+  .header-right {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 12px !important;           /* tighter spacing so all items fit */
+    flex-wrap: nowrap !important;   /* keep everything on one line */
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+  }
+
+  .nav-links {
+    display: inline-flex !important;
+    gap: 12px !important;
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;  /* avoid per-link wrapping */
+  }
+
+  .nav-links .nav-link {
+    white-space: nowrap !important;
+    font-size: 0.95em;               /* slight size down to save space */
+  }
+
+  /* Make sure the full desktop search bar stays hidden on mobile */
+  .header .search-container {
+    display: none !important;
+  }
+
+  /* Aggressively hide the big Premium button within the header on mobile.
+     Premium remains available inside the drawer. */
+  .header .premium-button {
+    display: none !important;
+  }
+
+  /* Tweak badge spacing so it doesn't force wrapping */
+  .download-badge {
+    margin-left: 12px !important;
+    margin-right: 0 !important;
+  }
+}
+
+/* === VARA: Non-wrapping header in the 769–972px range and mobile layout === */
+@media (max-width: 972px) {
+  /* Keep header single-line and tighten spacing */
+  .header {
+    padding: 12px 16px !important;
+    gap: 12px !important;
+    flex-wrap: nowrap !important;   /* prevent second row */
+  }
+
+  .header-left {
+    flex: 0 0 auto !important;
+    min-width: 0 !important;
+  }
+
+  .header-right {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 12px !important;
+    flex-wrap: nowrap !important;   /* keep single line */
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+  }
+
+  /* Show compact controls at <= 972px */
+  .mobile-search-btn,
+  .hamburger-btn {
+    display: inline-flex !important;
+  }
+
+  /* Order: [search] [login/profile] [hamburger] */
+  .header-right .mobile-search-btn { order: 1; }
+  .header-right .nav-links      { order: 2; }
+  .header-right .hamburger-btn  { order: 3; }
+
+  /* Hide HOME and AI on the top bar; show only Login/Profile */
+  .nav-links {
+    display: inline-flex !important;
+    gap: 12px !important;
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;
+  }
+  .nav-links .nav-link { display: none !important; }
+  .nav-links .nav-link.profile-link { display: inline-block !important; }  /* PROFILE or LOGIN */
+  .nav-links .nav-link.ai-link { display: none !important; }
+
+  .nav-links .nav-link.profile-link { font-size: 0.95em; } /* slight size trim */
+
+  /* Hide desktop search bar; we’ll show a full-width one below the header when toggled */
+  .header .search-container {
+    display: none !important;
+  }
+
+  /* Hide big Premium button on the top bar (kept in drawer) */
+  .header .premium-button {
+    display: none !important;
+  }
+
+  /* Logo + badge spacing so they don’t cause wrapping */
+  .header .logo { height: 40px !important; }
+  .download-badge {
+    margin-left: 12px !important;
+    margin-right: 0 !important;
+  }
+}
+
+/* === VARA: Drawer active state (match desktop "active" yellow) === */
+@media (max-width: 972px) {
+  .mobile-drawer .drawer-link.active {
+    color: #eebb2d !important;    /* same yellow as desktop */
+    font-weight: 800;
+    background: #1a1a1a;
+    border-color: #333;
+  }
+}
+
+/* === VARA: Mobile search bar below header (dropdown suggestions) === */
+/* Container appears only when Header.jsx renders it; style it to match header width/gutters */
+.mobile-search-bar-container {
+  display: none; /* only shows when rendered and on small screens */
+}
+
+/* Enable and style on <= 972px */
+@media (max-width: 972px) {
+  .mobile-search-bar-container {
+    display: block;
+    padding: 8px 20px 0 20px; /* align with header’s side gutters */
+    background: transparent;
+  }
+  /* Reuse the desktop .search-container look, but make it full width */
+  .mobile-search-bar-container .search-container {
+    display: flex !important;
+    max-width: none !important;
+    width: 100% !important;
+  }
+  /* Ensure the suggestions overlay is a positioned dropdown under the bar (not full-screen) */
+  .mobile-search-bar-container .quick-search-overlay {
+    position: absolute !important;
+    top: calc(100% + 8px) !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-height: 350px !important;
+    border-radius: 12px !important;
+    border: 1px solid #444 !important;
+    background-color: #282828 !important;
+    z-index: var(--vara-overlay-z) !important;
+    padding-top: 0 !important;  /* reset any full-screen padding */
+  }
+  /* If a close button was injected in earlier edits, hide it now */
+  .quick-search-overlay .mobile-search-close { display: none !important; }
+}
+
+/* Hamburger icon lines */
+.hamburger-btn .hamburger-lines {
+  position: relative;
+  width: 22px;
+  height: 2px;
+  background: currentColor;
+}
+.hamburger-btn .hamburger-lines::before,
+.hamburger-btn .hamburger-lines::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 22px;
+  height: 2px;
+  background: currentColor;
+}
+.hamburger-btn .hamburger-lines::before {
+  top: -6px;
+}
+.hamburger-btn .hamburger-lines::after {
+  top: 6px;
+}
+
+/* === VARA: Mobile header avatar + hide profile-section, drawer premium hidden === */
+.mobile-avatar-btn { display: none; }
+
+/* Mobile rules (<= 972px) */
+@media (max-width: 972px) {
+  /* Hide the legacy profile text/dropdown container in the header on mobile */
+  .profile-section {
+    display: none !important;
+  }
+
+  /* Mobile avatar button for logged-in users only (Header.jsx renders it conditionally) */
+  .mobile-avatar-btn {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 9999px;
+    background: #282828;
+    color: #e0e0e0;
+    border: 1px solid #333;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.35);
+    transition: background 160ms ease, transform 120ms ease, box-shadow 160ms ease;
+    overflow: hidden; /* round image mask */
+  }
+  .mobile-avatar-btn:hover {
+    background: #333333;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.45);
+  }
+  .mobile-avatar-btn img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .mobile-avatar-btn .avatar-initials {
+    font-weight: 900;
+    font-size: 0.95rem;
+    letter-spacing: 0.2px;
+    text-transform: uppercase;
+  }
+
+  /* Order: search (1), avatar (2), hamburger (3) */
+  .header-right .mobile-search-btn { order: 1; }
+  .header-right .mobile-avatar-btn { order: 2; }
+  .header-right .hamburger-btn  { order: 3; }
+
+  /* Defensive: in case JSX still renders Premium button inside the drawer, hide it on mobile */
+  .mobile-drawer .premium-button {
+    display: none !important;
+  }
+}
+
+/* === VARA: Mobile header refinements and drawer adjustments === */
+@media (max-width: 972px) {
+  /* Keep single-row header as before */
+  .header {
+    padding: 12px 16px !important;
+    gap: 12px !important;
+    flex-wrap: nowrap !important;
+  }
+  .header-right {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 12px !important;        /* equal spacing between items */
+    flex-wrap: nowrap !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+  }
+
+  /* IMPORTANT: Keep the profile section visible (for dropdown anchoring) but hide its text anchor */
+  .profile-section {
+    display: inline-block !important;   /* visible container */
+    position: relative !important;
+  }
+  .profile-section .nav-link.profile-link {
+    display: none !important;           /* hide the "PROFILE" text on mobile */
+  }
+
+  /* Circular AVATAR button (mobile-only) — rendered inside .profile-section by JSX */
+  .mobile-avatar-btn {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 9999px;
+    background: #282828;
+    color: #e0e0e0;
+    border: 1px solid #333;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.35);
+    transition: background 160ms ease, transform 120ms ease, box-shadow 160ms ease;
+    overflow: hidden; /* round mask for image */
+  }
+  .mobile-avatar-btn:hover {
+    background: #333333;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.45);
+  }
+  .mobile-avatar-btn img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .mobile-avatar-btn .avatar-initials {
+    font-weight: 900;
+    font-size: 0.95rem;
+    letter-spacing: 0.2px;
+    text-transform: uppercase;
+  }
+
+  /* Circular LOGIN button (mobile-only) — rendered by JSX when user is not logged in */
+  .mobile-login-btn {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 9999px;
+    background: #282828;
+    color: #e0e0e0;
+    border: 1px solid #333;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.35);
+    transition: background 160ms ease, transform 120ms ease, box-shadow 160ms ease;
+    overflow: hidden;
+  }
+  .mobile-login-btn:hover {
+    background: #333333;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.45);
+  }
+
+  /* Order in header-right: search (1), profile-section (2) or login (2), hamburger (3) */
+  .header-right .mobile-search-btn { order: 1; }
+  .header-right .mobile-avatar-btn { order: 2; }
+  .header-right .hamburger-btn     { order: 3; }
+
+  /* Defensive: in case JSX still renders Premium button inside the drawer, hide it on mobile */
+  .mobile-drawer .premium-button {
+    display: none !important;
+  }
+}
+
+/* === VARA: Mobile header refinements and drawer adjustments === */
+@media (max-width: 972px) {
+  /* Keep single-row header as before */
+  .header {
+    padding: 12px 16px !important;
+    gap: 12px !important;
+    flex-wrap: nowrap !important;
+  }
+  .header-right {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 12px !important;        /* equal spacing between items */
+    flex-wrap: nowrap !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+  }
+
+  /* IMPORTANT: Keep the profile section visible (for dropdown anchoring) but hide its text anchor */
+  .profile-section {
+    display: inline-block !important;   /* visible container */
+    position: relative !important;
+  }
+  .profile-section .nav-link.profile-link {
+    display: none !important;           /* hide the "PROFILE" text on mobile */
+  }
+
+  /* Circular AVATAR button (mobile-only) — rendered inside .profile-section by JSX */
+  .mobile-avatar-btn {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 9999px;
+    background: #282828;
+    color: #e0e0e0;
+    border: 1px solid #333;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.35);
+    transition: background 160ms ease, transform 120ms ease, box-shadow 160ms ease;
+    overflow: hidden; /* round mask for image */
+  }
+  .mobile-avatar-btn:hover {
+    background: #333333;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.45);
+  }
+  .mobile-avatar-btn img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .mobile-avatar-btn .avatar-initials {
+    font-weight: 900;
+    font-size: 0.95rem;
+    letter-spacing: 0.2px;
+    text-transform: uppercase;
+  }
+
+  /* Circular LOGIN button (mobile-only) — rendered by JSX when user is not logged in */
+  .mobile-login-btn {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 9999px;
+    background: #282828;
+    color: #e0e0e0;
+    border: 1px solid #333;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.35);
+    transition: background 160ms ease, transform 120ms ease, box-shadow 160ms ease;
+    overflow: hidden;
+  }
+  .mobile-login-btn:hover {
+    background: #333333;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.45);
+  }
+
+  /* Order in header-right: search (1), profile-section (2) or login (2), hamburger (3) */
+  .header-right .mobile-search-btn { order: 1; }
+  .header-right .profile-section   { order: 2; }  /* holds the avatar button */
+  .header-right .mobile-login-btn  { order: 2; }  /* when user is logged out */
+  .header-right .hamburger-btn     { order: 3; }
+
+  /* Premium button must be visible inside the drawer on mobile (full width) */
+  .mobile-drawer .premium-button {
+    display: inline-flex !important;
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  /* Drawer height depends on content; cap to viewport with internal scroll if needed */
+  .mobile-drawer {
+    height: auto !important;      /* content-based height */
+    max-height: 90vh !important;  /* safety cap */
+    overflow-y: auto !important;
+  }
+}
+
+/* === VARA: Drawer full-height layout + pinned footer (final overrides) === */
+@media (max-width: 972px) {
+  /* Full-height drawer with column layout */
+  .mobile-drawer {
+    top: 0 !important;
+    height: 100% !important;
+    border-radius: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important; /* header + content (scroll) + footer */
+  }
+
+  /* Make content take remaining height and scroll if needed */
+  .mobile-drawer .drawer-content {
+    flex: 1 1 auto !important;
+    overflow-y: auto !important;
+  }
+
+  /* Footer pinned to the bottom of the drawer */
+  .mobile-drawer .drawer-footer {
+    padding: 14px 16px !important;
+    border-top: 1px solid #222 !important;
+    background: #111111;
+    color: #9a9a9a;
+    font-size: 0.9rem;
+  }
+  .mobile-drawer .drawer-footer .footer-note {
+    margin-bottom: 6px;
+  }
+  .mobile-drawer .drawer-footer .footer-copy {
+    color: #777;
+  }
+
+  /* Ensure Premium button remains visible and full-width in drawer */
+  .mobile-drawer .premium-button {
+    display: inline-flex !important;
+    width: 100% !important;
+    justify-content: center !important;
+  }
+}
+
+/* === VARA: Final mobile header/drawer fixes (append-only) === */
+
+/* Hide the circular login button by default (desktop) */
+.mobile-login-btn {
+  display: none;
+}
+
+/* On mobile (<= 972px), apply all header fixes */
+@media (max-width: 972px) {
+  /* Keep single row, equal spacing */
+  .header {
+    padding: 12px 16px !important;
+    gap: 12px !important;
+    flex-wrap: nowrap !important;
+  }
+  .header-right {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 12px !important;
+    flex-wrap: nowrap !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+  }
+
+  /* Order: [search] [profile-section (avatar/login)] [hamburger] */
+  .header-right .mobile-search-btn { order: 1; }
+  .header-right .profile-section   { order: 2; }
+  .header-right .mobile-login-btn  { order: 2; }  /* when logged out */
+  .header-right .hamburger-btn     { order: 3; }
+
+  /* Keep the profile section visible for dropdown anchoring, but hide its text label on mobile */
+  .profile-section {
+    display: inline-flex !important;
+    align-items: center !important;
+  }
+  /* Hide LOGIN/PROFILE text on mobile; circular buttons handle mobile UI */
+  .nav-links .nav-link.profile-link {
+    display: none !important;
+  }
+
+  /* Ensure mobile circular buttons align perfectly vertically with other icons */
+  .mobile-search-btn,
+  .mobile-login-btn,
+  .profile-section .mobile-avatar-btn,
+  .hamburger-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 38px !important;
+    height: 38px !important;
+    line-height: 0 !important;            /* fixes minor baseline misalignments */
+    vertical-align: middle !important;
+  }
+
+  /* Ensure the circular login button shows only on mobile */
+  .mobile-login-btn {
+    display: inline-flex !important;
+    border-radius: 9999px;
+    background: #282828;
+    color: #e0e0e0;
+    border: 1px solid #333;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.35);
+    transition: background 160ms ease, transform 120ms ease, box-shadow 160ms ease;
+  }
+  .mobile-login-btn:hover {
+    background: #333333;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.45);
+  }
+
+  /* Keep the desktop search container hidden on mobile */
+  .header .search-container {
+    display: none !important;
+  }
+
+  /* Badge spacing stays compact */
+  .download-badge {
+    margin-left: 12px !important;
+    margin-right: 0 !important;
+  }
+
+  /* Drawer: revert to full height like before */
+  .mobile-drawer {
+    top: 0 !important;
+    height: 100% !important;
+    border-radius: 0 !important;
+    overflow-y: auto !important;
+  }
+
+  /* Premium button must be visible in the drawer (override any earlier "hide" rules) */
+  .mobile-drawer .premium-button {
+    display: inline-flex !important;
+    width: 100% !important;
+    justify-content: center !important;
+  }
+}
+
+/* === VARA: Bridge rules for “compact header” at 973–1057px (no wrapping) === */
+@media (min-width: 973px) and (max-width: 1057px) {
+  /* Re-enable drawer/backdrop in this range as well */
+  .mobile-drawer-backdrop { display: block !important; }
+  .mobile-drawer { display: flex !important; }
+
+  /* Keep header to a single row, tighten spacing */
+  .header {
+    padding: 12px 16px !important;
+    gap: 12px !important;
+    flex-wrap: nowrap !important;
+  }
+  .header-right {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 12px !important;
+    flex-wrap: nowrap !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+  }
+
+  /* Order of controls: [search] [profile-section/login circle] [hamburger] */
+  .header-right .mobile-search-btn { order: 1; }
+  .header-right .profile-section   { order: 2; }
+  .header-right .mobile-login-btn  { order: 2; }
+  .header-right .hamburger-btn     { order: 3; }
+
+  /* Hide desktop nav text and desktop search bar in this range */
+  .nav-links .nav-link { display: none !important; }
+  .header .search-container { display: none !important; }
+
+  /* Hide the big Premium button in the top bar; it remains in the drawer */
+  .header .premium-button { display: none !important; }
+
+  /* Ensure the icon buttons are perfectly aligned and evenly spaced */
+  .mobile-search-btn,
+  .hamburger-btn,
+  .profile-section .mobile-avatar-btn,
+  .mobile-login-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 38px !important;
+    height: 38px !important;
+    line-height: 0 !important;
+    vertical-align: middle !important;
+  }
+
+  /* Show the mobile-only circular login button in this range */
+  .mobile-login-btn {
+    display: inline-flex !important;
+  }
+
+  /* Keep the profile section present for dropdown anchoring; hide its text */
+  .profile-section { display: inline-flex !important; align-items: center !important; }
+  .profile-section .nav-link.profile-link { display: none !important; }
+
+  /* Badge spacing stays compact */
+  .download-badge {
+    margin-left: 12px !important;
+    margin-right: 0 !important;
+  }
+
+  /* Drawer stays full height with pinned footer */
+  .mobile-drawer {
+    top: 0 !important;
+    height: 100% !important;
+    border-radius: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+  .mobile-drawer .drawer-content {
+    flex: 1 1 auto !important;
+    overflow-y: auto !important;
+  }
+  .mobile-drawer .drawer-footer {
+    padding: 14px 16px !important;
+    border-top: 1px solid #222 !important;
+    background: #111111;
+    color: #9a9a9a;
+    font-size: 0.9rem;
+  }
+  .mobile-drawer .drawer-footer .footer-note { margin-bottom: 6px; }
+  .mobile-drawer .drawer-footer .footer-copy { color: #777; }
+
+  /* Premium button visible in drawer (full width) */
+  .mobile-drawer .premium-button {
+    display: inline-flex !important;
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  /* Mobile search bar below header enabled in this range too */
+  .mobile-search-bar-container {
+    display: block !important;
+    padding: 8px 20px 0 20px !important;
+    background: transparent;
+  }
+  .mobile-search-bar-container .search-container {
+    display: flex !important;
+    max-width: none !important;
+    width: 100% !important;
+  }
+  .mobile-search-bar-container .quick-search-overlay {
+    position: absolute !important;
+    top: calc(100% + 8px) !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-height: 350px !important;
+    border-radius: 12px !important;
+    border: 1px solid #444 !important;
+    background-color: #282828 !important;
+    z-index: var(--vara-overlay-z) !important;
+    padding-top: 0 !important;
+  }
+  .quick-search-overlay .mobile-search-close { display: none !important; }
+}
+
+/* === VARA: FINAL FIX — force drawer to be fixed + off‑canvas in 770–1056 and <=972 === */
+
+/* 1) Safeguard for <= 972px: always fixed slide-in (overrides earlier blocks) */
+@media (max-width: 972px) {
+  .mobile-drawer-backdrop {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: var(--vara-drawer-backdrop-z) !important;
+    display: block !important;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 180ms ease;
+  }
+  .mobile-drawer-backdrop.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .mobile-drawer {
+    position: fixed !important;         /* key fix */
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    height: 100vh !important;
+    width: min(84vw, 360px) !important;
+    display: flex !important;           /* ensure it’s enabled for slide-in */
+    flex-direction: column !important;
+    transform: translateX(100%) !important;     /* off-canvas by default */
+    will-change: transform;
+    backface-visibility: hidden;
+    box-shadow: -8px 0 26px rgba(0,0,0,0.45);
+    border-left: 1px solid rgba(235,186,47,0.25);
+    z-index: var(--vara-drawer-z) !important;
+    overflow: hidden !important;         /* header + content (scroll) + footer */
+  }
+  .mobile-drawer.open {
+    transform: translateX(0%) !important;       /* slide in when open */
+  }
+
+  .mobile-drawer .drawer-content {
+    flex: 1 1 auto !important;
+    overflow-y: auto !important;
+  }
+}
+
+/* 2) Bridge 770–1056px: force the same fixed slide-in behavior */
+@media (min-width: 770px) and (max-width: 1056px) {
+  .mobile-drawer-backdrop {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: var(--vara-drawer-backdrop-z) !important;
+    display: block !important;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 180ms ease;
+  }
+  .mobile-drawer-backdrop.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .mobile-drawer {
+    position: fixed !important;         /* key fix in this range */
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    height: 100vh !important;
+    width: min(84vw, 360px) !important;
+    display: flex !important;           /* active off-canvas container */
+    flex-direction: column !important;
+    transform: translateX(100%) !important;   /* off-canvas by default */
+    will-change: transform;
+    backface-visibility: hidden;
+    box-shadow: -8px 0 26px rgba(0,0,0,0.45);
+    border-left: 1px solid rgba(235,186,47,0.25);
+    z-index: var(--vara-drawer-z) !important;
+    overflow: hidden !important;
+  }
+  .mobile-drawer.open {
+    transform: translateX(0%) !important;
+  }
+
+  /* Keep header compact + single row */
+  .header { padding: 12px 16px !important; gap: 12px !important; flex-wrap: nowrap !important; }
+  .header-right { display: flex !important; align-items: center !important; justify-content: flex-end !important; gap: 12px !important; flex-wrap: nowrap !important; flex: 1 1 auto !important; min-width: 0 !important; }
+
+  /* Hide desktop nav/search and big premium on the top bar */
+  .nav-links .nav-link { display: none !important; }
+  .header .search-container { display: none !important; }
+  .header .premium-button { display: none !important; }
+
+  /* Ensure three icons align and keep equal spacing */
+  .mobile-search-btn,
+  .hamburger-btn,
+  .profile-section .mobile-avatar-btn,
+  .mobile-login-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 38px !important;
+    height: 38px !important;
+    line-height: 0 !important;
+    vertical-align: middle !important;
+  }
+
+  /* Profile section present for dropdown anchoring; hide its text label */
+  .profile-section { display: inline-flex !important; align-items: center !important; }
+  .profile-section .nav-link.profile-link { display: none !important; }
+
+  /* Badge spacing stays compact */
+  .download-badge {
+    margin-left: 12px !important;
+    margin-right: 0 !important;
+  }
+
+  /* Drawer content flex + footer pinned */
+  .mobile-drawer .drawer-content {
+    flex: 1 1 auto !important;
+    overflow-y: auto !important;
+  }
+  .mobile-drawer .drawer-footer {
+    padding: 14px 16px !important;
+    border-top: 1px solid #222 !important;
+    background: #111111;
+    color: #9a9a9a;
+    font-size: 0.9rem;
+  }
+  .mobile-drawer .drawer-footer .footer-note { margin-bottom: 6px; }
+  .mobile-drawer .drawer-footer .footer-copy { color: #777; }
+
+  /* Premium visible inside drawer */
+  .mobile-drawer .premium-button {
+    display: inline-flex !important;
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  /* Mobile search bar below header enabled here too */
+  .mobile-search-bar-container {
+    display: block !important;
+    padding: 8px 20px 0 20px !important;
+    background: transparent;
+  }
+  .mobile-search-bar-container .search-container {
+    display: flex !important;
+    max-width: none !important;
+    width: 100% !important;
+  }
+  .mobile-search-bar-container .quick-search-overlay {
+    position: absolute !important;
+    top: calc(100% + 8px) !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-height: 350px !important;
+    border-radius: 12px !important;
+    border: 1px solid #444 !important;
+    background-color: #282828 !important;
+    z-index: var(--vara-overlay-z) !important;
+    padding-top: 0 !important;
+  }
+  .quick-search-overlay .mobile-search-close { display: none !important; }
+}
+
+/* === VARA: FINAL OVERRIDES for 770–1056px band === */
+@media (min-width: 770px) and (max-width: 1056px) {
+  /* 1) Header: one row; enforce correct order and perfect circle avatar/login */
+  .header {
+    padding: 12px 16px !important;
+    gap: 12px !important;
+    flex-wrap: nowrap !important;
+  }
+  .header-right {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 12px !important;
+    flex-wrap: nowrap !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+  }
+
+  /* Order of controls in header-right */
+  .header-right .mobile-search-btn { order: 1 !important; }
+  .header-right .nav-links        { order: 2 !important; display: inline-flex !important; }
+  .header-right .hamburger-btn    { order: 3 !important; }
+
+  /* Hide desktop nav text and desktop search; Premium kept in drawer */
+  .nav-links .nav-link { display: none !important; }
+  .header .search-container { display: none !important; }
+  .header .premium-button { display: none !important; }
+
+  /* The profile container stays for dropdown anchoring; hide its text on this band */
+  .profile-section { display: inline-flex !important; align-items: center !important; }
+  .profile-section .nav-link.profile-link { display: none !important; }
+
+  /* Enforce circular avatar/login button (no square corners) */
+  .profile-section .mobile-avatar-btn,
+  .mobile-login-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 50% !important;    /* force full circle */
+    overflow: hidden !important;       /* clip inner image corners */
+    line-height: 0 !important;
+    vertical-align: middle !important;
+    background: #282828;
+    color: #e0e0e0;
+    border: 1px solid #333;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.35);
+  }
+  .mobile-login-btn { display: inline-flex !important; } /* show only in this band if logged out */
+  .profile-section .mobile-avatar-btn img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+  }
+
+  /* Compact badge spacing */
+  .download-badge { margin-left: 12px !important; margin-right: 0 !important; }
+
+  /* 2) Drawer: fixed off‑canvas with solid background, full height, footer pinned */
+  .mobile-drawer-backdrop {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: var(--vara-drawer-backdrop-z) !important;
+    display: block !important;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 180ms ease;
+  }
+  .mobile-drawer-backdrop.open { opacity: 1; pointer-events: auto; }
+
+  .mobile-drawer {
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    height: 100vh !important;
+    width: min(84vw, 360px) !important;
+    transform: translateX(100%) !important;  /* off‑canvas by default */
+    will-change: transform;
+    backface-visibility: hidden;
+    display: flex !important;
+    flex-direction: column !important;
+    z-index: var(--vara-drawer-z) !important;
+
+    /* Solid, opaque drawer surface */
+    background: #111111 !important;
+    box-shadow: -8px 0 26px rgba(0,0,0,0.45) !important;
+    border-left: 1px solid rgba(235,186,47,0.25) !important;
+    overflow: hidden !important;
+  }
+  .mobile-drawer.open { transform: translateX(0%) !important; }
+
+  /* Drawer content scroll + pinned footer at bottom */
+  .mobile-drawer .drawer-content { flex: 1 1 auto !important; overflow-y: auto !important; }
+  .mobile-drawer .drawer-footer {
+    padding: 14px 16px !important;
+    border-top: 1px solid #222 !important;
+    background: #111111 !important;
+    color: #9a9a9a; font-size: 0.9rem;
+  }
+  .mobile-drawer .drawer-footer .footer-note { margin-bottom: 6px; }
+  .mobile-drawer .drawer-footer .footer-copy { color: #777; }
+
+  /* Ensure Premium button is visible and full width in the drawer */
+  .mobile-drawer .premium-button {
+    display: inline-flex !important;
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  /* Keep the below-header search bar behavior in this band */
+  .mobile-search-bar-container { display: block !important; padding: 8px 20px 0 20px !important; }
+  .mobile-search-bar-container .search-container { display: flex !important; max-width: none !important; width: 100% !important; }
+  .mobile-search-bar-container .quick-search-overlay {
+    position: absolute !important;
+    top: calc(100% + 8px) !important;
+    left: 0 !important; right: 0 !important; width: 100% !important;
+    max-height: 350px !important;
+    border-radius: 12px !important; border: 1px solid #444 !important;
+    background-color: #282828 !important;
+    z-index: var(--vara-overlay-z) !important;
+    padding-top: 0 !important;
+  }
+  .quick-search-overlay .mobile-search-close { display: none !important; }
+}
+
+/* === VARA: Drawer item styles for 769–1057px (ensure not “unstyled”) === */
+@media (min-width: 769px) and (max-width: 1057px) {
+  /* Drawer surface (opaque, fixed) — defensive repeat */
+  .mobile-drawer {
+    background: #111111 !important;
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    height: 100vh !important;
+    width: min(84vw, 360px) !important;
+    transform: translateX(100%) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    z-index: var(--vara-drawer-z) !important;
+    overflow: hidden !important;
+    box-shadow: -8px 0 26px rgba(0,0,0,0.45) !important;
+    border-left: 1px solid rgba(235,186,47,0.25) !important;
+  }
+  .mobile-drawer.open { transform: translateX(0%) !important; }
+
+  /* Drawer header + close button */
+  .mobile-drawer .drawer-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 14px 16px !important;
+    border-bottom: 1px solid #222 !important;
+    background: #111111 !important;
+  }
+  .mobile-drawer .drawer-title {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    font-weight: 800 !important;
+    color: #fff !important;
+  }
+  .mobile-drawer .drawer-close-btn {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 8px !important;
+    background: #282828 !important;
+    color: #fff !important;
+    border: 1px solid #444 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-weight: 900 !important;
+    font-size: 20px !important;
+    line-height: 1 !important;
+    cursor: pointer !important;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.45) !important;
+    transition: background 160ms ease, transform 120ms ease, box-shadow 160ms ease !important;
+  }
+  .mobile-drawer .drawer-close-btn:hover {
+    background: #333333 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.55) !important;
+  }
+
+  /* Drawer content area + links (the missing styles in this band) */
+  .mobile-drawer .drawer-content {
+    padding: 14px 16px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    flex: 1 1 auto !important;
+    overflow-y: auto !important;
+    background: transparent !important;
+  }
+  .mobile-drawer .drawer-link {
+    display: block !important;
+    padding: 12px 10px !important;
+    border-radius: 10px !important;
+    color: #ddd !important;
+    font-weight: 700 !important;
+    border: 1px solid #222 !important;
+    background: #151515 !important;
+    transition: background 160ms ease, transform 120ms ease, color 160ms ease, border-color 160ms ease !important;
+  }
+  .mobile-drawer .drawer-link:hover {
+    background: #202020 !important;
+    color: #fff !important;
+    transform: translateY(-1px) !important;
+    border-color: #333 !important;
+  }
+  .mobile-drawer .drawer-link.active {
+    color: #eebb2d !important;
+    font-weight: 800 !important;
+    background: #1a1a1a !important;
+    border-color: #333 !important;
+  }
+
+  /* Footer pinned to bottom (already set elsewhere, restated here for safety) */
+  .mobile-drawer .drawer-footer {
+    padding: 14px 16px !important;
+    border-top: 1px solid #222 !important;
+    background: #111111 !important;
+    color: #9a9a9a !important;
+    font-size: 0.9rem !important;
+  }
+  .mobile-drawer .drawer-footer .footer-note { margin-bottom: 6px !important; }
+  .mobile-drawer .drawer-footer .footer-copy { color: #777 !important; }
+
+  /* Premium button visible and full width inside drawer */
+  .mobile-drawer .premium-button {
+    display: inline-flex !important;
+    width: 100% !important;
+    justify-content: center !important;
+  }
+}
+
+/* === VARA: Hide mobile-only overlay close button on desktop/mid widths === */
+.mobile-search-close {
+  display: none !important;  /* default = hidden everywhere */
+}
+
+/* Show the close button only on narrow mobile (fixed full-screen overlay mode) */
+@media (max-width: 768px) {
+  .quick-search-overlay .mobile-search-close {
+    display: inline-flex !important;
+  }
+}

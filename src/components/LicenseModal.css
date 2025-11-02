@@ -281,3 +281,85 @@
       0 12px 42px rgba(0,0,0,0.50);
   }
 }
+
+/* === VARA License Modal: top green band + white tick badge (append-only) === */
+
+/* Draw a soft green accent band behind the header, clipped to rounded top */
+.license-modal-dialog {
+  position: relative; /* allow ::before positioning */
+}
+.license-modal-dialog::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+
+  /* Height of green band (tweak 78–96px if needed) */
+  height: 88px;
+
+  /* Rich green gradient that fades downward to transparent */
+  background:
+    linear-gradient(
+      180deg,
+      rgba(44, 228, 106, 0.45) 0%,
+      rgba(44, 228, 106, 0.32) 45%,
+      rgba(44, 228, 106, 0.00) 100%
+    );
+
+  /* Respect the dialog’s top rounding */
+  border-top-left-radius: 18px;
+  border-top-right-radius: 18px;
+
+  pointer-events: none;
+  z-index: 0; /* keep under header/subtitle */
+}
+
+/* Ensure header + subtitle sit above the green band */
+.license-modal-header,
+.license-modal-subtitle {
+  position: relative;
+  z-index: 1;
+}
+
+/* White tick in a green circular badge (styling the existing "✔" character) */
+.license-modal-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Badge size (tweak 24–30px to fine-tune) */
+  width: 28px;
+  height: 28px;
+
+  border-radius: 50%;
+  color: #ffffff !important;      /* white tick */
+  font-size: 16px;                /* tick size */
+  font-weight: 900;
+  line-height: 1;
+
+  /* Green fill with subtle depth */
+  background: radial-gradient(72% 72% at 35% 30%, #36d77a 0%, #2ec86d 60%, #239e55 100%);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.35) inset,   /* soft inner highlight */
+    0 2px 6px rgba(0,0,0,0.35);              /* drop shadow */
+
+  /* Tighten alignment with title */
+  transform: translateY(-1px);
+}
+
+/* Slightly larger gap to breathe like the mock */
+.license-modal-title-row {
+  gap: 12px !important;
+}
+
+/* Title remains bright over the green band */
+.license-modal-title {
+  color: #ffffff;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.35);
+}
+
+/* Optional: make the close "X" pop consistently over the band */
+.license-modal-close {
+  z-index: 2;
+}

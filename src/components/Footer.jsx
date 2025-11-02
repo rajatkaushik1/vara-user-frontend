@@ -12,7 +12,7 @@ const Footer = ({ onPremiumClick }) => {
     const quickLinks2 = [
         { name: 'Privacy Policy', path: '/privacy-policy' },
         { name: 'Terms of Service', path: '/terms' },
-        { name: 'License Agreement', path: '/license' },
+        { name: 'Certificate Agreement', path: '/license' },
     ];
 
     return (
@@ -80,7 +80,7 @@ const Footer = ({ onPremiumClick }) => {
                                         target="_blank"
                                         rel="noopener noreferrer"
                                     >
-                                        License Verification
+                                        Certificate Verification
                                     </Link>
                                 </li>
                             </ul>
@@ -92,7 +92,7 @@ const Footer = ({ onPremiumClick }) => {
             {/* Bottom copyright notice */}
             <div className="footer-bottom">
                 <div className="footer-disclaimer" style={{ color: '#ebba2f', fontSize: '1em', marginBottom: '18px', fontWeight: 500 }}>
-                    ⚠️ All music on varamusic.com is AI-generated and licensed under VARA’s proprietary license. Each license grants usage of a track in one project only. Redistribution, resale, or uploading full tracks elsewhere is strictly prohibited and may lead to legal action. VARA issues licenses independently and is not affiliated with ASCAP, BMI, or any government body.
+                    ⚠️ All music on varamusic.com is AI-generated and licensed under VARA’s proprietary license. Each Certificate grants usage of a track in one project only. Redistribution, resale, or uploading full tracks elsewhere is strictly prohibited and may lead to legal action. VARA issues Certificate independently and is not affiliated with ASCAP, BMI, or any government body.
                 </div>
                 <p className="footer-copyright">
                     © {new Date().getFullYear()} Vara. All rights reserved.

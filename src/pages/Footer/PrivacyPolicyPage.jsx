@@ -43,7 +43,7 @@ const PrivacyPolicyPage = () => (
         <h2><span className="section-number">3.</span> How We Use Your Information</h2>
         <ul>
           <li>Provide you with access to our music library.</li>
-          <li>Issue license IDs for your downloads.</li>
+          <li>Issue certificate IDs for your downloads.</li>
           <li>Personalize your account experience.</li>
           <li>Improve site performance and user experience.</li>
           <li>Detect and prevent misuse, piracy, or account sharing.</li>
@@ -53,7 +53,7 @@ const PrivacyPolicyPage = () => (
         <h2><span className="section-number">4.</span> Sharing Your Information</h2>
         <p>We do not sell or share your personal details with third parties except:</p>
         <ul>
-          <li>With legal authorities if required by law or in cases of license violations.</li>
+          <li>With legal authorities if required by law or in cases of certificate violations.</li>
           <li>With service providers strictly for operating our website.</li>
         </ul>
       </section>
@@ -62,7 +62,7 @@ const PrivacyPolicyPage = () => (
         <p>
           We keep your account details as long as your subscription is active. If your account 
           is canceled, we may retain your download history for up to 12 months for fraud 
-          prevention and license verification.
+          prevention and certificate verification.
         </p>
       </section>
       <section className="footer-page-section">

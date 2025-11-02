@@ -124,3 +124,42 @@
   z-index: 3;
   pointer-events: none;
 }
+
+/* === VARA: Responsive hero height + reduced-motion fallback (append-only) === */
+
+/* Tablets: slightly shorter than full viewport */
+@media (max-width: 1024px) {
+  .hero-section--with-bg {
+    min-height: 85vh;
+  }
+}
+
+/* Mobile: clearly shorter hero to surface the CTA above the fold */
+@media (max-width: 768px) {
+  .hero-section--with-bg {
+    min-height: 70vh;
+    padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
+  }
+  /* Slightly lighter vignette on small screens so text remains legible with less height */
+  .vara-hero-bg .vignette {
+    background: linear-gradient(to top, #040604, rgba(4,6,4,0) 38%, rgba(4,6,4,0) 68%, rgba(4,6,4,0.8) 100%);
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-section--with-bg {
+    min-height: 62vh;
+  }
+}
+
+/* Respect users who prefer reduced motion: stop hero animations purely via CSS.
+   This keeps the background static without touching JS. */
+@media (prefers-reduced-motion: reduce) {
+  .vara-hero-bg .star,
+  .vara-hero-bg .particle,
+  .vara-hero-bg .lotus-center {
+    animation: none !important;
+  }
+}
+
+/* END: VARA responsive hero height + reduced-motion */

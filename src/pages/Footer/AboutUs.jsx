@@ -53,13 +53,13 @@ const AboutUs = () => (
             Hours lost searching for “royalty-free” music that still triggers
             copyright claims
           </li>
-          <li>Confusing license terms that scare away creators</li>
+          <li>Confusing certificate terms that scare away creators</li>
           <li>High costs for even a single track</li>
         </ul>
         <p>
           Vara changes that. With one simple subscription, you can access our
           entire library and download up to 50 songs per month — each ready
-          for commercial use under our license.
+          for commercial use under our certificate.
         </p>
       </section>
       <section>
@@ -74,7 +74,7 @@ const AboutUs = () => (
             so you don’t waste time sorting through filler.
           </li>
           <li>
-            ✅ <strong>Protection</strong> — License verification for
+            ✅ <strong>Protection</strong> — certificate verification for
             platforms like YouTube, Instagram, and Facebook to avoid false
             claims.
           </li>

@@ -319,7 +319,7 @@ const ProfileDropdown = ({ currentUser, onLogout, setCurrentUser }) => {
           target="_blank"
           rel="noopener noreferrer"
         >
-          License Verification
+          certificate Verification
         </a>
       </div>
 
@@ -330,7 +330,7 @@ const ProfileDropdown = ({ currentUser, onLogout, setCurrentUser }) => {
             <span className="warning-icon">⚠️</span>
             <div className="warning-text">
               <p><strong>Important:</strong> You can only use free Vara songs on your YouTube channel — and only for one video per song.</p>
-              <p>Using songs without a valid Vara license may lead to video flags or copyright issues.</p>
+              <p>Using songs without a valid Vara certificate may lead to video flags or copyright issues.</p>
               <p className="premium-suggestion">✅ To use music safely and legally, get Vara Premium.</p>
               <a
                 href="/terms"
