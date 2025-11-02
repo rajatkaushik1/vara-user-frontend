@@ -21,6 +21,7 @@ import LicenseAgreement from './pages/Footer/LicenseAgreement.jsx';
 import LicenseVerificationPage from './pages/LicenseVerificationPage.jsx';
 import FeedbackPage from './pages/FeedbackPage.jsx';
 import AssistantPage from './pages/AssistantPage.jsx';
+import TeamPage from './pages/TeamPage.jsx'
 import LicenseModal from './components/LicenseModal';
 import GoToTopButton from './components/GoToTopButton';
 import GlobalLoaderOverlay from './components/GlobalLoaderOverlay';
@@ -1593,7 +1594,9 @@ function App() {
                 <Route path="/premium" element={<PremiumPage currentUser={currentUser} onPremiumAccess={handlePremiumAccess} />} />
                 <Route path="/feedback" element={<FeedbackPage currentUser={currentUser} />} />
                 {/* Keep any other routes here unchanged */}
+                <Route path="/team" element={<TeamPage />} />
               </Routes>
+
               <GoToTopButton
                 show={currentPage === 'main' && (activeTab === 'home' || activeTab === 'favourites') && !showSearchPage}
                 onGoTop={() => scrollToSection('content-tabs-section')}
