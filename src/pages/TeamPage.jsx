@@ -1,7 +1,7 @@
 import React from 'react';
 import { Linkedin, Instagram, Twitter, CheckCircle2 } from 'lucide-react';
 // import { SonicWaveformBackground } from '@/components/ui/sonic-waveform'; // Removed - this component doesn't exist in vara-user-frontend
-import './TeamPage.css'; // <-- ADD THIS LINE
+import './Team.css'; // <-- ADD THIS LINE
 
 export default function TeamPage() { // Renamed function to TeamPage
   // Updated roles and descriptions with distinct apply links
