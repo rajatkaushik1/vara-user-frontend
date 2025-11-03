@@ -1,3 +1,266 @@
-body {
-  background-color: red !important;
+/* ==========================================
+   VARA Team Page - Standalone CSS
+   Based on TeamPage.jsx
+   ========================================== */
+
+:root {
+  --bg: #050405;
+  --text: #e0e0e0;
+  --text-strong: #ffffff;
+  --text-muted: #b0b0b0;
+  --gold: #ebba2f;
+  --gold-hover: #fbbf24;
+  --card-bg: rgba(0, 0, 0, 0.4);
+  --card-border: rgba(255, 255, 255, 0.1);
+  --card-glass: rgba(255, 255, 255, 0.05);
+}
+
+/* ========== Main Container ========== */
+.team-page-container {
+  background-color: var(--bg);
+  width: 100%;
+  min-height: 100vh;
+  color: var(--text-strong);
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  padding: 0;
+  margin: 0;
+}
+
+/* ========== Header ========== */
+.team-header {
+  max-width: 72rem; /* 1152px */
+  margin: 0 auto;
+  padding: 4rem 1.5rem 0;
+  text-align: center;
+}
+
+.team-title {
+  margin-bottom: 0.75rem;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.875rem; /* 30px */
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: rgba(255, 255, 255, 0.9);
+  text-transform: uppercase;
+}
+
+.team-subtitle {
+  font-size: 1.125rem; /* 18px */
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ========== Job Cards Grid ========== */
+.jobs-grid {
+  max-width: 80rem; /* 1280px */
+  margin: 3rem auto 0;
+  padding: 0 0.75rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+.job-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s ease;
+}
+
+.job-card:hover {
+  transform: translateY(-2px);
+}
+
+.job-title {
+  text-align: left;
+  font-size: 1.125rem; /* 18px */
+  font-weight: 800;
+  color: var(--text-strong);
+  margin-bottom: 0.5rem;
+}
+
+.job-description {
+  flex: 1; /* Pushes button to bottom */
+  margin-top: 0.5rem;
+  text-align: left;
+  font-size: 0.9375rem; /* 15px */
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.job-apply-btn {
+  margin-top: 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background-color: var(--gold);
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #000;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.job-apply-btn:hover {
+  background-color: var(--gold-hover);
+}
+
+/* ========== Benefits Section ========== */
+.benefits-section {
+  max-width: 80rem;
+  margin: 2.5rem auto 0;
+  padding: 0 0.75rem;
+}
+
+.benefits-card {
+  border-radius: 1rem;
+  border: 1px solid var(--card-border);
+  background: var(--card-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.benefits-content {
+  position: relative;
+  text-align: left;
+}
+
+.benefits-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.875rem; /* 30px */
+  font-weight: 800;
+  color: var(--text-strong);
+  margin-bottom: 1.25rem;
+}
+
+.benefits-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  font-size: 0.9375rem; /* 15px */
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.benefit-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.benefit-icon {
+  flex-shrink: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-top: 0.125rem;
+  color: var(--gold);
+}
+
+/* ========== Know More Section ========== */
+.know-more-section {
+  max-width: 80rem;
+  margin: 2.5rem auto 0;
+  padding: 0 0.75rem 4rem; /* Add bottom padding */
+}
+
+.know-more-card {
+  border-radius: 1rem;
+  border: 1px solid var(--card-border);
+  background: var(--card-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.know-more-content {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.know-more-text {
+  text-align: left;
+}
+
+.know-more-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.875rem; /* 30px */
+  font-weight: 800;
+  color: var(--text-strong);
+  margin-bottom: 0.75rem;
+}
+
+.know-more-description {
+  margin-top: 0.75rem;
+  font-size: 1rem; /* 16px */
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.know-more-logo-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.know-more-logo {
+  height: 6rem; /* 96px */
+  width: auto;
+  opacity: 0.9;
+  filter: drop-shadow(0 0 25px rgba(251, 191, 36, 0.3));
+}
+
+/* ========== Responsive Breakpoints ========== */
+
+/* Small screens (640px+) */
+@media (min-width: 640px) {
+  .jobs-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .benefits-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Medium screens (768px+) */
+@media (min-width: 768px) {
+  .team-title {
+    font-size: 2.25rem; /* 36px */
+  }
+  .team-subtitle {
+    font-size: 1.5rem; /* 24px */
+  }
+  .know-more-content {
+    grid-template-columns: 2fr 1fr;
+  }
+  .know-more-logo-wrapper {
+    justify-content: flex-end;
+  }
+  .know-more-logo {
+    height: 7rem; /* 112px */
+  }
+}
+
+/* Extra large screens (1280px+) */
+@media (min-width: 1280px) {
+  .jobs-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
