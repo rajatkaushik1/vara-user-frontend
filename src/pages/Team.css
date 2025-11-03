@@ -357,9 +357,14 @@
 
 /* ========== Reduced Motion ========== */
 @media (prefers-reduced-motion: reduce) {
-  .job-card,
-  .job-card::before,
-  .job-apply-btn {
-    transition: none;
+  /* Disable all animations/transitions for accessibility and to avoid linter quirks */
+  *, *::before, *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .job-card:hover {
+    transform: none !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), 0 2px 6px rgba(0, 0, 0, 0.2);
   }
 }
