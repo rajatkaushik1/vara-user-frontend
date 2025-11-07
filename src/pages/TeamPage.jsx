@@ -4,23 +4,12 @@ import './Team.css';
 
 export default function TeamPage() {
   const roles = [
-    {
-      title: 'WEB DEVELOPER (REACT)',
-      subtitle:
-        "Build and manage the code for the VARA website. You'll turn designs into features using React, ensuring our platform is fast, functional, and seamless for every user.",
-      href: 'https://docs.google.com/forms/d/e/1FAIpQLSecMkYEFK6Cu9OH5h5BwEw2fW7Htv47PNdwWeMXeP-ZLakwJw/viewform?usp=header'
-    },
+    
     {
       title: 'AI MUSIC CREATOR',
       subtitle:
         'Use AI tools to generate, review, and curate our entire music library. Your great knowledge of music will guide AI to produce high-quality tracks and ensure the catalog is perfectly organized.',
       href: 'https://docs.google.com/forms/d/e/1FAIpQLSd0uw7JrARQdSO0f1C_pfqQHIHK22N553C7kCXm2skZwfYOgg/viewform?usp=header'
-    },
-    {
-      title: 'MARKETING CREATOR',
-      subtitle:
-        "Tell VARA's story to the world. You will manage our social media, build a passionate online community, and create excitement to grow our brand.",
-      href: 'https://docs.google.com/forms/d/e/1FAIpQLSeh95cOuIZqdT4PnYAC4v85hPba0hLiPbec1DXQYHg1uwycfw/viewform?usp=header'
     }
   ];
 
