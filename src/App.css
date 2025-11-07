@@ -3804,3 +3804,14 @@ body {
   box-shadow: 0 0 0 2px rgba(235,186,47,0.85);
   border-color: #ebba2f;
 }
+/* === VARA: Mobile fix — place badge below header, sticky (<=700px) === */
+@media (max-width: 700px) {
+  .download-badge {
+    position: fixed !important;
+    /* Place it just below the sticky header; adjust 74px if your header height differs */
+    top: calc(74px + env(safe-area-inset-top, 0px));
+    right: 16px;
+    margin: 0 !important;
+    z-index: 1400; /* above page content; below search overlay (which uses ~3000) */
+  }
+}
