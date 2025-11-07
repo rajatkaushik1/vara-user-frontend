@@ -1676,6 +1676,55 @@ const MusicContent = ({
     };
     const activeTab = getActiveTab();
 
+  // Mobile-only: center the active tab horizontally inside the tab strip
+  const centerActiveTabOnMobile = React.useCallback(() => {
+    if (typeof window === 'undefined') return;
+    // Only on mobile widths (< 900px)
+    if (window.innerWidth >= 900) return;
+
+    // The tab strip is the same element we already reference for vertical scroll
+    const strip = tabSectionRef.current || document.getElementById('content-tabs-section');
+    if (!strip) return;
+
+    // Find the currently active tab button within the strip
+    const activeEl = strip.querySelector('.tab-button.active');
+    if (!activeEl) return;
+
+    // Only if there is horizontal overflow
+    const hasOverflow = strip.scrollWidth > strip.clientWidth;
+    if (!hasOverflow) return;
+
+    // Compute target scrollLeft to center the active tab
+    const stripRect = strip.getBoundingClientRect();
+    const activeRect = activeEl.getBoundingClientRect();
+    const currentLeft = strip.scrollLeft;
+    const activeCenter = (activeRect.left - stripRect.left) + currentLeft + (activeRect.width / 2);
+    const targetLeft = activeCenter - (stripRect.width / 2);
+
+    const maxLeft = strip.scrollWidth - strip.clientWidth;
+    const clamped = Math.max(0, Math.min(targetLeft, maxLeft));
+
+    // Smooth horizontal scroll
+    strip.scrollTo({ left: clamped, behavior: 'smooth' });
+  }, [tabSectionRef]);
+
+  // Run after the tab/state change renders the new .active element
+  React.useEffect(() => {
+    if (loadingMusicContent) return;
+    // Defer to next frames to ensure DOM/class updates have painted
+    let raf1 = 0, raf2 = 0;
+    raf1 = window.requestAnimationFrame(() => {
+      raf2 = window.requestAnimationFrame(() => {
+        centerActiveTabOnMobile();
+      });
+    });
+    return () => {
+      if (raf1) window.cancelAnimationFrame(raf1);
+      if (raf2) window.cancelAnimationFrame(raf2);
+    };
+    // Re-run whenever the active tab or the view changes
+  }, [centerActiveTabOnMobile, /* triggers */ activeTab, currentView?.view, loadingMusicContent]);
+
     const isGenreGrid =
       contentToDisplay.type === 'genres' ||
       contentToDisplay.type === 'sub-genres' ||
