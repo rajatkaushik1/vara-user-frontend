@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { AUTH_BASE_URL } from '../config';
+import { AUTH_BASE_URL, TASTE_ENDPOINTS } from '../config';
 import LotusLoader from '../components/LotusLoader';
 import Tooltip from '../components/Tooltip';
 import premiumLotusIcon from '/premium-lotus-icon.png';
@@ -214,6 +214,69 @@ function AssistantPage({
     }
   }, []);
 
+  // Enrich AI results with duration (and fill any missing core fields) via Admin API
+  const enrichResultsWithDurations = useCallback(async (rawResults = []) => {
+    try {
+      if (!Array.isArray(rawResults) || rawResults.length === 0) return rawResults;
+
+      // Collect unique IDs (support both songId and _id)
+      const ids = Array.from(
+        new Set(
+          rawResults
+            .map((r) => {
+              const v = r?.songId ?? r?._id;
+              return typeof v === 'string' || typeof v === 'number' ? String(v) : '';
+            })
+            .filter(Boolean)
+        )
+      );
+      if (ids.length === 0) return rawResults;
+
+      // Fetch full songs by ids from Admin API
+      const url = TASTE_ENDPOINTS.getSongsByIds(ids);
+      const res = await fetch(url, { method: 'GET' });
+      if (!res.ok) {
+        // On failure, return as-is; UI will hide duration
+        return rawResults.map((r) => ({ ...r, duration: undefined }));
+      }
+      const fullSongs = await res.json();
+      const byId = new Map(
+        (Array.isArray(fullSongs) ? fullSongs : []).map((s) => [String(s?._id), s])
+      );
+
+      // Merge duration (and optionally fill missing core metadata)
+      const merged = rawResults.map((r) => {
+        const sid = String(r?.songId ?? r?._id ?? '');
+        const s = byId.get(sid);
+        if (!s) {
+          return { ...r, duration: undefined }; // hide if not found
+        }
+        return {
+          ...r,
+          // Duration from Admin API
+            duration: typeof s.duration === 'number' ? s.duration : undefined,
+
+          // Soft-fill any missing fields so cards stay consistent with home
+          imageUrl: r.imageUrl || s.imageUrl || r.imageURL || undefined,
+          audioUrl: r.audioUrl || s.audioUrl || undefined,
+          bpm: r.bpm ?? s.bpm,
+          key: r.key ?? s.key,
+          hasVocals: r.hasVocals ?? s.hasVocals,
+          collectionType: r.collectionType ?? s.collectionType,
+          genres: (Array.isArray(r.genres) && r.genres.length) ? r.genres : s.genres,
+          subGenres: (Array.isArray(r.subGenres) && r.subGenres.length) ? r.subGenres : s.subGenres,
+          moods: (Array.isArray(r.moods) && r.moods.length) ? r.moods : s.moods,
+          instruments: (Array.isArray(r.instruments) && r.instruments.length) ? r.instruments : s.instruments,
+        };
+      });
+
+      return merged;
+    } catch {
+      // Hide duration on error to avoid showing 0:00
+      return rawResults.map((r) => ({ ...r, duration: undefined }));
+    }
+  }, []);
+
   const [tickerText, setTickerText] = useState('');
   const tickerRef = useRef({ timer: null, items: [], index: 0 });
   
@@ -267,7 +330,19 @@ function AssistantPage({
         throw new Error(data?.message || 'Recommendation request failed');
       }
       setIntent(data.intent || null);
-      setResults(Array.isArray(data.results) ? data.results : []);
+
+      // Set initial results immediately for responsiveness, then enrich in background
+      const baseResults = Array.isArray(data.results) ? data.results : [];
+      setResults(baseResults);
+
+      // Enrich with durations (and soft-fill metadata); update results once
+      try {
+        const enriched = await enrichResultsWithDurations(baseResults);
+        if (Array.isArray(enriched) && enriched.length) {
+          setResults(enriched);
+        }
+      } catch { /* no-op; keep baseResults */ }
+
       // Successful call → refresh limits (remaining may have decreased)
       try { await fetchAiLimits(); } catch {}
     } catch (e) {
@@ -487,7 +562,11 @@ function AssistantPage({
                   <div className="card-row">
                     <div className="card-column left">
                       <Tooltip text="Song length">
-                        <span className="song-timestamp">{formatTime ? formatTime(song.duration) : ''}</span>
+                        <span className="song-timestamp">
+        { (typeof song?.duration === 'number' && isFinite(song.duration) && song.duration > 0 && typeof formatTime === 'function')
+          ? formatTime(song.duration)
+          : '' }
+      </span>
                       </Tooltip>
                     </div>
                     <div className="card-column center">
