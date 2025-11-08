@@ -720,16 +720,21 @@ function App() {
   }, []);
 
   const handleBackButtonClick = useCallback(() => {
-    // One-time return path to AI page with restored results
+    // One-time return path to AI with restored results
     if (returnToAiOnce) {
       setReturnToAiOnce(false);
+
+      // Signal AI page to restore the last snapshot ONLY for this Back navigation.
+      try { if (typeof window !== 'undefined') window.__VARA_AI_RESTORE_ON_BACK__ = true; } catch {}
+
       navigate('/ai');
       setCurrentPage('ai');
       setActiveTab('ai');
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
-    // Default: back within Home navigation history
+
+    // Default: step back within Home's view stack
     if (navigationHistory.length > 1) {
       setNavigationHistory(prevHistory => prevHistory.slice(0, -1));
     }
@@ -853,6 +858,9 @@ function App() {
     setShowSearchPage(false);
     setSearchTerm('');
     if (tabName === 'home') {
+        // Clear any previous AI restore intent when clicking HOME
+        try { if (typeof window !== 'undefined') window.__VARA_AI_RESTORE_ON_BACK__ = false; } catch {}
+        
         setNavigationHistory([initialNavigationState]);
         // If this was triggered from the hero/TRY AUDIO button, mark auto-scroll allowed
         if (fromExplore && sectionId) {
