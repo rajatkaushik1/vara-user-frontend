@@ -287,6 +287,24 @@ function AssistantPage({
     return null;
   };
   
+  // Snapshot current AI state so it can be restored after navigating away
+  const snapshotAiState = React.useCallback(() => {
+    try {
+      const payload = {
+        results,
+        intent,
+        queryText,
+        vocals,
+        topK,
+        ts: Date.now()
+      };
+      if (typeof window !== 'undefined') {
+        window.__VARA_AI_LAST__ = payload;
+        window.__VARA_AI_SHOULD_RESTORE__ = true;
+      }
+    } catch {}
+  }, [results, intent, queryText, vocals, topK]);
+  
 
   // Refs and helpers for auto-growing textarea and result scroll
   const resultsRef = useRef(null);
@@ -438,6 +456,21 @@ function AssistantPage({
     }
   }, [currentUser, fetchAiLimits]);
 
+  // Restore previous AI results on mount if available
+  useEffect(() => {
+    try {
+      const w = typeof window !== 'undefined' ? window : {};
+      const last = w.__VARA_AI_LAST__;
+      if (w.__VARA_AI_SHOULD_RESTORE__ && last && Array.isArray(last.results) && last.results.length > 0) {
+        setResults(last.results);
+        if (last.intent) setIntent(last.intent);
+        if (typeof last.queryText === 'string') setQueryText(last.queryText);
+        if (last.vocals === 'on' || last.vocals === 'off') setVocals(last.vocals);
+        if (typeof last.topK === 'number') setTopK(last.topK);
+      }
+    } catch {}
+  }, []);
+
   const renderResultCard = (r, idx) => {
     const isFav = favouriteSongs instanceof Set ? favouriteSongs.has(r.songId) : false;
     const isCurrent = currentPlayingSong && (currentPlayingSong._id === r.songId);
@@ -506,7 +539,10 @@ function AssistantPage({
                           className="genre-pill"
                           onClick={() => {
                             const id = getSafeId(g);
-                            if (id && typeof onExplore === 'function') onExplore('genre', String(id));
+                            if (id && typeof onExplore === 'function') {
+                              snapshotAiState();
+                              onExplore('genre', String(id));
+                            }
                           }}
                         >
                           {g?.name || 'Genre'}
@@ -523,7 +559,10 @@ function AssistantPage({
                           className="subgenre-pill"
                           onClick={() => {
                             const id = getSafeId(sg);
-                            if (id && typeof onExplore === 'function') onExplore('subGenre', String(id));
+                            if (id && typeof onExplore === 'function') {
+                              snapshotAiState();
+                              onExplore('subGenre', String(id));
+                            }
                           }}
                         >
                           {sg?.name || 'Sub-genre'}
@@ -541,7 +580,10 @@ function AssistantPage({
                           style={INSTRUMENT_PILL_STYLE}
                           onClick={() => {
                             const id = getSafeId(ins);
-                            if (id && typeof onExplore === 'function') onExplore('instrument', String(id));
+                            if (id && typeof onExplore === 'function') {
+                              snapshotAiState();
+                              onExplore('instrument', String(id));
+                            }
                           }}
                         >
                           {ins?.name || 'Instrument'}
@@ -559,7 +601,10 @@ function AssistantPage({
                           style={MOOD_PILL_STYLE}
                           onClick={() => {
                             const id = getSafeId(m);
-                            if (id && typeof onExplore === 'function') onExplore('mood', String(id));
+                            if (id && typeof onExplore === 'function') {
+                              snapshotAiState();
+                              onExplore('mood', String(id));
+                            }
                           }}
                         >
                           {m?.name || 'Mood'}
