@@ -1587,6 +1587,7 @@ function App() {
                       handleToggleFavourite={handleToggleFavourite}
                       handleDownload={handleDownload}
                       currentSongId={currentSongId}
+                      onExplore={handleExploreFromSearch}   // NEW: use the same handler as Search
                     />
                   }
                 />
