@@ -178,7 +178,8 @@ function AssistantPage({
   favouriteSongs,
   handleToggleFavourite,
   handleDownload,
-  currentSongId
+  currentSongId,
+  onExplore // NEW
 }) {
   const [queryText, setQueryText] = useState('');
   const [vocals, setVocals] = useState('off'); // 'off' | 'on'
@@ -279,6 +280,12 @@ function AssistantPage({
 
   const [tickerText, setTickerText] = useState('');
   const tickerRef = useRef({ timer: null, items: [], index: 0 });
+  // Helper to safely extract an id from pill items
+  const getSafeId = (item) => {
+    if (item && (item._id || item.id)) return item._id || item.id;
+    if (typeof item === 'string') return item;
+    return null;
+  };
   
 
   // Refs and helpers for auto-growing textarea and result scroll
@@ -494,7 +501,16 @@ function AssistantPage({
                   {song.genres?.length > 0 && (
                     <div className="genre-pill-container">
                       {song.genres.map((g, gi) => (
-                        <span key={g?._id || `g-${gi}`} className="genre-pill">{g?.name || 'Genre'}</span>
+                        <span
+                          key={g?._id || `g-${gi}`}
+                          className="genre-pill"
+                          onClick={() => {
+                            const id = getSafeId(g);
+                            if (id && typeof onExplore === 'function') onExplore('genre', String(id));
+                          }}
+                        >
+                          {g?.name || 'Genre'}
+                        </span>
                       ))}
                     </div>
                   )}
@@ -502,7 +518,16 @@ function AssistantPage({
                   {song.subGenres?.length > 0 && (
                     <div className="subgenre-pill-container">
                       {song.subGenres.map((sg, sgi) => (
-                        <span key={sg?._id || `sg-${sgi}`} className="subgenre-pill">{sg?.name || 'Sub-genre'}</span>
+                        <span
+                          key={sg?._id || `sg-${sgi}`}
+                          className="subgenre-pill"
+                          onClick={() => {
+                            const id = getSafeId(sg);
+                            if (id && typeof onExplore === 'function') onExplore('subGenre', String(id));
+                          }}
+                        >
+                          {sg?.name || 'Sub-genre'}
+                        </span>
                       ))}
                     </div>
                   )}
@@ -514,6 +539,10 @@ function AssistantPage({
                           key={ins?._id || `ins-${ii}`}
                           className="subgenre-pill"
                           style={INSTRUMENT_PILL_STYLE}
+                          onClick={() => {
+                            const id = getSafeId(ins);
+                            if (id && typeof onExplore === 'function') onExplore('instrument', String(id));
+                          }}
                         >
                           {ins?.name || 'Instrument'}
                         </span>
@@ -528,6 +557,10 @@ function AssistantPage({
                           key={m?._id || `m-${mi}`}
                           className="subgenre-pill"
                           style={MOOD_PILL_STYLE}
+                          onClick={() => {
+                            const id = getSafeId(m);
+                            if (id && typeof onExplore === 'function') onExplore('mood', String(id));
+                          }}
                         >
                           {m?.name || 'Mood'}
                         </span>
