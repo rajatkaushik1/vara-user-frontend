@@ -299,8 +299,8 @@ function AssistantPage({
         ts: Date.now()
       };
       if (typeof window !== 'undefined') {
+        // Do NOT set any "should restore" flag here. Snapshot only.
         window.__VARA_AI_LAST__ = payload;
-        window.__VARA_AI_SHOULD_RESTORE__ = true;
       }
     } catch {}
   }, [results, intent, queryText, vocals, topK]);
@@ -356,19 +356,34 @@ function AssistantPage({
       }
       setIntent(data.intent || null);
 
-      // Set initial results immediately for responsiveness, then enrich in background
+      // Set base results first (fast UI), then enrich
       const baseResults = Array.isArray(data.results) ? data.results : [];
       setResults(baseResults);
 
-      // Enrich with durations (and soft-fill metadata); update results once
+      // Enrich with durations/metadata
+      let finalResults = baseResults;
       try {
         const enriched = await enrichResultsWithDurations(baseResults);
         if (Array.isArray(enriched) && enriched.length) {
           setResults(enriched);
+          finalResults = enriched;
         }
-      } catch { /* no-op; keep baseResults */ }
+      } catch { /* no-op enrichment */ }
 
-      // Successful call → refresh limits (remaining may have decreased)
+      // Snapshot the latest set so "Back from Home" shows the most recent results (e.g., 'sad' after 'happy')
+      try {
+        const payload = {
+          results: finalResults,
+          intent: data.intent || null,
+          queryText,
+          vocals,
+          topK,
+          ts: Date.now()
+        };
+        if (typeof window !== 'undefined') window.__VARA_AI_LAST__ = payload;
+      } catch {}
+
+      // Refresh AI usage limits
       try { await fetchAiLimits(); } catch {}
     } catch (e) {
       setError(e?.message || 'Failed to get recommendations');
@@ -456,18 +471,23 @@ function AssistantPage({
     }
   }, [currentUser, fetchAiLimits]);
 
-  // Restore previous AI results on mount if available
+  // Restore previous AI results on mount ONLY when returning from Home via Back
   useEffect(() => {
     try {
       const w = typeof window !== 'undefined' ? window : {};
+      const shouldRestore = !!w.__VARA_AI_RESTORE_ON_BACK__;
       const last = w.__VARA_AI_LAST__;
-      if (w.__VARA_AI_SHOULD_RESTORE__ && last && Array.isArray(last.results) && last.results.length > 0) {
+
+      if (shouldRestore && last && Array.isArray(last.results) && last.results.length > 0) {
         setResults(last.results);
         if (last.intent) setIntent(last.intent);
         if (typeof last.queryText === 'string') setQueryText(last.queryText);
         if (last.vocals === 'on' || last.vocals === 'off') setVocals(last.vocals);
         if (typeof last.topK === 'number') setTopK(last.topK);
       }
+
+      // One-time flag: consume it so header/AI navigation later doesn't keep restoring old results.
+      w.__VARA_AI_RESTORE_ON_BACK__ = false;
     } catch {}
   }, []);
 
