@@ -159,6 +159,7 @@ function App() {
   const [activeTab, setActiveTab] = useState('home');
   const [currentPage, setCurrentPage] = useState('main');
   const [navigationHistory, setNavigationHistory] = useState([initialNavigationState]);
+  const [returnToAiOnce, setReturnToAiOnce] = useState(false);
   
   // Notification state
   const [notification, setNotification] = useState({ message: '', type: '' });
@@ -719,10 +720,20 @@ function App() {
   }, []);
 
   const handleBackButtonClick = useCallback(() => {
+    // One-time return path to AI page with restored results
+    if (returnToAiOnce) {
+      setReturnToAiOnce(false);
+      navigate('/ai');
+      setCurrentPage('ai');
+      setActiveTab('ai');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    // Default: back within Home navigation history
     if (navigationHistory.length > 1) {
       setNavigationHistory(prevHistory => prevHistory.slice(0, -1));
     }
-  }, [navigationHistory.length]);
+  }, [returnToAiOnce, navigationHistory.length, navigate]);
 
   const handleTabClick = useCallback((viewType) => {
     flashLoader(550);
@@ -920,14 +931,23 @@ function App() {
 
   const handleExploreFromSearch = useCallback((type, id) => {
     flashLoader(550);
-    // Set suppression flag so the /home URL→state effect does NOT reset to "For You" once.
+    // Mark that we navigated to Home from AI/Search and we want the Home "Back" button to return to AI once.
+    setReturnToAiOnce(true);
+
+    // Prevent the /home URL→state effect from resetting us to "For You"
     suppressHomeResetRef.current = true;
-    handleBackToMainApp(); // this will navigate('/home') and close the search UI
+
+    // Explicitly switch the app to Home page so header highlights 'HOME' and the search bar is visible.
+    setCurrentPage('main');
+    setActiveTab('home');
+
+    // Now navigate to home and trigger the specific explore action shortly after.
+    handleBackToMainApp(); // navigates('/home') and closes search UI
     setTimeout(() => {
-        if (type === 'genre') handleExploreGenre(id);
-        else if (type === 'subGenre') handleExploreSubgenre(id);
-        else if (type === 'instrument') handleExploreInstrument(id);
-        else if (type === 'mood') handleExploreMood(id); // already present
+      if (type === 'genre') handleExploreGenre(id);
+      else if (type === 'subGenre') handleExploreSubgenre(id);
+      else if (type === 'instrument') handleExploreInstrument(id);
+      else if (type === 'mood') handleExploreMood(id);
     }, 50);
   }, [handleBackToMainApp, handleExploreGenre, handleExploreSubgenre, handleExploreInstrument, handleExploreMood]);
 
