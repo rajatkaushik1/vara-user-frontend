@@ -1,77 +1,70 @@
 import React from 'react';
 
-function SongCardSkeleton() {
+export default function SongCardSkeleton() {
   return (
-    <div
-      className="song-card search-song-card"
-      style={{
-        display: 'grid',
-        gridTemplateColumns: '180px 1fr',
-        gridTemplateRows: 'auto auto',
-        columnGap: '15px',
-        rowGap: '4px',
-        alignItems: 'start',
-        padding: '25px',
-        position: 'relative'
-      }}
-    >
-      {/* Left: cover image placeholder + play overlay placeholder */}
-      <div
-        className="song-image-wrapper"
-        style={{ position: 'relative', display: 'inline-block', gridColumn: 1, gridRow: '1 / -1', alignSelf: 'center' }}
-      >
-        <div className="skeleton-element skeleton-image skeleton-song-image" />
-        <div
-          className="skeleton-element skeleton-play-button"
-          style={{ position: 'absolute', left: 10, bottom: 10 }}
-        />
-      </div>
+    // Wrapper must be a direct child of the carousel scroll area or grid to pick up sizing
+    <div className="skeleton-card-wrap">
+      {/* Inner card uses the same class name as real cards so scale rules apply */}
+      <div className="song-card">
+        {/* Image block (match real markup) */}
+        <div className="song-image-wrapper" style={{ position: 'relative', display: 'inline-block' }}>
+          {/* Image placeholder: uses sizes from App.css (.skeleton-song-image) */}
+          <div className="skeleton-element skeleton-image skeleton-song-image" />
 
-      {/* Top-right: title + pills placeholders */}
-      <div className="trending-song-card-info" style={{ gridColumn: 2, gridRow: 1 }}>
-        <div
-          className="skeleton-element skeleton-text-line"
-          style={{ width: '65%', height: 18, borderRadius: 4, margin: '0 0 6px 0' }}
-        />
-        <div className="trending-genre-scroll-wrapper">
-          <div className="trending-genre-pill-container">
-            <div className="skeleton-element skeleton-pill" />
-            <div className="skeleton-element skeleton-pill" />
-            <div className="skeleton-element skeleton-pill" />
-          </div>
-          <div className="trending-subgenre-pill-container">
-            <div className="skeleton-element skeleton-pill" />
-            <div className="skeleton-element skeleton-pill" />
-          </div>
+          {/* Keep play button placeholder for layout balance */}
+          <div
+            className="cover-play-button skeleton-play-button"
+            aria-hidden="true"
+            style={{ position: 'absolute', left: 10, bottom: 10 }}
+          />
         </div>
-      </div>
 
-      {/* Bottom-right: two rows of metadata/actions placeholders */}
-      <div className="trending-song-card-bottom-row-final" style={{ gridColumn: 2, gridRow: 2 }}>
-        <div className="trending-metadata-grid" style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginRight: '10px' }}>
-          {/* Row 1 */}
-          <div className="trending-card-row" style={{ display: 'flex', alignItems: 'center', gap: '28px' }}>
-            <div className="trending-card-column left" style={{ flex: '1 1 33%' }}>
-              <div className="skeleton-element" style={{ width: 50, height: 16, borderRadius: 4 }} />
-            </div>
-            <div className="trending-card-column center" style={{ flex: '1 1 33%', display: 'flex', justifyContent: 'center' }}>
-              <div className="skeleton-element skeleton-play-button" style={{ width: 32, height: 32, borderRadius: '50%' }} />
-            </div>
-            <div className="trending-card-column right" style={{ flex: '1 1 33%', display: 'flex', justifyContent: 'center' }}>
-              <div className="skeleton-element" style={{ width: 60, height: 16, borderRadius: 4 }} />
+        {/* Text + pills + actions (match real markup) */}
+        <div className="song-text-and-button-wrapper">
+          <div className="song-card-info">
+            {/* Title line */}
+            <div className="skeleton-element skeleton-text-line skeleton-text-short" />
+
+            {/* Pills area: a few pill placeholders to keep height consistent */}
+            <div className="genre-scroll-wrapper">
+              <div className="genre-pill-container">
+                <div className="skeleton-element skeleton-pill" />
+                <div className="skeleton-element skeleton-pill" />
+                <div className="skeleton-element skeleton-pill" />
+              </div>
+              <div className="subgenre-pill-container">
+                <div className="skeleton-element skeleton-pill" />
+                <div className="skeleton-element skeleton-pill" />
+              </div>
             </div>
           </div>
 
-          {/* Row 2 */}
-          <div className="trending-card-row" style={{ display: 'flex', alignItems: 'center', gap: '28px' }}>
-            <div className="trending-card-column left" style={{ flex: '1 1 33%' }}>
-              <div className="skeleton-element" style={{ width: 60, height: 16, borderRadius: 4 }} />
-            </div>
-            <div className="trending-card-column center" style={{ flex: '1 1 33%', display: 'flex', justifyContent: 'center' }}>
-              <div className="skeleton-element skeleton-play-button" style={{ width: 32, height: 32, borderRadius: '50%' }} />
-            </div>
-            <div className="trending-card-column right" style={{ flex: '1 1 33%', display: 'flex', justifyContent: 'center' }}>
-              <div className="skeleton-element" style={{ width: 28, height: 28, borderRadius: 6 }} />
+          {/* Bottom metadata/actions area (match real layout so height is right) */}
+          <div className="song-card-bottom-row_final">
+            <div className="metadata-grid">
+              <div className="card-row">
+                <div className="card-column left">
+                  <div className="skeleton-element skeleton-text-line" style={{ width: 40 }} />
+                </div>
+                <div className="card-column center">
+                  <div className="skeleton-element skeleton-control-button" />
+                </div>
+                <div className="card-column right">
+                  <div className="skeleton-element skeleton-text-line" style={{ width: 52 }} />
+                </div>
+              </div>
+
+              <div className="card-row">
+                <div className="card-column left">
+                  <div className="skeleton-element skeleton-text-line" style={{ width: 48 }} />
+                </div>
+                <div className="card-column center">
+                  <div className="skeleton-element skeleton-control-button" />
+                </div>
+                <div className="card-column right">
+                  <div className="skeleton-element skeleton-play-button" />
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -80,4 +73,3 @@ function SongCardSkeleton() {
   );
 }
 
-export default SongCardSkeleton;
