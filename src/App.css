@@ -3595,17 +3595,17 @@ body {
 }
 
 /* Column count breakpoints (exact as requested) */
-@media (max-width: 1499px) {
+@media (max-width: 1399px) {
   .raw-library-grid {
     grid-template-columns: repeat(3, calc(var(--cardW) * var(--cardScale)));
   }
 }
-@media (max-width: 1013px) {
+@media (max-width: 1199px) {
   .raw-library-grid {
     grid-template-columns: repeat(2, calc(var(--cardW) * var(--cardScale)));
   }
 }
-@media (max-width: 599px) {
+@media (max-width: 799px) {
   .raw-library-grid {
     grid-template-columns: repeat(1, calc(var(--cardW) * var(--cardScale)));
   }
