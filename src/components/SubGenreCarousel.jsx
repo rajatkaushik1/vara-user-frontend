@@ -24,6 +24,21 @@ export default function SubGenreCarousel({
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const [hasOverflow, setHasOverflow] = useState(false);
+  const [pageCount, setPageCount] = useState(1);
+  const [pageIndex, setPageIndex] = useState(0);
+
+  const recalcPagination = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const vw = el.clientWidth || 1;
+    const total = el.scrollWidth || vw;
+    const count = Math.max(1, Math.ceil(total / vw));
+    setPageCount(count);
+
+    // Update current page from scrollLeft
+    const idx = Math.round(el.scrollLeft / vw);
+    setPageIndex(Math.min(count - 1, Math.max(0, idx)));
+  }, []);
 
   function isFirstCardFullyVisible() {
     const el = scrollRef.current;
@@ -59,6 +74,39 @@ export default function SubGenreCarousel({
     const t = setTimeout(checkScrollability, 80);
     return () => clearTimeout(t);
   }, [items, isLoading, checkScrollability]);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    recalcPagination();
+
+    // Listen to scroll to update active dot
+    const onScroll = () => recalcPagination();
+    el.addEventListener('scroll', onScroll, { passive: true });
+
+    // Resize observer to recompute page count when layout changes
+    const ro = new ResizeObserver(recalcPagination);
+    ro.observe(el);
+
+    // Also watch window resize
+    const onWin = () => recalcPagination();
+    window.addEventListener('resize', onWin, { passive: true });
+
+    return () => {
+      el.removeEventListener('scroll', onScroll);
+      ro.disconnect();
+      window.removeEventListener('resize', onWin);
+    };
+  }, [recalcPagination]);
+
+  const scrollToPage = useCallback((idx) => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const clamped = Math.max(0, Math.min(idx, pageCount - 1));
+    const x = clamped * el.clientWidth;
+    el.scrollTo({ left: x, behavior: 'smooth' });
+    setPageIndex(clamped);
+  }, [pageCount]);
 
   const handleScroll = (dir) => {
     const el = scrollRef.current;
@@ -155,6 +203,21 @@ export default function SubGenreCarousel({
           <ScrollRightIcon />
         </button>
       </div>
+
+      {pageCount > 1 && (
+        <div className="sg-dots" role="tablist" aria-label="Sub-genre pages">
+          {Array.from({ length: pageCount }).map((_, i) => (
+            <button
+              key={`sgdot-${i}`}
+              type="button"
+              className={`sg-dot ${i === pageIndex ? 'active' : ''}`}
+              aria-label={`Go to page ${i + 1}`}
+              aria-selected={i === pageIndex}
+              onClick={() => scrollToPage(i)}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
