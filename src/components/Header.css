@@ -1,3 +1,48 @@
+/* === VARA: Mobile search bar fix for very small widths (<=400px) === */
+@media (max-width: 400px) {
+  /* Ensure the container reserves space for the two right-side buttons */
+  .mobile-search-bar-container .search-container {
+    position: relative !important;
+    /* reserve space: 44px (search) + 32px (clear) + 16px total gaps */
+    padding-right: 92px !important;
+  }
+
+  /* Anchor the gold Search button to the right edge */
+  .mobile-search-bar-container .search-button {
+    position: absolute !important;
+    right: 8px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+
+    /* Fixed size so it never expands the bar */
+    width: 44px !important;
+    min-width: 44px !important;
+    height: calc(100% - 8px) !important;  /* leaves tiny vertical padding */
+    padding: 0 !important;
+    border-radius: 22px !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  .mobile-search-bar-container .search-button svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  /* Anchor the clear “x” just to the left of the Search button */
+  .mobile-search-bar-container .search-clear-button {
+    position: absolute !important;
+    right: 56px !important; /* 8px gap + 44px button */
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+
+    /* keep a consistent touch target */
+    width: 32px !important;
+    height: 32px !important;
+    margin-right: 0 !important;
+  }
+}
 /* Header-specific responsive styles for mobile drawer + search overlay */
 
 :root {
