@@ -3839,7 +3839,7 @@ body {
 /* Slightly stronger left shift on very small phones */
 @media (max-width: 480px) {
   .vara-watermark {
-    right: clamp(10px, 3.6%, 18px);
+    right: clamp(15px, 3.6%, 22px);
     bottom: 6px;
   }
 }
