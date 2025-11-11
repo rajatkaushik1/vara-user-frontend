@@ -30,10 +30,18 @@ export default function SubGenreCarousel({
   const recalcPagination = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
-    const vw = el.clientWidth || 1;
-    const total = el.scrollWidth || vw;
-    const count = Math.max(1, Math.ceil(total / vw));
+
+    const vw = el.clientWidth || 1;        // visible width
+    const total = el.scrollWidth || vw;    // total scrollable width
+
+    // Count how many full screens (pages) are needed to cover the content.
+    // Example: if total == vw → 1 page; if total == 1.3*vw → 2 pages.
+    const count = Math.max(1, Math.ceil((total - vw) / vw) + 1);
     setPageCount(count);
+
+    // Overflow flag for "hide dots when all are visible"
+    const overflow = total > vw + 1;
+    setHasOverflow(overflow);
 
     // Update current page from scrollLeft
     const idx = Math.round(el.scrollLeft / vw);
@@ -58,38 +66,31 @@ export default function SubGenreCarousel({
   }, []);
 
   useEffect(() => {
-    const scrollEl = scrollRef.current;
-    if (!scrollEl) return;
-    checkScrollability();
-    scrollEl.addEventListener('scroll', checkScrollability);
-    const ro = new ResizeObserver(checkScrollability);
-    ro.observe(scrollEl);
-    return () => {
-      scrollEl.removeEventListener('scroll', checkScrollability);
-      ro.unobserve(scrollEl);
-    };
-  }, [checkScrollability]);
-
-  useEffect(() => {
-    const t = setTimeout(checkScrollability, 80);
-    return () => clearTimeout(t);
-  }, [items, isLoading, checkScrollability]);
-
-  useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    recalcPagination();
 
-    // Listen to scroll to update active dot
-    const onScroll = () => recalcPagination();
+    // Initial measure
+    recalcPagination();
+    checkScrollability();
+
+    // Scroll listener
+    const onScroll = () => {
+      checkScrollability();
+      recalcPagination();
+    };
     el.addEventListener('scroll', onScroll, { passive: true });
 
-    // Resize observer to recompute page count when layout changes
-    const ro = new ResizeObserver(recalcPagination);
+    // Resize observer for the scroll area
+    const ro = new ResizeObserver(() => {
+      checkScrollability();
+      recalcPagination();
+    });
     ro.observe(el);
 
-    // Also watch window resize
-    const onWin = () => recalcPagination();
+    const onWin = () => {
+      checkScrollability();
+      recalcPagination();
+    };
     window.addEventListener('resize', onWin, { passive: true });
 
     return () => {
@@ -97,7 +98,15 @@ export default function SubGenreCarousel({
       ro.disconnect();
       window.removeEventListener('resize', onWin);
     };
-  }, [recalcPagination]);
+  }, [recalcPagination, checkScrollability]);
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      checkScrollability();
+      recalcPagination();
+    }, 60);
+    return () => clearTimeout(t);
+  }, [items, isLoading, checkScrollability, recalcPagination]);
 
   const scrollToPage = useCallback((idx) => {
     const el = scrollRef.current;
@@ -204,8 +213,8 @@ export default function SubGenreCarousel({
         </button>
       </div>
 
-      {pageCount > 1 && (
-        <div className="sg-dots" role="tablist" aria-label="Sub-genre pages">
+      {hasOverflow && pageCount > 1 && (
+        <div className="sg-dots" role="tablist" aria-label={`Pages for ${title || 'Sub-genres'}`}>
           {Array.from({ length: pageCount }).map((_, i) => (
             <button
               key={`sgdot-${i}`}
