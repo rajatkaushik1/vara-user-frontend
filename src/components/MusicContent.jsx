@@ -1429,14 +1429,29 @@ const MusicContent = ({
         }
 
         if (isLoading) {
-            const isGenreView =
-              contentToDisplay.type === 'genres' ||
-              contentToDisplay.type === 'sub-genres' ||
-              contentToDisplay.type === 'instruments' ||
-              contentToDisplay.type === 'moods'; // NEW
-            return isGenreView
-                ? Array.from({ length: 8 }).map((_, index) => <GenreCardSkeleton key={index} />)
-                : Array.from({ length: 9 }).map((_, index) => <SongCardSkeleton key={index} />);
+          const isGenreView =
+            contentToDisplay.type === 'genres' ||
+            contentToDisplay.type === 'sub-genres' ||
+            contentToDisplay.type === 'instruments' ||
+            contentToDisplay.type === 'moods'; // NEW
+
+          // Genres (existing behavior unchanged)
+          if (isGenreView) {
+            return Array.from({ length: 8 }).map((_, index) => (
+              <GenreCardSkeleton key={`gsk-${index}`} />
+            ));
+          }
+
+          // SONGS: match the real layout so skeletons scale exactly like cards (no grey gaps)
+          return (
+            <div className="raw-library-grid skeleton-grid">
+              {Array.from({ length: 8 }).map((_, index) => (
+                <div className="raw-card-sizer" key={`ssk-${index}`}>
+                  <SongCardSkeleton />
+                </div>
+              ))}
+            </div>
+          );
         }
 
         if (error) return <p style={{ gridColumn: '1 / -1', textAlign: 'center', color: '#ff6b6b', fontSize: '1.2em' }}>{error}</p>;
