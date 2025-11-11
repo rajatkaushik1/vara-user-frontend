@@ -3863,3 +3863,47 @@ body {
     grid-template-columns: repeat(2, calc(var(--cardW) * var(--cardScale))) !important;
   }
 }
+ /* === VARA: Sub-genre carousel dots === */
+ .sg-dots {
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   gap: 8px;
+
+   /* sit below the card row; do not overlap */
+   padding-top: 10px;
+   padding-bottom: 4px;
+ }
+
+ .sg-dot {
+   width: 8px;
+   height: 8px;
+   border-radius: 9999px;
+   background: #ffffff;      /* inactive = white */
+   opacity: 0.85;
+   border: none;
+   cursor: pointer;
+   transition: transform 140ms ease, opacity 140ms ease, background-color 140ms ease, box-shadow 140ms ease;
+   box-shadow: 0 0 0 1px rgba(255,255,255,0.25) inset;
+ }
+
+ .sg-dot:hover { opacity: 1; transform: scale(1.08); }
+ .sg-dot:focus-visible {
+   outline: none;
+   box-shadow: 0 0 0 2px rgba(235,186,47,0.85);
+ }
+
+ .sg-dot.active {
+   background: #ebba2f;      /* active = VARA yellow */
+   opacity: 1;
+   transform: scale(1.15);
+   box-shadow:
+     0 0 0 1px rgba(255,255,255,0.18) inset,
+     0 0 10px rgba(235,186,47,0.30);
+ }
+
+ @media (max-width: 420px) {
+   .sg-dots { gap: 6px; padding-top: 8px; }
+   .sg-dot { width: 7px; height: 7px; }
+   .sg-dot.active { transform: scale(1.12); }
+ }
