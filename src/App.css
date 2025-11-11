@@ -3815,3 +3815,29 @@ body {
     z-index: 1400; /* above page content; below search overlay (which uses ~3000) */
   }
 }
+ .vara-watermark {
+   position: absolute;
+   right: 8px;
+   bottom: 8px;
+
+   /* Keep the logo-to-cover ratio consistent across all card sizes */
+   width: clamp(22px, 14%, 54px);
+   height: auto;
+
+   /* Sit above the image, below play button; never intercept clicks */
+   z-index: 1;
+   pointer-events: none;
+   user-select: none;
+   opacity: 0.98;
+
+   /* Subtle separation on bright covers */
+   filter: drop-shadow(0 2px 6px rgba(0,0,0,0.55));
+ }
+
+ /* Optional: slightly tighter padding on very small phones */
+ @media (max-width: 480px) {
+   .vara-watermark {
+     right: 6px;
+     bottom: 6px;
+   }
+ }
