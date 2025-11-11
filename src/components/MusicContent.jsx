@@ -1004,6 +1004,7 @@ const SongCard = ({ song, onPlayPause, songList, currentPlayingSong, isPlaying, 
         className="song-card-image"
         onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/200x200/333/FFF?text=No+Image'; }}
       />
+        <img src="/logo.png" alt="" aria-hidden="true" className="vara-watermark" />
       {/* 48px circular overlay button at bottom-left of the image */}
       <button
         className="cover-play-button"
