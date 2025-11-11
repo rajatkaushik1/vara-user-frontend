@@ -3843,3 +3843,23 @@ body {
     bottom: 6px;
   }
 }
+
+/* === VARA: Skeleton-only responsive overrides === */
+.raw-library-grid.skeleton-grid {
+  /* 50% of normal card scale (does not affect real cards) */
+  --cardScale: 0.5;
+}
+
+/* Phones: strictly 1 column when viewport < 400px */
+@media (max-width: 399px) {
+  .raw-library-grid.skeleton-grid {
+    grid-template-columns: repeat(1, calc(var(--cardW) * var(--cardScale))) !important;
+  }
+}
+
+/* Tablets: strictly 2 columns between 400px and 1024px */
+@media (min-width: 400px) and (max-width: 1024px) {
+  .raw-library-grid.skeleton-grid {
+    grid-template-columns: repeat(2, calc(var(--cardW) * var(--cardScale))) !important;
+  }
+}
