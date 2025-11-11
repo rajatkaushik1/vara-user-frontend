@@ -3819,7 +3819,7 @@ body {
 .vara-watermark {
   position: absolute;
   /* Shift further left; scale with cover width, but keep sensible min/max */
-  right: clamp(12px, 2.4%, 20px);
+  right: clamp(20px, 4.4%, 25px);
   bottom: 8px;
 
   /* Keep the logo-to-cover ratio consistent across all card sizes */
