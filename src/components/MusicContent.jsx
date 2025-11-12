@@ -7,9 +7,9 @@ import GenreCardSkeleton from '../skeletons/GenreCardSkeleton.jsx';
 import { ArrowLeftIcon, PlayIcon, PauseIcon, HeartIcon, DownloadIcon } from './Icons';
 import premiumLotusIcon from '/premium-lotus-icon.png';
 import Tooltip from './Tooltip';
-import SharePopover from './SharePopover';
 import { TASTE_ENDPOINTS, SONGS_ENDPOINTS, ANALYTICS_ENDPOINTS } from '../config';
 import SubGenreCarousel from './SubGenreCarousel';
+import SharePopover from './SharePopover';
 
 const INSTRUMENT_PILL_STYLE = { backgroundColor: '#21c45d', color: '#ffffff' };
 const MOOD_PILL_STYLE = { backgroundColor: '#8e44ad', color: '#ffffff' }; // NEW
@@ -995,173 +995,236 @@ const WeeklyRecommendationsCarousel = ({
   );
 };
 
-const SongCard = ({ song, onPlayPause, songList, currentPlayingSong, isPlaying, formatTime, onToggleFavourite, favouriteSongs, onDownload, onExploreGenre, onExploreSubgenre, onExploreInstrument, onExploreMood }) => (
-  <div className="song-card">
-    {/* Positioning wrapper ONLY; DOES NOT set width/height. Image sizing stays controlled by CSS class .song-card-image */}
-    <div className="song-image-wrapper" style={{ position: 'relative', display: 'inline-block' }}>
-      <img
-        src={song.imageUrl || 'https://placehold.co/200x200/333/FFF?text=No+Image'}
-        alt={song.title}
-        className="song-card-image"
-        onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/200x200/333/FFF?text=No+Image'; }}
-      />
+const SongCard = ({ song, onPlayPause, songList, currentPlayingSong, isPlaying, formatTime, onToggleFavourite, favouriteSongs, onDownload, onExploreGenre, onExploreSubgenre, onExploreInstrument, onExploreMood }) => {
+  const [isShareOpen, setIsShareOpen] = React.useState(false);
+  const shareBtnRef = React.useRef(null);
+
+  // Always force the public domain in the link (as requested)
+  const shareLink = React.useMemo(() => `https://varamusic.com/home?track=${encodeURIComponent(String(song?._id || song?.id || ''))}`, [song?._id, song?.id]);
+
+  // Minimal inline styles for the share icon button (the popover styles are internal to SharePopover)
+  const shareBtnStyle = {
+    position: 'absolute',
+    left: 10,
+    top: 10,
+    width: 32,
+    height: 32,
+    borderRadius: 9999,
+    border: 'none',
+    background: '#ebba2f',
+    color: '#1a1a1a',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: '0 6px 14px rgba(0,0,0,0.35)',
+    cursor: 'pointer',
+    zIndex: 3
+  };
+
+  const ShareGlyph = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="#1a1a1a" aria-hidden="true">
+      <path d="M18 8a3 3 0 1 0-2.82-4H15a3 3 0 0 0 3 3zM6 13a3 3 0 1 0 0 6 3 3 0 0 0 0-6zm12 0a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+      <path d="M8.59 13.51l6.83-3.42m-6.83 7.82 6.83-3.42" stroke="#1a1a1a" strokeWidth="1.5" fill="none" />
+    </svg>
+  );
+
+  return (
+    <div className="song-card">
+      {/* Positioning wrapper ONLY; DOES NOT set width/height. Image sizing stays controlled by CSS class .song-card-image */}
+      <div className="song-image-wrapper" style={{ position: 'relative', display: 'inline-block' }}>
+        <img
+          src={song.imageUrl || 'https://placehold.co/200x200/333/FFF?text=No+Image'}
+          alt={song.title}
+          className="song-card-image"
+          onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/200x200/333/FFF?text=No+Image'; }}
+        />
+
+        {/* VARA watermark (already present in your code) */}
         <img src="/logo.png" alt="" aria-hidden="true" className="vara-watermark" />
-      {/* 48px circular overlay button at bottom-left of the image */}
-      <button
-        className="cover-play-button"
-        onClick={() => onPlayPause(song, songList)}
-        aria-label="Play/Pause"
-        style={{
-          position: 'absolute',
-          left: 10,
-          bottom: 10
-        }}
-      >
-        {currentPlayingSong?._id === song._id && isPlaying ? <PauseIcon /> : <PlayIcon />}
-      </button>
-    </div>
 
-    {(song.collectionType === 'premium' || song.collectionType === 'paid') && (
-      <div className="premium-indicator">
-        <Tooltip text={<span>Premium<br />song</span>}>
-          <img src={premiumLotusIcon} alt="Premium" className="premium-indicator-icon" />
-        </Tooltip>
+        {/* Share icon (top-left) */}
+        <button
+          ref={shareBtnRef}
+          type="button"
+          className="share-icon-btn"
+          style={shareBtnStyle}
+          aria-label="Share song"
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsShareOpen((v) => !v);
+          }}
+        >
+          <ShareGlyph />
+        </button>
+
+        {/* 48px circular overlay button at bottom-left of the image */}
+        <button
+          className="cover-play-button"
+          onClick={() => onPlayPause(song, songList)}
+          aria-label="Play/Pause"
+          style={{ position: 'absolute', left: 10, bottom: 10, zIndex: 2 }}
+        >
+          {currentPlayingSong?._id === song._id && isPlaying ? <PauseIcon /> : <PlayIcon />}
+        </button>
+
+        {/* Share popover (anchored to Share button; yellow theme; has Close '×' and Copy; does NOT auto-close on copy) */}
+        <SharePopover
+          isOpen={isShareOpen}
+          anchorRef={shareBtnRef}
+          link={shareLink}
+          onClose={() => setIsShareOpen(false)}
+          onCopy={() => {
+            // Reuse your Notification via global event
+            window.dispatchEvent(new CustomEvent('vara:notify', {
+              detail: { message: '✅ Link copied', type: 'success' }
+            }));
+          }}
+          enableNativeShare={true}
+          align="left"
+          title="Share this song"
+        />
       </div>
-    )}
 
-    <div className="song-text-and-button-wrapper">
-      <div className="song-card-info">
-        <h4>{song.title}</h4>
-
-        {/* Pills: genres, sub-genres, instruments (green), moods (purple) */}
-        <div className="genre-scroll-wrapper">
-          {Array.isArray(song.genres) && song.genres.length > 0 && (
-            <div className="genre-pill-container">
-              {song.genres.map((g, gi) => {
-                const gid = getSafeId(g, gi);
-                const gname = g && g.name ? g.name : (typeof g === 'string' ? g : 'Genre');
-                return (
-                  <span
-                    key={makePillKey(song, 'g', g, gi)}
-                    className="genre-pill"
-                    onClick={() => onExploreGenre && onExploreGenre(gid)}
-                  >
-                    {gname}
-                  </span>
-                );
-              })}
-            </div>
-          )}
-
-          {Array.isArray(song.subGenres) && song.subGenres.length > 0 && (
-            <div className="subgenre-pill-container">
-              {song.subGenres.map((sg, sgi) => {
-                const sid = getSafeId(sg, sgi);
-                const sgName = sg && sg.name ? sg.name : (typeof sg === 'string' ? sg : 'Sub-genre');
-                return (
-                  <span
-                    key={makePillKey(song, 'sg', sg, sgi)}
-                    className="subgenre-pill"
-                    onClick={() => onExploreSubgenre && onExploreSubgenre(sid)}
-                  >
-                    {sgName}
-                  </span>
-                );
-              })}
-            </div>
-          )}
-
-          {Array.isArray(song.instruments) && song.instruments.length > 0 && (
-            <div className="instrument-pill-container">
-              {song.instruments.map((ins, ii) => {
-                const iid = getSafeId(ins, ii);
-                const iName = ins && ins.name ? ins.name : (typeof ins === 'string' ? ins : 'Instrument');
-                return (
-                  <span
-                    key={makePillKey(song, 'ins', ins, ii)}
-                    className="subgenre-pill"
-                    style={INSTRUMENT_PILL_STYLE}
-                    onClick={() => onExploreInstrument && onExploreInstrument(iid)}
-                  >
-                    {iName}
-                  </span>
-                );
-              })}
-            </div>
-          )}
-
-          {Array.isArray(song.moods) && song.moods.length > 0 && (
-            <div className="instrument-pill-container">
-              {song.moods.map((m, mi) => {
-                const mid = getSafeId(m, mi);
-                const mName = m && m.name ? m.name : (typeof m === 'string' ? m : 'Mood');
-                return (
-                  <span
-                    key={makePillKey(song, 'm', m, mi)}
-                    className="subgenre-pill"
-                    style={MOOD_PILL_STYLE}
-                    onClick={() => onExploreMood && onExploreMood(mid)}
-                  >
-                    {mName}
-                  </span>
-                );
-              })}
-            </div>
-          )}
+      {(song.collectionType === 'premium' || song.collectionType === 'paid') && (
+        <div className="premium-indicator">
+          <Tooltip text={<span>Premium<br />song</span>}>
+            <img src={premiumLotusIcon} alt="Premium" className="premium-indicator-icon" />
+          </Tooltip>
         </div>
-      </div>
+      )}
 
-      {/* Metadata rows restored: 
-         Row 1: BPM | Download | Key
-         Row 2: Duration | Favorite | Vocals */}
-      <div className="song-card-bottom-row_final">
-        <div className="metadata-grid">
-          <div className="card-row">
-            <div className="card-column left">
-              <Tooltip text="Beats Per Minute">
-                <span className="metadata-item">{song.bpm || ''}</span>
-              </Tooltip>
-            </div>
-            <div className="card-column center">
-              <Tooltip text="Download this song">
-                <button className="icon-button" onClick={() => onDownload(song)} aria-label="Download song">
-                  <DownloadIcon />
-                </button>
-              </Tooltip>
-            </div>
-            <div className="card-column right">
-              <Tooltip text="Musical key">
-                <span className="metadata-item">{song.key || ''}</span>
-              </Tooltip>
-            </div>
+      <div className="song-text-and-button-wrapper">
+        <div className="song-card-info">
+          <h4>{song.title}</h4>
+
+          {/* Pills: genres, sub-genres, instruments (green), moods (purple) */}
+          <div className="genre-scroll-wrapper">
+            {Array.isArray(song.genres) && song.genres.length > 0 && (
+              <div className="genre-pill-container">
+                {song.genres.map((g, gi) => {
+                  const gid = getSafeId(g, gi);
+                  const gname = g && g.name ? g.name : (typeof g === 'string' ? g : 'Genre');
+                  return (
+                    <span
+                      key={makePillKey(song, 'g', g, gi)}
+                      className="genre-pill"
+                      onClick={() => onExploreGenre && onExploreGenre(gid)}
+                    >
+                      {gname}
+                    </span>
+                  );
+                })}
+              </div>
+            )}
+
+            {Array.isArray(song.subGenres) && song.subGenres.length > 0 && (
+              <div className="subgenre-pill-container">
+                {song.subGenres.map((sg, sgi) => {
+                  const sid = getSafeId(sg, sgi);
+                  const sgName = sg && sg.name ? sg.name : (typeof sg === 'string' ? sg : 'Sub-genre');
+                  return (
+                    <span
+                      key={makePillKey(song, 'sg', sg, sgi)}
+                      className="subgenre-pill"
+                      onClick={() => onExploreSubgenre && onExploreSubgenre(sid)}
+                    >
+                      {sgName}
+                    </span>
+                  );
+                })}
+              </div>
+            )}
+
+            {Array.isArray(song.instruments) && song.instruments.length > 0 && (
+              <div className="instrument-pill-container">
+                {song.instruments.map((ins, ii) => {
+                  const iid = getSafeId(ins, ii);
+                  const iName = ins && ins.name ? ins.name : (typeof ins === 'string' ? ins : 'Instrument');
+                  return (
+                    <span
+                      key={makePillKey(song, 'ins', ins, ii)}
+                      className="subgenre-pill"
+                      style={INSTRUMENT_PILL_STYLE}
+                      onClick={() => onExploreInstrument && onExploreInstrument(iid)}
+                    >
+                      {iName}
+                    </span>
+                  );
+                })}
+              </div>
+            )}
+
+            {Array.isArray(song.moods) && song.moods.length > 0 && (
+              <div className="instrument-pill-container">
+                {song.moods.map((m, mi) => {
+                  const mid = getSafeId(m, mi);
+                  const mName = m && m.name ? m.name : (typeof m === 'string' ? m : 'Mood');
+                  return (
+                    <span
+                      key={makePillKey(song, 'm', m, mi)}
+                      className="subgenre-pill"
+                      style={MOOD_PILL_STYLE}
+                      onClick={() => onExploreMood && onExploreMood(mid)}
+                    >
+                      {mName}
+                    </span>
+                  );
+                })}
+              </div>
+            )}
           </div>
+        </div>
 
-          <div className="card-row">
-            <div className="card-column left">
-              <Tooltip text="Song length">
-                <span className="song-timestamp">{formatTime(song.duration)}</span>
-              </Tooltip>
-            </div>
-            <div className="card-column center">
-              <Tooltip text={favouriteSongs.has(song._id) ? "Remove from favorites" : "Add to favorites"}>
-                <button className="icon-button" onClick={() => onToggleFavourite(song._id)} aria-label="Add to favourites">
-                  <HeartIcon filled={favouriteSongs.has(song._id)} />
-                </button>
-              </Tooltip>
-            </div>
-            <div className="card-column right">
-              {song.hasVocals && (
-                <Tooltip text="Contains vocals">
-                  <img src="/vocal-icon.png" alt="Vocals" className="vocal-icon" title="This song contains vocals" />
+        {/* Bottom metadata/actions (unchanged) */}
+        <div className="song-card-bottom-row_final">
+          <div className="metadata-grid">
+            <div className="card-row">
+              <div className="card-column left">
+                <Tooltip text="Beats Per Minute">
+                  <span className="metadata-item">{song.bpm || ''}</span>
                 </Tooltip>
-              )}
+              </div>
+              <div className="card-column center">
+                <Tooltip text="Download this song">
+                  <button className="icon-button" onClick={() => onDownload(song)} aria-label="Download song">
+                    <DownloadIcon />
+                  </button>
+                </Tooltip>
+              </div>
+              <div className="card-column right">
+                <Tooltip text="Musical key">
+                  <span className="metadata-item">{song.key || ''}</span>
+                </Tooltip>
+              </div>
+            </div>
+
+            <div className="card-row">
+              <div className="card-column left">
+                <Tooltip text="Song length">
+                  <span className="song-timestamp">{formatTime(song.duration)}</span>
+                </Tooltip>
+              </div>
+              <div className="card-column center">
+                <Tooltip text={favouriteSongs.has(song._id) ? "Remove from favorites" : "Add to favorites"}>
+                  <button className="icon-button" onClick={() => onToggleFavourite(song._id)} aria-label="Add to favourites">
+                    <HeartIcon filled={favouriteSongs.has(song._id)} />
+                  </button>
+                </Tooltip>
+              </div>
+              <div className="card-column right">
+                {song.hasVocals && (
+                  <Tooltip text="Contains vocals">
+                    <img src="/vocal-icon.png" alt="Vocals" className="vocal-icon" title="This song contains vocals" />
+                  </Tooltip>
+                )}
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const GenreCard = ({ genre, onExplore, type }) => {
   const isSubGenre = type === 'Sub-Genre';
