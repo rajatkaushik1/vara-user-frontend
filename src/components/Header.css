@@ -1387,3 +1387,10 @@
   }
 }
 
+/* === VARA: Safety anchor for profile dropdown on very small screens === */
+@media (max-width: 480px) {
+  .header-right .profile-section {
+    position: relative !important;  /* guarantees an anchoring context when not fixed */
+    z-index: 1;                     /* dropdown itself uses a higher z-index */
+  }
+}
