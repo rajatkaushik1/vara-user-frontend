@@ -1386,7 +1386,6 @@
     z-index: 1;                      /* stay above badge; dropdown itself has its own z-index */
   }
 }
-
 /* === VARA: Safety anchor for profile dropdown on very small screens === */
 @media (max-width: 480px) {
   .header-right .profile-section {
