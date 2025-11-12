@@ -220,6 +220,30 @@ function App() {
     return import.meta.env.VITE_REACT_APP_BACKEND_URL || 'https://vara-admin-backend.onrender.com';
   };
 
+  // Build a share URL for copying (forced domain)
+  const getForcedShareUrl = useCallback((songId) => {
+    return `https://varamusic.com/home?track=${encodeURIComponent(String(songId))}`;
+  }, []);
+
+  // Update the address bar to add/replace the 'track' query param (preserve current path)
+  const setUrlTrackParam = useCallback((songId) => {
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set('track', String(songId));
+      // Keep current pathname (don’t navigate the SPA), replace state to avoid history spam
+      window.history.replaceState({}, document.title, url.toString());
+    } catch {}
+  }, []);
+
+  // Remove the 'track' query param from the address bar
+  const clearUrlTrackParam = useCallback(() => {
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('track');
+      window.history.replaceState({}, document.title, url.toString());
+    } catch {}
+  }, []);
+
   // --- Memoized Derived State ---
   const currentView = useMemo(() => navigationHistory[navigationHistory.length - 1], [navigationHistory]);
 
@@ -425,6 +449,9 @@ function App() {
     songsPromiseRef.current = p;
     return p;
   }, [songsLoaded, getDataBackendUrl]);
+
+  // Add initial autoplay ref for track deep-linking
+  const initialTrackAutoplayRef = useRef(false);
 
   const fetchGenres = useCallback(async () => {
     if (genresPromiseRef.current) return genresPromiseRef.current;
@@ -1022,6 +1049,8 @@ function App() {
     // ADD:
     setIsAudioLoading(true);
     setCurrentPlayingSong(song);
+    // Update URL to reflect current track (deep-link)
+    try { setUrlTrackParam(song._id); } catch {}
     setCurrentSongId(song._id); // <-- Set currentSongId when a song is played
     setIsPlayerVisible(true);
     audio.src = song.audioUrl;
@@ -1151,6 +1180,8 @@ function App() {
     }
     setIsPlayerVisible(false);
     setCurrentPlayingSong(null);
+    // Clear track param from URL when player is closed
+    try { clearUrlTrackParam(); } catch {}
   }, [isPlaying]);
 
   const formatTime = (seconds) => {
@@ -1529,6 +1560,27 @@ function App() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [location.pathname, location.search]);
+
+  // Autoplay when a shared link is opened: check ?track=<id> once songs are loaded
+  useEffect(() => {
+    // Only run once when songs are ready
+    if (initialTrackAutoplayRef.current) return;
+    if (!songsLoaded || !Array.isArray(songs) || songs.length === 0) return;
+
+    try {
+      const url = new URL(window.location.href);
+      const trackId = url.searchParams.get('track');
+      if (trackId) {
+        const s = songs.find(x => String(x?._id) === String(trackId));
+        if (s) {
+          // Open the player and autoplay (YouTube-like behaviour)
+          // Do not force navigation; keep the current page and just play.
+          playSong(s);
+          initialTrackAutoplayRef.current = true;
+        }
+      }
+    } catch {}
+  }, [songsLoaded, songs, playSong]);
 
   return (
     <Routes>
