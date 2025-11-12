@@ -371,3 +371,46 @@
     width: 100%;
   }
 }
+
+/* === VARA: Profile dropdown responsive clamp + safe wrapping === */
+.profile-dropdown {
+  /* Keep current look but clamp width to viewport */
+  box-sizing: border-box;
+  /* Fit within viewport even on very small screens, with ~8px side margins */
+  max-width: min(92vw, 360px);
+  /* Prevent horizontal overflow and allow vertical scroll when content is long */
+  overflow-x: hidden;
+  max-height: min(84vh, 640px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Ensure helper text always wraps inside the panel */
+.profile-privacy {
+  white-space: normal;
+  overflow-wrap: anywhere;   /* breaks long tokens if needed */
+  word-break: break-word;
+  line-height: 1.35;
+}
+
+/* Narrow phones/tablets: keep the panel inside the viewport */
+@media (max-width: 700px) {
+  .profile-dropdown {
+    right: 8px;                              /* small right gutter */
+    max-width: min(92vw, 340px);             /* clamp width a bit more */
+  }
+}
+
+/* Very narrow devices (<= 400px): strongest clamp */
+@media (max-width: 400px) {
+  .profile-dropdown {
+    right: 8px !important;                   /* anchor to the right edge with gutter */
+    width: calc(100vw - 16px) !important;    /* full-bleed minus 8px margins per side */
+    max-width: none !important;              /* ensure the calc width wins */
+  }
+  /* Keep dynamic elements from forcing overflow */
+  .youtube-channel-name {
+    max-width: 65vw !important;              /* ensure ellipsis actually fits on tiny widths */
+  }
+}
