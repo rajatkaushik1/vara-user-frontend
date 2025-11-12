@@ -414,3 +414,52 @@
     max-width: 65vw !important;              /* ensure ellipsis actually fits on tiny widths */
   }
 }
+
+/* === VARA: Profile dropdown responsive clamp, fixed on tiny screens, and safe layering === */
+
+/* Keep width in-check and enable scrolling when tall */
+.profile-dropdown {
+  box-sizing: border-box;
+  max-width: min(92vw, 360px);
+  overflow-x: hidden;
+  max-height: min(84vh, 640px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Ensure privacy/help text wraps safely */
+.profile-privacy {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.35;
+}
+
+/* Mobile: align to right with a small gutter and raise z-index above the header/badge */
+@media (max-width: 700px) {
+  .profile-dropdown {
+    right: 8px;                 /* small right gutter */
+    left: auto;                 /* anchor to the right by default */
+    max-width: min(92vw, 340px);
+    z-index: 2700 !important;   /* above header (1200) and badge; below search overlay (3000) */
+  }
+}
+
+/* Very small phones: use fixed + left/right gutters to clamp within the viewport */
+@media (max-width: 480px) {
+  .profile-dropdown {
+    position: fixed !important;     /* detach from header width; clamp to viewport */
+    top: 64px !important;           /* safe offset below sticky header; tweak if your header is taller */
+    left: 8px !important;
+    right: 8px !important;
+    width: auto !important;         /* width becomes 100vw - 16px via left/right */
+    max-width: none !important;     /* let left/right control width */
+    margin: 0 !important;
+  }
+
+  /* Ensure long channel names do not force horizontal growth */
+  .youtube-channel-name {
+    max-width: 65vw !important;
+  }
+}
