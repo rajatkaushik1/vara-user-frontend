@@ -112,9 +112,7 @@ export default function FeedbackPage({ currentUser }) {
           Open the form
         </a>
 
-        <div style={{ marginTop: 18, color: '#8e8e8e', fontSize: 14 }}>
-          Tip: Set VITE_FEEDBACK_FORM_URL (and optional VITE_FEEDBACK_NAME_PARAM / VITE_FEEDBACK_EMAIL_PARAM) in .env.local to control prefill.
-        </div>
+
       </div>
     </div>
   );
