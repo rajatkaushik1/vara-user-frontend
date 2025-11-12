@@ -1582,6 +1582,17 @@ function App() {
     } catch {}
   }, [songsLoaded, songs, playSong]);
 
+  useEffect(() => {
+    function onVaraNotify(e) {
+      const detail = e?.detail || {};
+      const msg = typeof detail.message === 'string' ? detail.message : '✅ Link copied';
+      const typ = typeof detail.type === 'string' ? detail.type : 'success';
+      setNotification({ message: msg, type: typ });
+    }
+    window.addEventListener('vara:notify', onVaraNotify);
+    return () => window.removeEventListener('vara:notify', onVaraNotify);
+  }, []);
+
   return (
     <Routes>
       <Route path="/faq" element={<FAQ />} />
