@@ -3907,3 +3907,47 @@ body {
    .sg-dot { width: 7px; height: 7px; }
    .sg-dot.active { transform: scale(1.12); }
  }
+/* === VARA: Search page — gutters and bottom spacing for Songs carousel (trending-style) === */
+/* Scope everything to the Search page root so Home carousels are untouched */
+.search-results-section .trending-carousel-container {
+  /* Give a little extra breathing room below the carousel block on Search only */
+  margin-bottom: 14px;
+}
+
+/* Add inner gutters and slight bottom padding to the scroll area */
+.search-results-section .trending-carousel-scroll-area {
+  /* Match prior Search look: 40px left/right gutters on desktop */
+  padding-left: 40px;
+  padding-right: 40px;
+  padding-bottom: 18px;         /* “a little bit” under the carousel */
+
+  /* Help scroll snapping start nicely from the gutter */
+  scroll-padding-left: 40px;
+}
+
+/* Tighten gutters on phones/tablets so cards don’t feel squeezed */
+@media (max-width: 768px) {
+  .search-results-section .trending-carousel-scroll-area {
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-bottom: 16px;
+    scroll-padding-left: 15px;
+  }
+
+  /* Keep the section title aligned with the new gutters */
+  .search-results-section .trending-carousel-title {
+    padding: 0 15px;
+  }
+}
+
+/* Optional: small tablet adjustment (between 769–1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .search-results-section .trending-carousel-scroll-area {
+    padding-left: 24px;
+    padding-right: 24px;
+    scroll-padding-left: 24px;
+  }
+  .search-results-section .trending-carousel-title {
+    padding: 0 24px;
+  }
+}
