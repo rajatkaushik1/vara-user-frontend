@@ -7,6 +7,7 @@ import GenreCardSkeleton from '../skeletons/GenreCardSkeleton.jsx';
 import { ArrowLeftIcon, PlayIcon, PauseIcon, HeartIcon, DownloadIcon } from './Icons';
 import premiumLotusIcon from '/premium-lotus-icon.png';
 import Tooltip from './Tooltip';
+import SharePopover from './SharePopover';
 import { TASTE_ENDPOINTS, SONGS_ENDPOINTS, ANALYTICS_ENDPOINTS } from '../config';
 import SubGenreCarousel from './SubGenreCarousel';
 
