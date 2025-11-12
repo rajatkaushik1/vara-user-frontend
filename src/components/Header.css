@@ -1393,3 +1393,43 @@
     z-index: 1;                     /* dropdown itself uses a higher z-index */
   }
 }
+/* === VARA: Mobile search bar pinned below sticky header (always visible) === */
+@media (max-width: 972px) {
+  .mobile-search-bar-container {
+    position: fixed !important;
+    /* Place right under the sticky header; 74px matches your badge offset; adjust if needed */
+    top: calc(74px + env(safe-area-inset-top, 0px)) !important;
+    left: 0 !important;
+    right: 0 !important;
+    /* Keep the same side gutters as before */
+    padding: 8px 20px 0 20px !important;
+    /* Sit above content and the fixed badge (badge ~1400; header z is 1200; overlay you use ~3000) */
+    z-index: 2800 !important;
+    /* Let inner controls receive clicks while the container itself doesn’t block the page */
+    pointer-events: none !important;
+  }
+
+  /* Ensure the actual input/overlay are clickable */
+  .mobile-search-bar-container .search-container,
+  .mobile-search-bar-container .quick-search-overlay {
+    pointer-events: auto !important;
+  }
+
+  /* Optional: center and limit width on wider phones/tablets */
+  .mobile-search-bar-container .search-container {
+    margin: 0 auto !important;
+    max-width: 720px !important;
+    width: auto !important;
+  }
+
+  /* The dropdown under the fixed bar; keep it clamped within the viewport */
+  .mobile-search-bar-container .quick-search-overlay {
+    position: absolute !important;
+    top: calc(100% + 8px) !important;
+    left: 0 !important;
+    right: 0 !important;
+    /* Cap height so it never goes off-screen; still scrollable inside */
+    max-height: min(60vh, 420px) !important;
+    z-index: 3000 !important; /* above the bar container and badge */
+  }
+}
