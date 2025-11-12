@@ -6,6 +6,7 @@ import GenreCardSkeleton from './skeletons/GenreCardSkeleton.jsx';
 import premiumLotusIcon from '/premium-lotus-icon.png';
 import Tooltip from './components/Tooltip';
 import { PlayIcon, PauseIcon, HeartIcon, DownloadIcon } from './components/Icons.jsx';
+import SharePopover from './components/SharePopover.jsx';
 
 // --- Icons --- 
 const ArrowLeftIcon = () => (
@@ -173,6 +174,9 @@ const SearchPage = ({
   onExplore, currentUser, currentSongId, instruments,
   moods,
 }) => { 
+  const [shareOpenFor, setShareOpenFor] = useState(null);      // songId currently showing popover
+  const shareBtnRefs = useRef({});                              // anchor refs per song id
+
   // --- Instrument-aware search logic ---
   const searchResults = useMemo(() => {
     const q = (searchQuery || '').toLowerCase();
@@ -566,6 +570,58 @@ const SearchPage = ({
                       onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = 'https://placehold.co/200x200/333/FFF?text=VARA'; }}
                       draggable={false}
                     />
+
+                    {/* Share icon button (top-left) */}
+                    <button
+                      ref={(el) => { if (el) shareBtnRefs.current[song._id] = el; }}
+                      type="button"
+                      aria-label="Share song"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShareOpenFor(prev => prev === song._id ? null : song._id);
+                      }}
+                      style={{
+                        position: 'absolute',
+                        left: 10,
+                        top: 10,
+                        width: 32,
+                        height: 32,
+                        borderRadius: 9999,
+                        border: 'none',
+                        background: '#ebba2f',
+                        color: '#1a1a1a',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: '0 6px 14px rgba(0,0,0,0.35)',
+                        cursor: 'pointer',
+                        zIndex: 3
+                      }}
+                    >
+                      {/* Simple share glyph */}
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="#1a1a1a" aria-hidden="true">
+                        <path d="M18 8a3 3 0 1 0-2.82-4H15a3 3 0 0 0 3 3zM6 13a3 3 0 1 0 0 6 3 3 0 0 0 0-6zm12 0a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+                        <path d="M8.59 13.51l6.83-3.42m-6.83 7.82 6.83-3.42" stroke="#1a1a1a" strokeWidth="1.5" fill="none" />
+                      </svg>
+                    </button>
+
+                    {/* Share popover (yellow bubble with link + Copy + Close) */}
+                    <SharePopover
+                      isOpen={shareOpenFor === song._id}
+                      anchorRef={{ current: shareBtnRefs.current[song._id] }}
+                      link={`https://varamusic.com/home?track=${encodeURIComponent(String(song._id))}`}
+                      onClose={() => setShareOpenFor(null)}
+                      onCopy={() => {
+                        window.dispatchEvent(new CustomEvent('vara:notify', {
+                          detail: { message: '✅ Link copied', type: 'success' }
+                        }));
+                      }}
+                      enableNativeShare={true}
+                      align="left"
+                      title="Share this song"
+                    />
+
+                    {/* Play button (existing) */}
                     <button
                       className="cover-play-button"
                       onClick={() => handlePlayPause && handlePlayPause(song, searchResults.music)}
