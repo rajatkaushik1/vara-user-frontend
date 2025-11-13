@@ -1338,6 +1338,23 @@ const MusicContent = ({
       }
     }, [currentView?.view, songs?.length]);
 
+    // NEW: Generic songs views pagination (Free, Favourites, songs-by-*)
+    const [filteredShowCount, setFilteredShowCount] = useState(8);
+    useEffect(() => {
+      const v = currentView?.view || '';
+      // Views that render a generic songs grid
+      const SONGS_LIST_VIEWS = new Set([
+        'free-songs',
+        'favourites',
+        'songs-by-sub-genre',
+        'songs-by-instrument',
+        'songs-by-mood',
+      ]);
+      if (SONGS_LIST_VIEWS.has(v)) {
+        setFilteredShowCount(8); // reset to first page on each view change
+      }
+    }, [currentView?.view]);
+
     const contentToDisplay = useMemo(() => {
         switch (currentView.view) {
             case 'for-you':
@@ -1665,20 +1682,51 @@ const MusicContent = ({
             return <p style={{ gridColumn: '1 / -1', textAlign: 'center', color: '#b0b0b0' }}>No content found.</p>;
         }
 
-        // INSERTED: Use Raw Library grid for generic songs views
+        // INSERTED: Use Raw Library grid for generic songs views (with Show more)
         if (contentToDisplay.type === 'songs') {
+          const allSongs = Array.isArray(contentToDisplay.data) ? contentToDisplay.data : [];
+          const visibleSongs = allSongs.slice(0, filteredShowCount);
+
           return (
-            <div className="raw-library-grid">
-              {contentToDisplay.data.map(song => (
-                <div className="raw-card-sizer" key={song._id}>
-                  <SongCard
-                    song={song}
-                    songList={contentToDisplay.data}
-                    {...{ onPlayPause, currentPlayingSong, isPlaying, formatTime, onToggleFavourite, favouriteSongs, onDownload, onExploreGenre, onExploreSubgenre, onExploreInstrument }}
-                  />
+            <>
+              <div className="raw-library-grid">
+                {visibleSongs.map((song) => (
+                  <div className="raw-card-sizer" key={song._id}>
+                    <SongCard
+                      song={song}
+                      songList={allSongs}
+                      {...{
+                        onPlayPause,
+                        currentPlayingSong,
+                        isPlaying,
+                        formatTime,
+                        onToggleFavourite,
+                        favouriteSongs,
+                        onDownload,
+                        onExploreGenre,
+                        onExploreSubgenre,
+                        onExploreInstrument,
+                        onExploreMood,
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+
+              {allSongs.length > filteredShowCount && (
+                <div className="raw-library-showmore">
+                  <button
+                    className="raw-show-more-btn"
+                    onClick={() =>
+                      setFilteredShowCount((n) => Math.min(n + 8, allSongs.length))
+                    }
+                    aria-label="Show more songs"
+                  >
+                    Show more
+                  </button>
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           );
         }
 
