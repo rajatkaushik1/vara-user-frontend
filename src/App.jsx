@@ -25,6 +25,7 @@ import TeamPage from './pages/TeamPage.jsx'
 import LicenseModal from './components/LicenseModal';
 import GoToTopButton from './components/GoToTopButton';
 import GlobalLoaderOverlay from './components/GlobalLoaderOverlay';
+import LoginNudgeModal from './components/LoginNudgeModal';
 
 // Updated Notification Component with Yellow Theme
 const Notification = ({ message, type, onClose }) => {
@@ -199,6 +200,10 @@ function App() {
 
   const [licenseModalOpen, setLicenseModalOpen] = useState(false);
   const [licenseModalData, setLicenseModalData] = useState(null);
+
+  // --- Guest login nudge modal state ---
+  const [loginNudgeOpen, setLoginNudgeOpen] = useState(false);
+  const guestPlayAttemptsRef = useRef(0);
 
   // --- Auto-scroll flag for tabs when navigation comes from "Explore" / "Try Audio"
   const [autoScrollTabs, setAutoScrollTabs] = useState(false);
@@ -1044,7 +1049,36 @@ function App() {
     }
   }, [currentUser]);
 
+  const canProceedGuestPlay = useCallback(() => {
+    if (currentUser) return true; // logged-in users are never blocked
+    let count = 0;
+    try {
+      count = parseInt(sessionStorage.getItem('vara_guest_play_attempts') || '0', 10);
+    } catch {
+      count = guestPlayAttemptsRef.current || 0;
+    }
+    count += 1;
+    try { sessionStorage.setItem('vara_guest_play_attempts', String(count)); }
+    catch { guestPlayAttemptsRef.current = count; }
+
+    if (count > 3) {
+      // Show modal every time they exceed the limit; block playback
+      setLoginNudgeOpen(true);
+      return false;
+    }
+    return true;
+  }, [currentUser]);
+
   const playSong = useCallback((song) => {
+    // Block guest playback from the 4th play attempt onward (every click counts)
+    if (!currentUser) {
+      const ok = canProceedGuestPlay();
+      if (!ok) {
+        // Block: do not start audio or change now playing state
+        setNotification({ message: 'Please log in to keep listening 🎵', type: 'warning' });
+        return;
+      }
+    }
     const audio = audioRef.current;
     // ADD:
     setIsAudioLoading(true);
@@ -1071,6 +1105,14 @@ function App() {
   const handlePlayPause = useCallback((songToPlay, queue = []) => {
     const audio = audioRef.current;
     if (songToPlay) {
+      // A) Starting a NEW song
+      if (!currentUser) {
+        const ok = canProceedGuestPlay();
+        if (!ok) {
+          setNotification({ message: 'Please log in to keep listening 🎵', type: 'warning' });
+          return; // block before calling playSong
+        }
+      }
       if (currentPlayingSong?._id === songToPlay._id) {
         if (isPlaying) {
           audio.pause();
@@ -1084,6 +1126,16 @@ function App() {
         playSong(songToPlay);
       }
     } else if (currentPlayingSong) {
+      // B) Toggling current song from paused → play (no songToPlay provided)
+      if (!isPlaying) { // user is requesting to play
+        if (!currentUser) {
+          const ok = canProceedGuestPlay();
+          if (!ok) {
+            setNotification({ message: 'Please log in to keep listening 🎵', type: 'warning' });
+            return; // block resume
+          }
+        }
+      }
       if (isPlaying) {
         audio.pause();
         setIsPlaying(false);
@@ -1091,7 +1143,7 @@ function App() {
         audio.play().then(() => setIsPlaying(true));
       }
     }
-  }, [currentPlayingSong, isPlaying, playSong]);
+  }, [currentPlayingSong, isPlaying, playSong, canProceedGuestPlay, currentUser]);
 
   const handleNextSong = useCallback(() => {
     if (playQueue.length === 0) return;
@@ -1631,6 +1683,15 @@ function App() {
                 message={notification.message}
                 type={notification.type}
                 onClose={() => setNotification({ message: '', type: '' })}
+              />
+              <LoginNudgeModal
+                open={loginNudgeOpen}
+                onClose={() => setLoginNudgeOpen(false)}
+                onLogin={() => {
+                  setLoginNudgeOpen(false);
+                  navigate('/login');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
               />
               <LicenseModal
                 open={licenseModalOpen}
