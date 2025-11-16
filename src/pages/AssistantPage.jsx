@@ -94,8 +94,6 @@ const VocalsDropdown = React.memo(function VocalsDropdown({ value, onChange }) {
 
   const currentLabel = value === 'on' ? 'With Vocals' : 'Instrumental';
 
-  const showThinking = loading && (uiPhase === 'spin+ticker' || uiPhase === 'skeletons');
-
   return (
     <div className={`ai-pill-dropdown ${open ? 'open' : ''}`} ref={rootRef}>
       <button
