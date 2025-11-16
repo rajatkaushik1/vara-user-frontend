@@ -708,19 +708,15 @@ const Header = ({
                     {searchTerm.trim() ? 'Suggestions' : 'Quick Searches'}
                   </h4>
                   <ul className="suggestion-list">
-                    {(searchTerm.trim() ? filteredSuggestions : quickSearchSuggestions).length > 0 ? (
-                      (searchTerm.trim() ? filteredSuggestions : quickSearchSuggestions).map((item, index) => (
-                        <li 
-                          key={index} 
-                          className={`suggestion-item ${index === activeSuggestionIndex ? 'active' : ''}`} 
-                          onClick={() => handleSuggestionClick(item)}
-                        >
-                          {item}
-                        </li>
-                      ))
-                    ) : (
-                      <li className="suggestion-item no-results">No results found.</li>
-                    )}
+                    {(searchTerm.trim() ? filteredSuggestions : quickSearchSuggestions).map((item, index) => (
+                      <li 
+                        key={index} 
+                        className={`suggestion-item ${index === activeSuggestionIndex ? 'active' : ''}`} 
+                        onClick={() => handleSuggestionClick(item)}
+                      >
+                        {item}
+                      </li>
+                    ))}
                   </ul>
                 </div>
               )}
@@ -977,19 +973,15 @@ const Header = ({
                   {searchTerm.trim() ? 'Suggestions' : 'Quick Searches'}
                 </h4>
                 <ul className="suggestion-list">
-                  {(searchTerm.trim() ? filteredSuggestions : quickSearchSuggestions).length > 0 ? (
-                    (searchTerm.trim() ? filteredSuggestions : quickSearchSuggestions).map((item, index) => (
-                      <li
-                        key={index}
-                        className={`suggestion-item ${index === activeSuggestionIndex ? 'active' : ''}`}
-                        onClick={() => handleSuggestionClick(item)}
-                      >
-                        {item}
-                      </li>
-                    ))
-                  ) : (
-                    <li className="suggestion-item no-results">No results found.</li>
-                  )}
+                  {(searchTerm.trim() ? filteredSuggestions : quickSearchSuggestions).map((item, index) => (
+                    <li
+                      key={index}
+                      className={`suggestion-item ${index === activeSuggestionIndex ? 'active' : ''}`}
+                      onClick={() => handleSuggestionClick(item)}
+                    >
+                      {item}
+                    </li>
+                  ))}
                 </ul>
               </div>
             )}
