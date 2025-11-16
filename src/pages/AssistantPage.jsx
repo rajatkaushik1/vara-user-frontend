@@ -2,6 +2,7 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { AUTH_BASE_URL, TASTE_ENDPOINTS } from '../config';
 import LotusLoader from '../components/LotusLoader';
 import Tooltip from '../components/Tooltip';
+import SongCardSkeleton from '../skeletons/SongCardSkeleton.jsx';
 import premiumLotusIcon from '/premium-lotus-icon.png';
 import { PlayIcon, PauseIcon, HeartIcon, DownloadIcon } from '../components/Icons';
 import SharePopover from '../components/SharePopover';
@@ -92,6 +93,8 @@ const VocalsDropdown = React.memo(function VocalsDropdown({ value, onChange }) {
   }, []);
 
   const currentLabel = value === 'on' ? 'With Vocals' : 'Instrumental';
+
+  const showThinking = loading && (uiPhase === 'spin+ticker' || uiPhase === 'skeletons');
 
   return (
     <div className={`ai-pill-dropdown ${open ? 'open' : ''}`} ref={rootRef}>
@@ -192,6 +195,9 @@ function AssistantPage({
   const [showDebug, setShowDebug] = useState(false);
   const [shareOpenFor, setShareOpenFor] = useState(null);   // songId currently showing popover
   const shareBtnRefs = useRef({});                           // anchor refs per song id
+
+  const [uiPhase, setUiPhase] = useState('idle'); // 'idle' | 'spin' | 'spin+ticker' | 'skeletons' | 'cards'
+  const uiTimersRef = useRef({ ticker: null, skeleton: null });
 
   // AI usage indicator
   const [aiInfo, setAiInfo] = useState({ monthlyLimit: null, usedThisMonth: null, remaining: null });
@@ -336,6 +342,33 @@ function AssistantPage({
         return;
       }
 
+      // Clear any existing UI phase timers for a fresh request
+      if (uiTimersRef.current.ticker) {
+        clearTimeout(uiTimersRef.current.ticker);
+        uiTimersRef.current.ticker = null;
+      }
+      if (uiTimersRef.current.skeleton) {
+        clearTimeout(uiTimersRef.current.skeleton);
+        uiTimersRef.current.skeleton = null;
+      }
+
+      // Start in "spin only" phase
+      setUiPhase('spin');
+
+      // After 2s, if still in a loading phase, move to "spin + ticker"
+      uiTimersRef.current.ticker = setTimeout(() => {
+        setUiPhase(prev =>
+          prev === 'spin' ? 'spin+ticker' : prev
+        );
+      }, 2000);
+
+      // After 6s, if still in a loading phase, move to "skeletons"
+      uiTimersRef.current.skeleton = setTimeout(() => {
+        setUiPhase(prev =>
+          (prev === 'spin' || prev === 'spin+ticker') ? 'skeletons' : prev
+        );
+      }, 6000);
+
       // Enhanced fetch with 401/429 handling and limits refresh
       const res = await fetch(`${AUTH_BASE_URL.replace(/\/+$/, '')}/api/ai/recommend`, {
         method: 'POST',
@@ -388,10 +421,26 @@ function AssistantPage({
 
       // Refresh AI usage limits
       try { await fetchAiLimits(); } catch {}
+
+      // If we have real results, move phase to "cards"; otherwise reset to idle
+      if (Array.isArray(finalResults) && finalResults.length > 0) {
+        setUiPhase('cards');
+      } else {
+        setUiPhase('idle');
+      }
     } catch (e) {
       setError(e?.message || 'Failed to get recommendations');
     } finally {
       setLoading(false);
+      // Clear any remaining phase timers
+      if (uiTimersRef.current.ticker) {
+        clearTimeout(uiTimersRef.current.ticker);
+        uiTimersRef.current.ticker = null;
+      }
+      if (uiTimersRef.current.skeleton) {
+        clearTimeout(uiTimersRef.current.skeleton);
+        uiTimersRef.current.skeleton = null;
+      }
     }
   }, [queryText, vocals, topK]);
 
@@ -424,13 +473,26 @@ function AssistantPage({
   }, [loading, results]);
 
   useEffect(() => {
+    if (uiPhase === 'skeletons' && loading && results.length === 0 && resultsRef.current) {
+      setTimeout(() => {
+        const header = document.querySelector('.header');
+        const offset = (header ? header.offsetHeight : 0) + 12;
+        const y = resultsRef.current.getBoundingClientRect().top + window.pageYOffset - offset;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }, 150);
+    }
+  }, [uiPhase, loading, results.length]);
+
+  useEffect(() => {
     // Clear any previous timer on change
     if (tickerRef.current.timer) {
       clearTimeout(tickerRef.current.timer);
       tickerRef.current.timer = null;
     }
 
-    if (loading) {
+    const shouldRun = loading && (uiPhase === 'spin+ticker' || uiPhase === 'skeletons');
+
+    if (shouldRun) {
       // Build a fresh, randomized pool (3–5 lines)
       const pool = shuffleArray(AI_TICKER_LINES);
       const count = 3 + Math.floor(Math.random() * 3); // 3..5
@@ -463,7 +525,7 @@ function AssistantPage({
         tickerRef.current.timer = null;
       }
     };
-  }, [loading]);
+  }, [loading, uiPhase]);
 
   // Fetch AI limits on mount and when currentUser changes
   useEffect(() => {
@@ -815,9 +877,9 @@ function AssistantPage({
           </div>
         </div>
 
-        {/* Thinking ticker (appears while loading) */}
-        <div className={`ai-thinking ${loading ? 'show' : ''}`} aria-live="polite">
-          {loading && tickerText ? (
+        {/* Thinking ticker (appears only in appropriate phase) */}
+        <div className={`ai-thinking ${showThinking ? 'show' : ''}`} aria-live="polite">
+          {showThinking && tickerText ? (
             <div className="ai-thinking-line" key={tickerText}>{tickerText}</div>
           ) : null}
         </div>
@@ -859,9 +921,25 @@ function AssistantPage({
       </div>
 
       <div className="ai-results" ref={resultsRef}>
+        {/* Placeholder when idle (no loading, no error, no results) */}
         {results.length === 0 && !loading && !error && (
           <div className="ai-placeholder">No results yet — try a query above.</div>
         )}
+
+        {/* Skeletons: only when loading, no results yet, and in "skeletons" phase */}
+        {loading && results.length === 0 && uiPhase === 'skeletons' && (
+          <div className="ai-results-wrap">
+            <div className="raw-library-grid">
+              {Array.from({ length: Math.max(1, Math.min(Number(topK) || 10, 20)) }).map((_, i) => (
+                <div className="raw-card-sizer ai-enter" key={`ai-skel-${i}`}>
+                  <SongCardSkeleton />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Real results: whenever results exist, regardless of phase (skeletons are replaced) */}
         {results.length > 0 && (
           <div className="ai-results-wrap">
             <div className="raw-library-grid">
