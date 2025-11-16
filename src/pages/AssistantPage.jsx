@@ -813,6 +813,8 @@ function AssistantPage({
     );
   };
 
+  const showThinking = loading && (uiPhase === 'spin+ticker' || uiPhase === 'skeletons');
+
   return (
     <div className="ai-page">
       <div className="ai-hero">
