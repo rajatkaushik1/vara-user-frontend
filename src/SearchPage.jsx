@@ -189,6 +189,11 @@ const SearchPage = ({
     const instrumentList = Array.isArray(instruments) ? instruments : [];
     const moodList = Array.isArray(moods) ? moods : [];
 
+    const genreById = new Map(genreList.map(g => [String(g?._id), g]));
+    const subGenreById = new Map(subGenreList.map(sg => [String(sg?._id), sg]));
+    const moodById = new Map(moodList.map(m => [String(m?._id), m]));
+    const instrumentById = new Map(instrumentList.map(i => [String(i?._id), i]));
+
     const uniqById = (arr) => {
       const map = new Map();
       for (const item of Array.isArray(arr) ? arr : []) {
@@ -310,7 +315,6 @@ const SearchPage = ({
       const subMap = new Map(subGenreList.map(sg => [sg._id, sg]));
       const relatedSubGenres = sortedSubIds.map(id => subMap.get(id)).filter(Boolean).slice(0, 12);
 
-      const moodById = new Map(moodList.map(m => [String(m?._id || ''), m]));
       const moodByName = new Map(moodList.map(m => [(m?.name || '').toLowerCase(), m]));
 
       const coOccurCounts = new Map();
@@ -370,7 +374,15 @@ const SearchPage = ({
 
     const scoreCollection = (collection, weights) => {
       if (!Array.isArray(collection) || !collection.length) return 0;
-      return collection.reduce((acc, entry) => acc + computeTextScore(entry?.name || entry, weights), 0);
+      return collection.reduce((acc, entry) => {
+        let label = '';
+        if (entry && typeof entry === 'object') {
+          label = `${entry?.name || ''} ${entry?.description || ''}`;
+        } else {
+          label = String(entry || '');
+        }
+        return acc + computeTextScore(label, weights);
+      }, 0);
     };
 
     const scoredEntries = songList.map((song) => {
@@ -514,15 +526,65 @@ const SearchPage = ({
       };
     };
 
+    if (!moodMatches.length && music.length) {
+      const usage = new Map();
+      for (const s of music) {
+        const list = Array.isArray(s?.moods) ? s.moods : [];
+        for (const mm of list) {
+          const id = String(mm?._id || mm?.id || mm || '');
+          if (!id) continue;
+          usage.set(id, (usage.get(id) || 0) + 1);
+        }
+      }
+      const derived = [];
+      for (const [id, count] of usage.entries()) {
+        const doc = moodById.get(id);
+        if (doc) derived.push({ doc, count });
+      }
+      derived.sort((a, b) => b.count - a.count || (a.doc.name || '').localeCompare(b.doc.name || ''));
+      moodMatches = derived.map(x => x.doc).slice(0, 12);
+    }
+
+    if (!instrumentMatches.length && music.length) {
+      const usage = new Map();
+      for (const s of music) {
+        const list = Array.isArray(s?.instruments) ? s.instruments : [];
+        for (const ins of list) {
+          const id = String(ins?._id || ins?.id || ins || '');
+          if (!id) continue;
+          usage.set(id, (usage.get(id) || 0) + 1);
+        }
+      }
+      const derived = [];
+      for (const [id, count] of usage.entries()) {
+        const doc = instrumentById.get(id);
+        if (doc) derived.push({ doc, count });
+      }
+      derived.sort((a, b) => b.count - a.count || (a.doc.name || '').localeCompare(b.doc.name || ''));
+      instrumentMatches = derived.map(x => x.doc).slice(0, 12);
+    }
+
     const packedMusic = music.map(packSong);
 
     moodMatches = uniqById(moodMatches);
     instrumentMatches = uniqById(instrumentMatches);
 
+    const rawGenres = uniqById(topGenreStore.toArray(12));
+    const mappedGenres = rawGenres.map((g) => {
+      const id = String(g?._id || g?.id || g || '');
+      return genreById.get(id) || g;
+    });
+
+    const rawSubGenres = uniqById(topSubGenreStore.toArray(16));
+    const mappedSubGenres = rawSubGenres.map((sg) => {
+      const id = String(sg?._id || sg?.id || sg || '');
+      return subGenreById.get(id) || sg;
+    });
+
     return {
       music: packedMusic,
-      genres: uniqById(topGenreStore.toArray(12)),
-      subGenres: uniqById(topSubGenreStore.toArray(16)),
+      genres: mappedGenres,
+      subGenres: mappedSubGenres,
       meta,
       moodMatches,
       instrumentMatches
