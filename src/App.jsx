@@ -177,7 +177,7 @@ function App() {
   const searchInputRef = useRef(null);
   const quickSearchOverlayRef = useRef(null);
   const suppressHomeResetRef = useRef(false);
-  const quickSearchSuggestions = useMemo(() => ["vlog", "happy music", "documentary", "food", "finance", "tech", "comedy"], []);
+  const quickSearchSuggestions = useMemo(() => ["vlog", "happy music", "documentary", "food", "finance", "tech", "funny"], []);
 
   // --- Music Player State ---
   const audioRef = useRef(new Audio());
