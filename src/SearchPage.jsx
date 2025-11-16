@@ -179,10 +179,16 @@ const SearchPage = ({
 
   // --- Instrument-aware search logic ---
   const searchResults = useMemo(() => {
-    const q = (searchQuery || '').toLowerCase();
+    const rawQuery = String(searchQuery || '').trim();
+    const q = rawQuery.toLowerCase();
     const meta = { isInstrument: false, instrumentName: null, instrumentId: null };
 
-    // Helper: dedupe an array of docs by stable id
+    const songList = Array.isArray(songs) ? songs : [];
+    const genreList = Array.isArray(genres) ? genres : [];
+    const subGenreList = Array.isArray(subGenres) ? subGenres : [];
+    const instrumentList = Array.isArray(instruments) ? instruments : [];
+    const moodList = Array.isArray(moods) ? moods : [];
+
     const uniqById = (arr) => {
       const map = new Map();
       for (const item of Array.isArray(arr) ? arr : []) {
@@ -193,80 +199,74 @@ const SearchPage = ({
       return Array.from(map.values());
     };
 
-    // --- NEW: instrumentMatches (case-insensitive, exact first) ---
-    const instrumentArray = Array.isArray(instruments) ? instruments : [];
-    let instrumentMatches = instrumentArray.filter(inst => (inst?.name || '').toLowerCase().includes(q));
-    const exactInstrument = instrumentArray.find(inst => (inst?.name || '').toLowerCase() === q);
+    const STOPWORDS = new Set([
+      'instrument', 'instruments', 'instr', 'inst', 'music', 'musics', 'song', 'songs', 'related', 'to', 'your', 'search', 'and', 'the', 'a', 'an'
+    ]);
+
+    const normalize = (value = '') => String(value || '')
+      .toLowerCase()
+      .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    const normalizeWithoutStopwords = (value = '') => normalize(value)
+      .split(' ')
+      .filter(Boolean)
+      .filter(token => !STOPWORDS.has(token))
+      .join(' ')
+      .trim();
+
+    const tokenize = (value = '') => normalizeWithoutStopwords(value)
+      .split(' ')
+      .filter(Boolean);
+
+    const plainNormalized = normalize(rawQuery);
+    const sanitized = normalizeWithoutStopwords(rawQuery);
+    const tokens = tokenize(rawQuery);
+    const wordTokens = tokens.filter(token => !/^\d+$/.test(token));
+    const numericTokens = tokens
+      .map(token => Number(token))
+      .filter(num => Number.isFinite(num));
+
+    const wantsInstrumental = /\binstrumental\b|no vocals|without vocals|ambient only/.test(q);
+    const wantsVocals = /\bvocal|\bsinger|\blyric|\bvoice/.test(q);
+
+    // --- instrument + mood match buckets used for carousels ---
+    let instrumentMatches = instrumentList.filter(inst => (inst?.name || '').toLowerCase().includes(q));
+    const exactInstrument = instrumentList.find(inst => (inst?.name || '').toLowerCase() === q);
     if (exactInstrument && !instrumentMatches.some(x => String(x?._id) === String(exactInstrument?._id))) {
       instrumentMatches.unshift(exactInstrument);
     }
 
-    // --- NEW: moodMatches (case-insensitive, exact first) ---
-    let moodMatches = Array.isArray(moods)
-      ? moods.filter(m => (m?.name || '').toLowerCase().includes(q))
-      : [];
-    const exactMood = Array.isArray(moods)
-      ? moods.find(m => (m?.name || '').toLowerCase() === q)
-      : null;
+    let moodMatches = moodList.filter(m => (m?.name || '').toLowerCase().includes(q));
+    const exactMood = moodList.find(m => (m?.name || '').toLowerCase() === q);
     if (exactMood && !moodMatches.some(x => String(x?._id) === String(exactMood?._id))) {
       moodMatches.unshift(exactMood);
     }
 
-    // Always include arrays in empty-query return
-    if (!q) return { music: [], genres: [], subGenres: [], meta, moodMatches: [], instrumentMatches: [] };
+    const emptyPayload = { music: [], genres: [], subGenres: [], meta, moodMatches: [], instrumentMatches: [] };
+    if (!q) return emptyPayload;
 
-    const list = Array.isArray(instruments) ? instruments : [];
-
-    // Lookup for mood names by ID to support songs that store mood IDs
-    const moodArray = Array.isArray(moods) ? moods : [];
-    const moodNameById = (id) => {
-      const m = moodArray.find(x => String(x?._id) === String(id));
-      return m?.name || null;
-    };
-
-    // Remove generic words like "instrument" to allow queries such as "rock instrument"
-    const STOPWORDS = new Set([
-      'instrument','instruments','instr','inst','music','musics','song','songs','related','to','your','search'
-    ]);
-
-    const normalize = (s) => (s || '')
-      .toLowerCase()
-      .replace(/[^\p{L}\p{N}\s]/gu, ' ')    // strip punctuation
-      .split(/\s+/)
-      .filter(Boolean)
-      .filter(tok => !STOPWORDS.has(tok))
-      .join(' ')
-      .trim();
-
-    const sanitized = normalize(q);
-    const tokens = sanitized.split(/\s+/).filter(Boolean).sort((a,b) => b.length - a.length);
-
-    // Build candidate terms to try (exact first, then unique partial):
-    // 1) full raw query
-    // 2) sanitized query (stopwords removed)
-    // 3) individual tokens (longest first)
     const candidates = [];
     if (q) candidates.push(q);
     if (sanitized && sanitized !== q) candidates.push(sanitized);
-    for (const t of tokens) if (t && !candidates.includes(t)) candidates.push(t);
+    for (const token of tokens.sort((a, b) => b.length - a.length)) {
+      if (token && !candidates.includes(token)) candidates.push(token);
+    }
 
     const byName = (i) => (i?.name || '').toLowerCase();
-
     let matchedInstrument = null;
-    let matchedMood = null;
 
-    // Try exact matches across candidates
     for (const term of candidates) {
       if (!term) continue;
-      matchedInstrument = list.find(i => byName(i) === term);
+      matchedInstrument = instrumentList.find(i => byName(i) === term);
       if (matchedInstrument) break;
     }
 
-    // If no exact match, allow a single unique partial match
     if (!matchedInstrument) {
       for (const term of candidates) {
         if (!term) continue;
-        const partial = list.filter(i => byName(i).includes(term));
+        const partial = instrumentList.filter(i => byName(i).includes(term));
         if (partial.length === 1) {
           matchedInstrument = partial[0];
           break;
@@ -274,23 +274,20 @@ const SearchPage = ({
       }
     }
 
-    // Instrument mode: only show songs featuring this instrument
     if (matchedInstrument) {
       meta.isInstrument = true;
       meta.instrumentName = matchedInstrument.name;
       meta.instrumentId = matchedInstrument._id;
 
-      const music = (songs || []).filter(s =>
+      const music = songList.filter(s =>
         Array.isArray(s?.instruments) &&
         s.instruments.some(ins => {
           const insId = ins?._id || ins;
           const insName = (ins?.name || '').toLowerCase();
-          return (insId && insId === matchedInstrument._id) ||
-                 (!!insName && insName === matchedInstrument.name.toLowerCase());
+          return (insId && insId === matchedInstrument._id) || (!!insName && insName === matchedInstrument.name.toLowerCase());
         })
       );
 
-      // Top genres by count
       const genreCounts = new Map();
       for (const s of music) {
         for (const g of (s.genres || [])) {
@@ -298,11 +295,10 @@ const SearchPage = ({
           if (id) genreCounts.set(id, (genreCounts.get(id) || 0) + 1);
         }
       }
-      const sortedGenreIds = [...genreCounts.entries()].sort((a,b) => b[1] - a[1]).map(([id]) => id);
-      const genreMap = new Map((genres || []).map(g => [g._id, g]));
+      const sortedGenreIds = [...genreCounts.entries()].sort((a, b) => b[1] - a[1]).map(([id]) => id);
+      const genreMap = new Map(genreList.map(g => [g._id, g]));
       const relatedGenres = sortedGenreIds.map(id => genreMap.get(id)).filter(Boolean).slice(0, 8);
 
-      // Top sub-genres by count
       const subCounts = new Map();
       for (const s of music) {
         for (const sg of (s.subGenres || [])) {
@@ -310,19 +306,18 @@ const SearchPage = ({
           if (id) subCounts.set(id, (subCounts.get(id) || 0) + 1);
         }
       }
-      const sortedSubIds = [...subCounts.entries()].sort((a,b) => b[1] - a[1]).map(([id]) => id);
-      const subMap = new Map((subGenres || []).map(sg => [sg._id, sg]));
+      const sortedSubIds = [...subCounts.entries()].sort((a, b) => b[1] - a[1]).map(([id]) => id);
+      const subMap = new Map(subGenreList.map(sg => [sg._id, sg]));
       const relatedSubGenres = sortedSubIds.map(id => subMap.get(id)).filter(Boolean).slice(0, 12);
 
-      // --- NEW: co-occurrence moods from songs that feature this instrument ---
-      const moodById = new Map((Array.isArray(moods) ? moods : []).map(m => [String(m?._id || ''), m]));
-      const moodByName = new Map((Array.isArray(moods) ? moods : []).map(m => [(m?.name || '').toLowerCase(), m]));
+      const moodById = new Map(moodList.map(m => [String(m?._id || ''), m]));
+      const moodByName = new Map(moodList.map(m => [(m?.name || '').toLowerCase(), m]));
 
-      const coOccurCounts = new Map(); // key: moodId, val: count
+      const coOccurCounts = new Map();
       for (const s of music) {
         const mlist = Array.isArray(s?.moods) ? s.moods : [];
         for (const mm of mlist) {
-          const idRaw = mm?._id || mm?.id || mm; // objectId string or object
+          const idRaw = mm?._id || mm?.id || mm;
           const idStr = idRaw ? String(idRaw) : '';
           const nameStr = (mm?.name || '').toLowerCase();
 
@@ -335,141 +330,164 @@ const SearchPage = ({
           }
         }
       }
-      const coOccurMoodIds = Array.from(coOccurCounts.entries()).sort((a,b) => b[1] - a[1]).map(([id]) => id);
+      const coOccurMoodIds = Array.from(coOccurCounts.entries()).sort((a, b) => b[1] - a[1]).map(([id]) => id);
       const moodMatchesCoOccur = coOccurMoodIds.map(id => moodById.get(id)).filter(Boolean);
 
-      // Merge co-occurrence (priority) with text matches, de-duped by _id
       const mergedMoodMap = new Map();
       for (const m of [...moodMatchesCoOccur, ...moodMatches]) {
         if (!m) continue;
-        mergedMoodMap.set(String(m?._id), m);
+        mergedMoodMap.set(String(m?._id || m?.id), m);
       }
       moodMatches = Array.from(mergedMoodMap.values());
 
-      // Ensure the matched instrument is included at the front
       if (!instrumentMatches.some(x => String(x?._id) === String(matchedInstrument?._id))) {
         instrumentMatches.unshift(matchedInstrument);
       }
 
-      // Dedupe to prevent duplicate keys
       const musicUnique = uniqById(music);
       const relatedGenresUnique = uniqById(relatedGenres);
       const relatedSubGenresUnique = uniqById(relatedSubGenres);
       moodMatches = uniqById(moodMatches);
       instrumentMatches = uniqById(instrumentMatches);
 
-      // Return the deduped arrays
       return { music: musicUnique, genres: relatedGenresUnique, subGenres: relatedSubGenresUnique, meta, moodMatches, instrumentMatches };
     }
 
-    // Fallback: keep your existing (non-instrument) behavior unchanged
-    const matchedSong = songs.find(s => s.title?.toLowerCase() === q);
-    const matchedGenre = genres.find(g => g.name?.toLowerCase() === q);
-    const matchedSubGenre = subGenres.find(sg => sg.name?.toLowerCase() === q);
-
-    let music = [];
-    let relatedGenres = [];
-    let relatedSubGenres = [];
-
-    if (matchedSong) {
-      const songGenres = (matchedSong.genres || []).map(g => g._id);
-      const songSubGenres = (matchedSong.subGenres || []).map(sg => sg._id);
-      const relatedSongs = songs.filter(s =>
-        s._id !== matchedSong._id &&
-        ((s.genres || []).some(g => songGenres.includes(g._id)) ||
-         (s.subGenres || []).some(sg => songSubGenres.includes(sg._id)))
-      );
-      music = [matchedSong, ...relatedSongs];
-      relatedGenres = matchedSong.genres || [];
-      const parentGenreIds = new Set((matchedSong.genres || []).map(g => g._id));
-      const siblingSubGenres = subGenres.filter(sg => parentGenreIds.has(sg.genre?._id) && !songSubGenres.includes(sg._id));
-      relatedSubGenres = [...(matchedSong.subGenres || []), ...siblingSubGenres];
-    } else if (matchedGenre) {
-      const genreId = matchedGenre._id;
-      const subGenresInGenre = subGenres.filter(sg => sg.genre?._id === genreId);
-      const songsBySubGenre = subGenresInGenre.map(sg => songs.filter(s => (s.subGenres || []).some(s_sg => s_sg._id === sg._id)));
-      let interleaved = [];
-      let i = 0;
-      let songsLeft = true;
-      while (songsLeft) {
-        songsLeft = false;
-        songsBySubGenre.forEach(list => {
-          if (list[i]) { interleaved.push(list[i]); songsLeft = true; }
-        });
-        i++;
+    const computeTextScore = (value, weights) => {
+      const text = normalize(value);
+      if (!text) return 0;
+      let score = 0;
+      if (weights.exact && text === plainNormalized) score += weights.exact;
+      if (weights.prefix && plainNormalized.length >= 3 && text.startsWith(plainNormalized)) score += weights.prefix;
+      if (weights.tokens && wordTokens.length) {
+        for (const token of wordTokens) {
+          if (text.includes(token)) score += weights.tokens;
+        }
       }
-      music = interleaved;
-      relatedGenres = [matchedGenre];
-      relatedSubGenres = subGenresInGenre;
-    } else if (matchedSubGenre) {
-      const subGenreName = matchedSubGenre.name;
-      const allMatchingSubGenres = subGenres.filter(sg => sg.name?.toLowerCase() === subGenreName.toLowerCase());
-      const matchingSubGenreIds = allMatchingSubGenres.map(sg => sg._id);
-      const songsByGenre = {};
-      songs.forEach(song => {
-        if ((song.subGenres || []).some(sg => matchingSubGenreIds.includes(sg._id))) {
-          const parentGenre = (song.genres || [])[0];
-          if (parentGenre) {
-            if (!songsByGenre[parentGenre.name]) songsByGenre[parentGenre.name] = [];
-            songsByGenre[parentGenre.name].push(song);
+      if (weights.full && sanitized && text.includes(sanitized)) score += weights.full;
+      return score;
+    };
+
+    const scoreCollection = (collection, weights) => {
+      if (!Array.isArray(collection) || !collection.length) return 0;
+      return collection.reduce((acc, entry) => acc + computeTextScore(entry?.name || entry, weights), 0);
+    };
+
+    const scoredEntries = songList.map((song) => {
+      let score = 0;
+
+      score += computeTextScore(song?.title, { exact: 170, prefix: 110, tokens: 28, full: 45 });
+      score += scoreCollection(song?.genres, { exact: 85, prefix: 45, tokens: 22 });
+      score += scoreCollection(song?.subGenres, { exact: 70, prefix: 35, tokens: 18 });
+      score += scoreCollection(song?.instruments, { exact: 90, prefix: 40, tokens: 20 });
+      score += scoreCollection(song?.moods, { exact: 70, prefix: 30, tokens: 16 });
+      score += computeTextScore(song?.description, { tokens: 8, full: 18 });
+
+      if (song?.collectionType && /premium|exclusive/.test(song.collectionType.toLowerCase()) && /premium|exclusive/.test(q)) {
+        score += 40;
+      }
+
+      if (song?.bpm && numericTokens.length) {
+        const bpmValue = Number(song.bpm);
+        if (Number.isFinite(bpmValue)) {
+          const closest = Math.min(...numericTokens.map(num => Math.abs(num - bpmValue)));
+          if (closest === 0) score += 90;
+          else if (closest <= 3) score += 55;
+          else if (closest <= 6) score += 35;
+        }
+      }
+
+      if (song?.key) {
+        const keyNormalized = normalize(song.key).replace('key', '').trim();
+        if (keyNormalized && plainNormalized.includes(keyNormalized)) {
+          score += 60;
+        }
+        for (const token of wordTokens) {
+          if (token.length > 1 && keyNormalized.includes(token)) {
+            score += 20;
           }
         }
+      }
+
+      if (wantsVocals && song?.hasVocals) score += 50;
+      if (wantsInstrumental && song && song.hasVocals === false) score += 50;
+
+      return { song, score };
+    }).filter(entry => entry.score > 0);
+
+    let rankedEntries = scoredEntries.sort((a, b) => {
+      if (b.score === a.score) {
+        const titleA = (a.song?.title || '').toLowerCase();
+        const titleB = (b.song?.title || '').toLowerCase();
+        return titleA.localeCompare(titleB);
+      }
+      return b.score - a.score;
+    });
+
+    if (!rankedEntries.length) {
+      const fallbackMusic = songList.filter(song => {
+        const title = (song?.title || '').toLowerCase();
+        const genreHit = (song?.genres || []).some(g => (g?.name || '').toLowerCase().includes(q));
+        const subHit = (song?.subGenres || []).some(sg => (sg?.name || '').toLowerCase().includes(q));
+        return title.includes(q) || genreHit || subHit;
+      }).map(song => ({ song, score: 1 }));
+
+      rankedEntries = fallbackMusic.sort((a, b) => {
+        const titleA = (a.song?.title || '').toLowerCase();
+        const titleB = (b.song?.title || '').toLowerCase();
+        return titleA.localeCompare(titleB);
       });
-      let interleaved = [];
-      let i = 0;
-      let songsLeft = true;
-      const songLists = Object.values(songsByGenre);
-      while (songsLeft) {
-        songsLeft = false;
-        songLists.forEach(list => {
-          if (list[i]) { interleaved.push(list[i]); songsLeft = true; }
-        });
-        i++;
-      }
-      music = interleaved;
-      relatedGenres = genres.filter(g => allMatchingSubGenres.some(sg => sg.genre?._id === g._id));
-      relatedSubGenres = allMatchingSubGenres;
-    } else {
-      const qq = q;
-      music = songs.filter(song =>
-        song.title?.toLowerCase().includes(qq) ||
-        ((song.genres || []).some(g => g.name?.toLowerCase().includes(qq))) ||
-        ((song.subGenres || []).some(sg => sg.name?.toLowerCase().includes(qq)))
-      );
-      relatedGenres = genres.filter(g => (g?.name || '').toLowerCase().includes(qq));
-      relatedSubGenres = subGenres.filter(sg => (sg?.name || '').toLowerCase().includes(qq));
     }
 
-    // Instrument mode early return
-    if (matchedInstrument) {
-      // Ensure the matched instrument is included at the front
-      if (!instrumentMatches.some(x => String(x?._id) === String(matchedInstrument?._id))) {
-        instrumentMatches.unshift(matchedInstrument);
+    const weightingStore = (limit) => {
+      const store = new Map();
+      return {
+        add(doc, weight = 1) {
+          if (!doc) return;
+          const key = String(doc?._id || doc?.id || doc?.name || '');
+          if (!key) return;
+          const existing = store.get(key);
+          if (existing) existing.weight += weight;
+          else store.set(key, { doc, weight });
+        },
+        toArray(max = limit) {
+          return Array.from(store.values())
+            .sort((a, b) => b.weight - a.weight)
+            .map(entry => entry.doc)
+            .slice(0, max);
+        }
+      };
+    };
+
+    const topGenreStore = weightingStore(12);
+    const topSubGenreStore = weightingStore(16);
+
+    rankedEntries.slice(0, 60).forEach(({ song, score }, index) => {
+      const weight = score + Math.max(0, 60 - index);
+      (song?.genres || []).forEach(g => topGenreStore.add(g, weight));
+      (song?.subGenres || []).forEach(sg => topSubGenreStore.add(sg, weight));
+    });
+
+    genreList.forEach((genre) => {
+      if (normalize(genre?.name).includes(sanitized)) {
+        topGenreStore.add(genre, 120);
       }
-      return { music, genres: relatedGenres, subGenres: relatedSubGenres, meta, moodMatches, instrumentMatches };
-    }
+    });
+    subGenreList.forEach((subGenre) => {
+      if (normalize(subGenre?.name).includes(sanitized)) {
+        topSubGenreStore.add(subGenre, 90);
+      }
+    });
 
-    // RIGHT BEFORE creating packedMusic, dedupe raw lists
-    const musicUnique = uniqById(music);
-    const relatedGenresUnique = uniqById(relatedGenres);
-    const relatedSubGenresUnique = uniqById(relatedSubGenres);
-    moodMatches = uniqById(moodMatches);
-    instrumentMatches = uniqById(instrumentMatches);
+    let music = rankedEntries.map(entry => entry.song);
+    music = uniqById(music);
 
-    // Then build packedMusic from musicUnique (not music)
-    const packedMusic = musicUnique.map((song) => {
-      const {
-        _id, title, duration, bpm, key, hasVocals,
-        genres, subGenres, instruments, moods
-      } = song;
-
-      // Preserve these fields so Search cards can render covers, premium badge, and play/download correctly
+    const packSong = (song) => {
+      const { _id, title, duration, bpm, key, hasVocals, genres: g = [], subGenres: sg = [], instruments: ins = [], moods: md = [] } = song;
       const collectionType = song?.collectionType || '';
       const audioUrl = song?.audioUrl || '';
-
-      // Preserve all possible image sources (the card’s cover resolver will use these)
       const imageUrl = song?.imageUrl || '';
-      const image = song?.image || null;            // may be object or string
+      const image = song?.image || null;
       const coverUrl = song?.coverUrl || '';
       const images = Array.isArray(song?.images) ? song.images : [];
 
@@ -481,27 +499,30 @@ const SearchPage = ({
         image,
         coverUrl,
         images,
-        // normalize nested refs for pills
-        genres: (genres || []).map(g => ({
-          _id: g._id, name: g.name, imageUrl: g.imageUrl, description: g.description
+        genres: (g || []).map((item) => ({
+          _id: item?._id, name: item?.name, imageUrl: item?.imageUrl, description: item?.description
         })),
-        subGenres: (subGenres || []).map(sg => ({
-          _id: sg._id, name: sg.name, imageUrl: sg.imageUrl, description: sg.description
+        subGenres: (sg || []).map((item) => ({
+          _id: item?._id, name: item?.name, imageUrl: item?.imageUrl, description: item?.description
         })),
-        instruments: (instruments || []).map(ins => ({
-          _id: ins._id, name: ins.name
+        instruments: (ins || []).map((item) => ({
+          _id: item?._id, name: item?.name
         })),
-        moods: (moods || []).map(m => ({
-          _id: m._id, name: m.name, imageUrl: m.imageUrl, description: m.description
+        moods: (md || []).map((item) => ({
+          _id: item?._id, name: item?.name, imageUrl: item?.imageUrl, description: item?.description
         })),
       };
-    });
+    };
 
-    // Final return: use the deduped arrays
+    const packedMusic = music.map(packSong);
+
+    moodMatches = uniqById(moodMatches);
+    instrumentMatches = uniqById(instrumentMatches);
+
     return {
       music: packedMusic,
-      genres: relatedGenresUnique,
-      subGenres: relatedSubGenresUnique,
+      genres: uniqById(topGenreStore.toArray(12)),
+      subGenres: uniqById(topSubGenreStore.toArray(16)),
       meta,
       moodMatches,
       instrumentMatches
