@@ -1081,7 +1081,6 @@ function App() {
     }
     const audio = audioRef.current;
     // ADD:
-    setIsAudioLoading(true);
     setCurrentPlayingSong(song);
     // Update URL to reflect current track (deep-link)
     try { setUrlTrackParam(song._id); } catch {}
@@ -1167,6 +1166,7 @@ function App() {
   
   useEffect(() => {
     const audio = audioRef.current;
+    audio.preload = 'metadata';
     // ADD:
     const handleCanPlay = () => {
       setIsAudioLoading(false);
