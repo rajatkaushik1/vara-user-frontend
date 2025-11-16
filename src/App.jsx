@@ -457,6 +457,7 @@ function App() {
 
   // Add initial autoplay ref for track deep-linking
   const initialTrackAutoplayRef = useRef(false);
+  const audioPreconnectDoneRef = useRef(false);
 
   const fetchGenres = useCallback(async () => {
     if (genresPromiseRef.current) return genresPromiseRef.current;
@@ -1633,6 +1634,60 @@ function App() {
       }
     } catch {}
   }, [songsLoaded, songs, playSong]);
+
+  useEffect(() => {
+    // Only attempt once per page load
+    if (audioPreconnectDoneRef.current) return;
+    if (!songsLoaded) return;
+    if (!Array.isArray(songs) || songs.length === 0) return;
+
+    // Find the first song with a valid absolute audioUrl
+    const candidate = songs.find(s =>
+      s &&
+      typeof s.audioUrl === 'string' &&
+      s.audioUrl.startsWith('http')
+    );
+    if (!candidate) return;
+
+    let origin;
+    try {
+      origin = new URL(candidate.audioUrl).origin;
+    } catch {
+      return;
+    }
+    if (!origin) return;
+
+    const head = document.head || document.getElementsByTagName('head')[0];
+    if (!head) return;
+
+    // Avoid injecting duplicates if something else already added them
+    const existingLinks = head.querySelectorAll('link[rel="preconnect"], link[rel="dns-prefetch"]');
+    let alreadyPresent = false;
+    existingLinks.forEach(link => {
+      if (link.href && link.href.startsWith(origin)) {
+        alreadyPresent = true;
+      }
+    });
+    if (alreadyPresent) {
+      audioPreconnectDoneRef.current = true;
+      return;
+    }
+
+    // Create preconnect link
+    const preconnect = document.createElement('link');
+    preconnect.rel = 'preconnect';
+    preconnect.href = origin;
+    preconnect.crossOrigin = 'anonymous';
+    head.appendChild(preconnect);
+
+    // Create dns-prefetch link
+    const dnsPrefetch = document.createElement('link');
+    dnsPrefetch.rel = 'dns-prefetch';
+    dnsPrefetch.href = origin;
+    head.appendChild(dnsPrefetch);
+
+    audioPreconnectDoneRef.current = true;
+  }, [songsLoaded, songs]);
 
   useEffect(() => {
     function onVaraNotify(e) {
