@@ -1466,17 +1466,13 @@ body {
     flex: 0 0 450px; 
     width: 450px;
 }
-  .search-results-section .carousel-scroll-area .genre-card {
+  .carousel-scroll-area .genre-card {
       flex: 0 0 220px;
       width: 220px;
   }
-
   /* Hide description text on genre/sub-genre/mood/instrument cards inside carousels */
  /* Hide description text on genre/sub-genre/mood/instrument cards INSIDE Search page carousels */
-  .search-results-section .carousel-scroll-area .genre-card-description-wrapper,
-  .search-results-section .carousel-scroll-area .genre-card-description {
-      display: none !important;
-  }
+
 /* --- TRENDING CAROUSEL STYLES --- */
   .trending-carousel-container {
       margin-bottom: 32px !important;
