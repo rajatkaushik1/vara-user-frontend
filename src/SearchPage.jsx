@@ -47,6 +47,23 @@ const Carousel = ({ title, children, isLoading, skeletonType }) => {
   const [canScrollRight, setCanScrollRight] = useState(false); 
   const [hasOverflow, setHasOverflow] = useState(false);
 
+  const [pageCount, setPageCount] = useState(1);
+  const [pageIndex, setPageIndex] = useState(0);
+
+  const recalcPagination = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    const vw = el.clientWidth || 1;      // visible width
+    const total = el.scrollWidth || vw;  // total scroll width
+
+    const count = Math.max(1, Math.ceil(total / vw));
+    setPageCount(count);
+
+    const idx = Math.round(el.scrollLeft / vw);
+    setPageIndex(Math.min(count - 1, Math.max(0, idx)));
+  }, []);
+
   // Helper: is first card fully visible
   function isFirstCardFullyVisible() {
     const el = scrollRef.current;
@@ -59,27 +76,47 @@ const Carousel = ({ title, children, isLoading, skeletonType }) => {
 
   const checkScrollability = useCallback(() => { 
     const el = scrollRef.current; 
-    if (el) { 
-      const overflow = el.scrollWidth > el.clientWidth; 
-      setHasOverflow(overflow);
-      setCanScrollLeft(!isFirstCardFullyVisible());
-      setCanScrollRight(overflow && el.scrollLeft < el.scrollWidth - el.clientWidth - 1); 
-    } 
-  }, []); 
+    if (!el) return;
+    const overflow = el.scrollWidth > el.clientWidth; 
+    setHasOverflow(overflow);
+    setCanScrollLeft(!isFirstCardFullyVisible());
+    setCanScrollRight(overflow && el.scrollLeft < el.scrollWidth - el.clientWidth - 1); 
+    recalcPagination();
+  }, [recalcPagination]); 
 
   useEffect(() => { 
     const scrollElement = scrollRef.current; 
-    if (scrollElement) { 
-      checkScrollability(); 
-      scrollElement.addEventListener('scroll', checkScrollability); 
-      const resizeObserver = new ResizeObserver(checkScrollability); 
-      resizeObserver.observe(scrollElement); 
-      return () => { 
-        scrollElement.removeEventListener('scroll', checkScrollability); 
-        resizeObserver.unobserve(scrollElement); 
-      }; 
-    } 
-  }, [children, isLoading, checkScrollability]);
+    if (!scrollElement) return;
+
+    checkScrollability();
+    recalcPagination();
+
+    const onScroll = () => {
+      checkScrollability();
+    };
+    scrollElement.addEventListener('scroll', onScroll, { passive: true }); 
+
+    const resizeObserver = new ResizeObserver(() => {
+      checkScrollability();
+      recalcPagination();
+    }); 
+    resizeObserver.observe(scrollElement); 
+
+    return () => { 
+      scrollElement.removeEventListener('scroll', onScroll); 
+      resizeObserver.unobserve(scrollElement); 
+    }; 
+  }, [children, isLoading, checkScrollability, recalcPagination]);
+
+  const scrollToPage = useCallback((idx) => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const vw = el.clientWidth || 1;
+    const clamped = Math.max(0, Math.min(idx, pageCount - 1));
+    const target = clamped * vw;
+    el.scrollTo({ left: target, behavior: 'smooth' });
+    setPageIndex(clamped);
+  }, [pageCount]);
 
   const handleScroll = (direction) => { 
     if (scrollRef.current) { 
@@ -93,9 +130,12 @@ const Carousel = ({ title, children, isLoading, skeletonType }) => {
   };
 
   useEffect(() => {
-    const timer = setTimeout(checkScrollability, 50);
+    const timer = setTimeout(() => {
+      checkScrollability();
+      recalcPagination();
+    }, 50);
     return () => clearTimeout(timer);
-  }, [children, isLoading, checkScrollability]);
+  }, [children, isLoading, checkScrollability, recalcPagination]);
 
   useEffect(() => {
     if (!isLoading) {
@@ -160,6 +200,20 @@ const Carousel = ({ title, children, isLoading, skeletonType }) => {
           <ScrollRightIcon /> 
         </button>
       </div> 
+      {hasOverflow && pageCount > 1 && (
+        <div className="sg-dots" role="tablist" aria-label={`Pages for ${title || 'carousel'}`}>
+          {Array.from({ length: pageCount }).map((_, i) => (
+            <button
+              key={`search-dot-${title || 'section'}-${i}`}
+              type="button"
+              className={`sg-dot ${i === pageIndex ? 'active' : ''}`}
+              aria-label={`Go to page ${i + 1}`}
+              aria-selected={i === pageIndex}
+              onClick={() => scrollToPage(i)}
+            />
+          ))}
+        </div>
+      )}
     </div> 
   ); 
 }; 
@@ -620,15 +674,34 @@ const SearchPage = ({
   const [songsCanScrollRight, setSongsCanScrollRight] = useState(false);
   const [songsHasOverflow, setSongsHasOverflow] = useState(false);
 
+  const [songsPageCount, setSongsPageCount] = useState(1);
+  const [songsPageIndex, setSongsPageIndex] = useState(0);
+
+  const recalcSongsPagination = useCallback(() => {
+    const el = songsScrollRef.current;
+    if (!el) return;
+
+    const vw = el.clientWidth || 1;
+    const total = el.scrollWidth || vw;
+
+    const count = Math.max(1, Math.ceil(total / vw));
+    setSongsPageCount(count);
+
+    const idx = Math.round(el.scrollLeft / vw);
+    setSongsPageIndex(Math.min(count - 1, Math.max(0, idx)));
+  }, []);
+
   const checkSongsScrollability = useCallback(() => {
     const el = songsScrollRef.current;
-    if (el) {
-      const overflow = el.scrollWidth > el.clientWidth;
-      setSongsHasOverflow(overflow);
-      setSongsCanScrollLeft(el.scrollLeft > 0);
-      setSongsCanScrollRight(overflow && el.scrollLeft < el.scrollWidth - el.clientWidth - 1);
-    }
-  }, []);
+    if (!el) return;
+
+    const overflow = el.scrollWidth > el.clientWidth;
+    setSongsHasOverflow(overflow);
+    setSongsCanScrollLeft(el.scrollLeft > 0);
+    setSongsCanScrollRight(overflow && el.scrollLeft < el.scrollWidth - el.clientWidth - 1);
+
+    recalcSongsPagination();
+  }, [recalcSongsPagination]);
 
   useEffect(() => {
     const el = songsScrollRef.current;
@@ -651,6 +724,16 @@ const SearchPage = ({
     const next = direction === 'left' ? el.scrollLeft - scrollAmount : el.scrollLeft + scrollAmount;
     el.scrollTo({ left: next, behavior: 'smooth' });
   };
+
+  const scrollSongsToPage = useCallback((idx) => {
+    const el = songsScrollRef.current;
+    if (!el) return;
+    const vw = el.clientWidth || 1;
+    const clamped = Math.max(0, Math.min(idx, songsPageCount - 1));
+    const target = clamped * vw;
+    el.scrollTo({ left: target, behavior: 'smooth' });
+    setSongsPageIndex(clamped);
+  }, [songsPageCount]);
 
   return ( 
     <section className="search-results-section" id="search-results-section"> 
@@ -931,6 +1014,25 @@ const SearchPage = ({
               <ScrollRightIcon />
             </button>
           </div>
+
+          {songsHasOverflow && songsPageCount > 1 && (
+            <div
+              className="sg-dots"
+              role="tablist"
+              aria-label={`Pages for ${musicTitle || 'Songs'}`}
+            >
+              {Array.from({ length: songsPageCount }).map((_, i) => (
+                <button
+                  key={`songs-dot-${i}`}
+                  type="button"
+                  className={`sg-dot ${i === songsPageIndex ? 'active' : ''}`}
+                  aria-label={`Go to page ${i + 1}`}
+                  aria-selected={i === songsPageIndex}
+                  onClick={() => scrollSongsToPage(i)}
+                />
+              ))}
+            </div>
+          )}
         </div>
       )}
 
