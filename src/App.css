@@ -1740,7 +1740,7 @@ transition: filter 180ms ease; / smoother transition for glow */
 }
 
 /* Responsive adjustments for trending carousel */
-@media (max-width: 2024px) {
+@media (max-width: 1024px) {
 .trending-carousel-scroll-area {
 padding: 0 15px 0 40px;
 gap: 15px;
