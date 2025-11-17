@@ -1466,17 +1466,17 @@ body {
     flex: 0 0 450px; 
     width: 450px;
 }
-  .carousel-scroll-area .genre-card {
+  .search-results-section .carousel-scroll-area .genre-card {
       flex: 0 0 220px;
       width: 220px;
   }
 
   /* Hide description text on genre/sub-genre/mood/instrument cards inside carousels */
-  .carousel-scroll-area .genre-card-description-wrapper,
-  .carousel-scroll-area .genre-card-description {
+ /* Hide description text on genre/sub-genre/mood/instrument cards INSIDE Search page carousels */
+  .search-results-section .carousel-scroll-area .genre-card-description-wrapper,
+  .search-results-section .carousel-scroll-area .genre-card-description {
       display: none !important;
   }
-
 /* --- TRENDING CAROUSEL STYLES --- */
   .trending-carousel-container {
       margin-bottom: 32px !important;
@@ -3571,7 +3571,12 @@ body {
 @media (max-width: 580px) {
   .trending-carousel-scroll-area > div { --cardScale: 0.585; }
 }
-
+  @media (min-width: 1024px) {
+    .search-results-section .trending-carousel-scroll-area {
+      padding-left: 40px;
+      padding-right: 40px;
+    }
+  }
 /* === RAW LIBRARY GRID LAYOUT (NEW) — keep visuals identical to carousel cards === */
 .raw-library-grid {
   /* Make this section span the full content grid width */
