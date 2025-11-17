@@ -1745,6 +1745,11 @@ transition: filter 180ms ease; / smoother transition for glow */
 padding: 0 15px 0 40px;
 gap: 15px;
 }
+@media (min-width: 1024px) {
+.trending-carousel-scroll-area {
+padding: 0 15px 0 0;
+gap: 15px;
+}
 .trending-song-card {
 flex-basis: 380px;
 width: 380px;
