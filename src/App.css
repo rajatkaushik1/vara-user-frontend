@@ -1228,21 +1228,21 @@ body {
 
 
 /* --- Search Results Page Specific Styles --- */
- .search-results-section {
-      padding-top: 24px;
-      margin-top: 24px;
-  }
+.search-results-section {
+    padding-top: 20px;
+    margin-top: 20px;
+}
 .search-results-title {
-      color: #ebba2f;
-      font-size: 1.25em;
-      font-weight: bold;
-      text-align: center;
-      margin-top: 24px;
-      margin-bottom: 18px;
-      width: 100%;
-      padding: 0 20px;
-      box-sizing: border-box;
-  }
+    color: #ebba2f;
+    font-size: 1.25em;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 30px;
+    margin-bottom: 20px;
+    width: 100%;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
 
 
 /* --- Login Page Styles --- */
@@ -1389,16 +1389,16 @@ body {
 
 /* --- Search Page Carousel Styles --- */
 .search-carousel-container {
-    margin-bottom: 36px;
+    margin-bottom: 20px;
 }
-  .search-carousel-title {
-      font-size: 1.4em;
-      font-weight: 600;
-      color: #e0e0e0;
-      margin: 26px 0 12px 0;
-      text-transform: capitalize;
-      padding: 0 40px; /* align with 40px left gutter of carousel cards */
-  }
+.search-carousel-title {
+    font-size: 1.4em;
+    font-weight: 600;
+    color: #e0e0e0;
+    margin-bottom: 15px;
+    text-transform: capitalize;
+    padding: 0 40px; /* align with 40px left gutter of carousel cards */
+}
 .carousel-wrapper {
     position: relative;
 }
@@ -1466,18 +1466,17 @@ body {
     flex: 0 0 450px; 
     width: 450px;
 }
-  .carousel-scroll-area .genre-card {
-      flex: 0 0 220px;
-      width: 220px;
-  }
-  /* Hide description text on genre/sub-genre/mood/instrument cards inside carousels */
- /* Hide description text on genre/sub-genre/mood/instrument cards INSIDE Search page carousels */
+.carousel-scroll-area .genre-card {
+    flex: 0 0 300px;
+    width: 300px;
+}
 
 /* --- TRENDING CAROUSEL STYLES --- */
-  .trending-carousel-container {
-      margin-bottom: 32px !important;
-      padding-bottom: 0px !important;
-  }
+.trending-carousel-container {
+    margin-bottom: 0px !important;
+    padding-bottom: 0px !important;
+}
+
 .trending-carousel-title {
     font-size: 1.4em;
     font-weight: 600;
@@ -3567,12 +3566,7 @@ body {
 @media (max-width: 580px) {
   .trending-carousel-scroll-area > div { --cardScale: 0.585; }
 }
-  @media (min-width: 1024px) {
-    .search-results-section .trending-carousel-scroll-area {
-      padding-left: 40px;
-      padding-right: 40px;
-    }
-  }
+
 /* === RAW LIBRARY GRID LAYOUT (NEW) — keep visuals identical to carousel cards === */
 .raw-library-grid {
   /* Make this section span the full content grid width */
@@ -3601,17 +3595,17 @@ body {
 }
 
 /* Column count breakpoints (exact as requested) */
-@media (max-width: 1399px) {
+@media (max-width: 1499px) {
   .raw-library-grid {
     grid-template-columns: repeat(3, calc(var(--cardW) * var(--cardScale)));
   }
 }
-@media (max-width: 1199px) {
+@media (max-width: 1013px) {
   .raw-library-grid {
     grid-template-columns: repeat(2, calc(var(--cardW) * var(--cardScale)));
   }
 }
-@media (max-width: 799px) {
+@media (max-width: 599px) {
   .raw-library-grid {
     grid-template-columns: repeat(1, calc(var(--cardW) * var(--cardScale)));
   }
@@ -3810,106 +3804,3 @@ body {
   box-shadow: 0 0 0 2px rgba(235,186,47,0.85);
   border-color: #ebba2f;
 }
-/* === VARA: Mobile fix — place badge below header, sticky (<=700px) === */
-@media (max-width: 700px) {
-  .download-badge {
-    position: fixed !important;
-    /* Place it just below the sticky header; adjust 74px if your header height differs */
-    top: calc(74px + env(safe-area-inset-top, 0px));
-    right: 16px;
-    margin: 0 !important;
-    z-index: 1400; /* above page content; below search overlay (which uses ~3000) */
-  }
-}
- /* === VARA watermark overlay (bottom-right on cover image) — adjusted X inset === */
-.vara-watermark {
-  position: absolute;
-  /* Shift further left; scale with cover width, but keep sensible min/max */
-  right: clamp(20px, 4.4%, 25px);
-  bottom: 8px;
-
-  /* Keep the logo-to-cover ratio consistent across all card sizes */
-  width: clamp(22px, 14%, 54px);
-  height: auto;
-
-  /* Sit above the image, below play button; never intercept clicks */
-  z-index: 1;
-  pointer-events: none;
-  user-select: none;
-  opacity: 0.98;
-
-  /* Subtle separation on bright covers */
-  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.55));
-}
-
-/* Slightly stronger left shift on very small phones */
-@media (max-width: 480px) {
-  .vara-watermark {
-    right: clamp(20px, 4.6%, 25px);
-    bottom: 6px;
-  }
-}
-
-/* === VARA: Skeleton-only responsive overrides === */
-.raw-library-grid.skeleton-grid {
-  /* 50% of normal card scale (does not affect real cards) */
-  --cardScale: 0.5;
-}
-
-/* Phones: strictly 1 column when viewport < 400px */
-@media (max-width: 399px) {
-  .raw-library-grid.skeleton-grid {
-    grid-template-columns: repeat(1, calc(var(--cardW) * var(--cardScale))) !important;
-  }
-}
-
-/* Tablets: strictly 2 columns between 400px and 1024px */
-@media (min-width: 400px) and (max-width: 1024px) {
-  .raw-library-grid.skeleton-grid {
-    grid-template-columns: repeat(2, calc(var(--cardW) * var(--cardScale))) !important;
-  }
-}
- /* === VARA: Sub-genre carousel dots === */
- .sg-dots {
-   display: flex;
-   align-items: center;
-   justify-content: center;
-   gap: 8px;
-
-   /* sit below the card row; do not overlap */
-   padding-top: 10px;
-   padding-bottom: 4px;
- }
-
- .sg-dot {
-   width: 8px;
-   height: 8px;
-   border-radius: 9999px;
-   background: #ffffff;      /* inactive = white */
-   opacity: 0.85;
-   border: none;
-   cursor: pointer;
-   transition: transform 140ms ease, opacity 140ms ease, background-color 140ms ease, box-shadow 140ms ease;
-   box-shadow: 0 0 0 1px rgba(255,255,255,0.25) inset;
- }
-
- .sg-dot:hover { opacity: 1; transform: scale(1.08); }
- .sg-dot:focus-visible {
-   outline: none;
-   box-shadow: 0 0 0 2px rgba(235,186,47,0.85);
- }
-
- .sg-dot.active {
-   background: #ebba2f;      /* active = VARA yellow */
-   opacity: 1;
-   transform: scale(1.15);
-   box-shadow:
-     0 0 0 1px rgba(255,255,255,0.18) inset,
-     0 0 10px rgba(235,186,47,0.30);
- }
-
- @media (max-width: 420px) {
-   .sg-dots { gap: 6px; padding-top: 8px; }
-   .sg-dot { width: 7px; height: 7px; }
-   .sg-dot.active { transform: scale(1.12); }
- }
