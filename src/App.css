@@ -1228,21 +1228,21 @@ body {
 
 
 /* --- Search Results Page Specific Styles --- */
-.search-results-section {
-    padding-top: 20px;
-    margin-top: 20px;
-}
+ .search-results-section {
+      padding-top: 24px;
+      margin-top: 24px;
+  }
 .search-results-title {
-    color: #ebba2f;
-    font-size: 1.25em;
-    font-weight: bold;
-    text-align: center;
-    margin-top: 30px;
-    margin-bottom: 20px;
-    width: 100%;
-    padding: 0 20px;
-    box-sizing: border-box;
-}
+      color: #ebba2f;
+      font-size: 1.25em;
+      font-weight: bold;
+      text-align: center;
+      margin-top: 24px;
+      margin-bottom: 18px;
+      width: 100%;
+      padding: 0 20px;
+      box-sizing: border-box;
+  }
 
 
 /* --- Login Page Styles --- */
@@ -1389,16 +1389,16 @@ body {
 
 /* --- Search Page Carousel Styles --- */
 .search-carousel-container {
-    margin-bottom: 20px;
+    margin-bottom: 36px;
 }
-.search-carousel-title {
-    font-size: 1.4em;
-    font-weight: 600;
-    color: #e0e0e0;
-    margin-bottom: 15px;
-    text-transform: capitalize;
-    padding: 0 40px; /* align with 40px left gutter of carousel cards */
-}
+  .search-carousel-title {
+      font-size: 1.4em;
+      font-weight: 600;
+      color: #e0e0e0;
+      margin: 26px 0 12px 0;
+      text-transform: capitalize;
+      padding: 0 40px; /* align with 40px left gutter of carousel cards */
+  }
 .carousel-wrapper {
     position: relative;
 }
@@ -1466,17 +1466,22 @@ body {
     flex: 0 0 450px; 
     width: 450px;
 }
-.carousel-scroll-area .genre-card {
-    flex: 0 0 300px;
-    width: 300px;
-}
+  .carousel-scroll-area .genre-card {
+      flex: 0 0 220px;
+      width: 220px;
+  }
+
+  /* Hide description text on genre/sub-genre/mood/instrument cards inside carousels */
+  .carousel-scroll-area .genre-card-description-wrapper,
+  .carousel-scroll-area .genre-card-description {
+      display: none !important;
+  }
 
 /* --- TRENDING CAROUSEL STYLES --- */
-.trending-carousel-container {
-    margin-bottom: 0px !important;
-    padding-bottom: 0px !important;
-}
-
+  .trending-carousel-container {
+      margin-bottom: 32px !important;
+      padding-bottom: 0px !important;
+  }
 .trending-carousel-title {
     font-size: 1.4em;
     font-weight: 600;
@@ -3907,47 +3912,3 @@ body {
    .sg-dot { width: 7px; height: 7px; }
    .sg-dot.active { transform: scale(1.12); }
  }
-/* === VARA: Search page — gutters and bottom spacing for Songs carousel (trending-style) === */
-/* Scope everything to the Search page root so Home carousels are untouched */
-.search-results-section .trending-carousel-container {
-  /* Give a little extra breathing room below the carousel block on Search only */
-  margin-bottom: 14px;
-}
-
-/* Add inner gutters and slight bottom padding to the scroll area */
-.search-results-section .trending-carousel-scroll-area {
-  /* Match prior Search look: 40px left/right gutters on desktop */
-  padding-left: 40px;
-  padding-right: 40px;
-  padding-bottom: 18px;         /* “a little bit” under the carousel */
-
-  /* Help scroll snapping start nicely from the gutter */
-  scroll-padding-left: 40px;
-}
-
-/* Tighten gutters on phones/tablets so cards don’t feel squeezed */
-@media (max-width: 768px) {
-  .search-results-section .trending-carousel-scroll-area {
-    padding-left: 15px;
-    padding-right: 15px;
-    padding-bottom: 16px;
-    scroll-padding-left: 15px;
-  }
-
-  /* Keep the section title aligned with the new gutters */
-  .search-results-section .trending-carousel-title {
-    padding: 0 15px;
-  }
-}
-
-/* Optional: small tablet adjustment (between 769–1024px) */
-@media (min-width: 769px) and (max-width: 1024px) {
-  .search-results-section .trending-carousel-scroll-area {
-    padding-left: 24px;
-    padding-right: 24px;
-    scroll-padding-left: 24px;
-  }
-  .search-results-section .trending-carousel-title {
-    padding: 0 24px;
-  }
-}
