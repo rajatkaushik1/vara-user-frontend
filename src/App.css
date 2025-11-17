@@ -201,26 +201,27 @@ flex-shrink: 0;
 padding: 0 18px;
 }
 
-/* Clear (X) button inside the search bar — refined, accessible, consistent with theme /
+/* Clear (X) button inside the search bar — refined, accessible, consistent with theme */
 .search-clear-button {
-background: transparent;
-border: none;
-color: #cfcfcf; / subtle by default /
-width: 32px; / slightly larger for better hit target /
-height: 32px;
-margin-right: 8px; / spacing before the main search button */
-border-radius: 50%;
-display: inline-flex;
-align-items: center;
-justify-content: center;
-cursor: pointer;
-flex-shrink: 0;
-transition:
-background-color 160ms ease,
-color 160ms ease,
-transform 120ms ease,
-box-shadow 160ms ease;
+  background: transparent;
+  border: none;
+  color: #cfcfcf;                 /* subtle by default */
+  width: 32px;                    /* slightly larger for better hit target */
+  height: 32px;
+  margin-right: 8px;              /* spacing before the main search button */
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    transform 120ms ease,
+    box-shadow 160ms ease;
 }
+
 
 .search-clear-button:hover {
 background-color: rgba(255, 255, 255, 0.10); /* subtle hover */
@@ -233,12 +234,12 @@ transform: scale(0.98);
 background-color: rgba(255, 255, 255, 0.14);
 }
 
-/* Keyboard accessibility: crisp focus ring that matches VARA yellow /
+/* Keyboard accessibility: crisp focus ring that matches VARA yellow */
 .search-clear-button:focus-visible {
-outline: none;
-box-shadow: 0 0 0 2px rgba(235,186,47,0.9); / VARA yellow ring */
-background-color: rgba(235,186,47,0.10);
-color: #ffffff;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(235,186,47,0.9);  /* VARA yellow ring */
+  background-color: rgba(235,186,47,0.10);
+  color: #ffffff;
 }
 
 .search-clear-button span {
@@ -463,15 +464,15 @@ transition: background-color 0.3s ease;
 .tab-button.active { color: #facc25; }
 .tab-button.active::after { background-color: #facc25; }
 
-/* --- NEW & MODIFIED: Content Header for Back Button and Title --- /
+/* --- NEW & MODIFIED: Content Header for Back Button and Title --- */
 .content-header {
 display: flex;
 align-items: center;
-justify-content: space-between; / This will push items to the edges /
+justify-content: space-between; /* This will push items to the edges */
 padding: 0px 0px;
 box-sizing: border-box;
-min-height: 0px; / Give it a fixed height to prevent layout shifts /
-position: relative; / Needed for absolute centering */
+min-height: 0px; /* Give it a fixed height to prevent layout shifts */
+position: relative; /* Needed for absolute centering */
 }
 
 .back-button-container {
@@ -539,7 +540,7 @@ grid-template-columns: repeat(4, 1fr);
 gap: 25px;
 }
 
-/* --- Main Page Card Styles --- /
+/* --- Main Page Card Styles --- */
 .song-card {
 background-color: #282828;
 border-radius: 15px;
@@ -617,19 +618,19 @@ box-shadow: 0 5px 5px rgba(255, 193, 7, 0.5);
 .subgenre-pill { background-color: #3498db; color: white; }
 .song-card-bottom-row {
 display: flex;
-flex-direction: column; / Stack the metadata and actions vertically /
+flex-direction: column; /* Stack the metadata and actions vertically */
 justify-content: space-between;
-flex-grow: 1; / Allow it to take up remaining space */
+flex-grow: 1; /* Allow it to take up remaining space */
 margin-top: 10px;
 padding-top: 5px;
 }
 
-/* Container for the new metadata items (BPM, Key, Vocal Icon) /
+/* Container for the new metadata items (BPM, Key, Vocal Icon) */
 .song-metadata-container {
 display: flex;
 align-items: center;
-gap: 12px; / Space between items /
-margin-bottom: 10px; / Space between this row and the actions row */
+gap: 12px; /* Space between items */
+margin-bottom: 10px; /* Space between this row and the actions row */
 }
 
 /* Individual style for each metadata item (BPM, Key) */
@@ -639,19 +640,19 @@ color: #b0b0b0;
 font-weight: 500;
 }
 
-/* Style for the vocal icon image /
+/* Style for the vocal icon image */
 .vocal-icon {
 width: 20px;
 height: 20px;
-/ This makes the white icon visible on the dark background */
+/* This makes the white icon visible on the dark background */
 filter: brightness(0) invert(0.8);
 }
 
-/* Container for the existing action buttons (Timestamp, Like, Download, Play) /
+/* Container for the existing action buttons (Timestamp, Like, Download, Play) */
 .song-actions-container {
 display: flex;
 align-items: center;
-justify-content: space-between; / Pushes timestamp to the left and buttons to the right */
+justify-content: space-between; /* Pushes timestamp to the left and buttons to the right */
 width: 100%;
 }
 
@@ -701,8 +702,8 @@ width: 30px;
 height: 30px;
 object-fit: contain;
 filter: invert(100%);
-mix-blend-mode: normal; /* ensure no blending issues /
-transition: filter 180ms ease; / smoother transition for glow /
+mix-blend-mode: normal; /* ensure no blending issues */
+transition: filter 180ms ease; /* smoother transition for glow */
 }
 .genre-card {
 background-color: #282828;
@@ -714,7 +715,7 @@ align-items: center;
 padding: 20px;
 text-align: center;
 overflow: hidden;
-height: 100%; / Ensure full height of grid cell /
+height: 100%; /* Ensure full height of grid cell */
 }
 .genre-card-image {
 width: 150px;
@@ -722,14 +723,14 @@ height: 150px;
 object-fit: cover;
 border-radius: 10px;
 margin-bottom: 0px;
-flex-shrink: 0; / Prevent image from shrinking /
+flex-shrink: 0; /* Prevent image from shrinking */
 }
 .genre-card-content {
 display: flex;
 flex-direction: column;
-flex: 1; / Take up remaining space /
+flex: 1; /* Take up remaining space */
 width: 100%;
-min-height: 0; / Allow flex child to shrink below content size /
+min-height: 0; /* Allow flex child to shrink below content size */
 }
 .genre-card-name {
 font-family: 'Montserrat', sans-serif;
@@ -741,7 +742,7 @@ white-space: nowrap;
 overflow: hidden;
 text-overflow: ellipsis;
 width: 100%;
-flex-shrink: 0; / Prevent title from shrinking /
+flex-shrink: 0; /* Prevent title from shrinking */
 }
 .genre-card-description-wrapper {
 max-height: 80px;
@@ -752,7 +753,7 @@ padding-right: 5px;
 box-sizing: border-box;
 scrollbar-width: thin;
 scrollbar-color: #e9ba2e transparent;
-flex: 1; / Allow description area to grow and fill space */
+flex: 1; /* Allow description area to grow and fill space */
 }
 
 /* --- Music Player Bar Styles --- */
@@ -885,7 +886,7 @@ gap: 18px;
 min-width: 0;
 }
 
-/* --- Vertical Volume Slider Styles --- /
+/* --- Vertical Volume Slider Styles --- */
 .player-volume input[type="range"].volume-bar {
 width: 14px;
 height: 100px;
@@ -893,13 +894,13 @@ background: linear-gradient(to top, #ebba2f 0%, #ebba2f 0%, #555 0%, #555 100%);
 border-radius: 8px;
 outline: none;
 cursor: pointer;
-/ REPLACE deprecated appearance: slider-vertical with standards-based vertical writing mode /
+/* REPLACE deprecated appearance: slider-vertical with standards-based vertical writing mode */
 writing-mode: vertical-lr;
 direction: rtl;
 margin-bottom: 0;
 transition: background-size 0.2s;
 box-shadow: 0 2px 8px rgba(0,0,0,0.18);
-/ Remove background-image and background-size, use JS for dynamic fill if needed */
+/* Remove background-image and background-size, use JS for dynamic fill if needed */
 }
 
 /* Webkit browsers (Chrome, Edge, Safari) */
@@ -987,14 +988,14 @@ position: relative;
 z-index: 1;
 }
 
-/* Gold color filter for PNG on card or icon hover /
+/* Gold color filter for PNG on card or icon hover */
 .song-card:hover .premium-indicator-icon,
 .song-card .premium-indicator-icon:hover,
 .trending-song-card:hover .trending-premium-indicator-icon,
 .trending-song-card .trending-premium-indicator-icon:hover {
 filter:
-invert(100%) / keep icon white /
-drop-shadow(0 0 3px rgba(235,186,47,0.75)) / golden glow */
+invert(100%) /* keep icon white */
+drop-shadow(0 0 3px rgba(235,186,47,0.75)) /* golden glow */
 drop-shadow(0 0 8px rgba(235,186,47,0.55))
 drop-shadow(0 0 14px rgba(235,186,47,0.45));
 }
@@ -1028,14 +1029,14 @@ border-radius: 8px;
 100% { left: 120%; }
 }
 
-/* --- Footer Styles --- /
+/* --- Footer Styles --- */
 .footer {
-background-color: #0c0c0c; / A slightly different dark shade for contrast /
+background-color: #0c0c0c; /* A slightly different dark shade for contrast */
 color: #a0a0a0;
 padding: 100px 40px 0px 0px;
 border-top: 1px solid #222;
 position: relative;
-overflow: hidden; / Important for the lotus image effect */
+overflow: hidden; /* Important for the lotus image effect */
 
 }
 
@@ -1060,9 +1061,6 @@ flex-shrink: 0;
 
 .footer-lotus-image {
 position: absolute;
-
-text
-
 top: 50%;
 transform: translateY(-50%);
 width: 400px;
@@ -1247,7 +1245,7 @@ padding: 0 20px;
 box-sizing: border-box;
 }
 
-/* --- Login Page Styles --- /
+/* --- Login Page Styles --- */
 @keyframes fadeInSlideUp {
 from { opacity: 0; transform: translateY(20px); }
 to { opacity: 1; transform: translateY(0); }
@@ -1268,7 +1266,7 @@ background-size: cover;
 background-position: center;
 background-repeat: no-repeat;
 }
-/ -------- collapse empty full-width sections (used by MusicContent carousels) -------- */
+/* -------- collapse empty full-width sections (used by MusicContent carousels) -------- */
 
 .full-width-section {
 grid-column: 1 / -1;
@@ -1389,7 +1387,7 @@ background-size: 200% 100%;
 .skeleton-progress-bar, .volume-bar { height: 6px; border-radius: 5px; width: 100%; }
 .footer .skeleton-text-line { height: 18px; margin: auto; }
 
-/* --- Search Page Carousel Styles --- /
+/* --- Search Page Carousel Styles --- */
 .search-carousel-container {
 margin-bottom: 20px;
 }
@@ -1399,7 +1397,7 @@ font-weight: 600;
 color: #e0e0e0;
 margin-bottom: 15px;
 text-transform: capitalize;
-padding: 0 40px; / align with 40px left gutter of carousel cards /
+padding: 0 40px; /* align with 40px left gutter of carousel cards */
 }
 .carousel-wrapper {
 position: relative;
@@ -1408,12 +1406,12 @@ position: relative;
 display: flex;
 gap: 25px;
 overflow-x: auto;
-/ Add padding to make space for buttons that will overlap /
+/* Add padding to make space for buttons that will overlap */
 padding: 0 60px 20px 40px;
-/ CHANGED: left padding from 60px to 80px /
+/* CHANGED: left padding from 60px to 80px */
 scrollbar-width: none;
 -ms-overflow-style: none;
-/ Crucial for smooth scrolling on touch devices /
+/* Crucial for smooth scrolling on touch devices */
 -webkit-overflow-scrolling: touch;
 scroll-snap-type: x mandatory;
 }
@@ -1426,7 +1424,7 @@ display: none;
 .carousel-scroll-button {
 position: absolute;
 top: 50%;
-/ Adjust transform to account for button height /
+/* Adjust transform to account for button height */
 transform: translateY(-60%);
 background-color: rgba(235, 186, 47, 0.9);
 color: #1a1a1a;
@@ -1440,7 +1438,7 @@ align-items: center;
 justify-content: center;
 box-shadow: 0 4px 15px rgba(0,0,0,0.4);
 z-index: 10;
-/ ADDON 1: Add transition for smooth hiding/showing /
+/* ADDON 1: Add transition for smooth hiding/showing */
 opacity: 1;
 transition: opacity 0.3s ease, transform 0.2s ease, background-color 0.3s ease;
 }
@@ -1450,7 +1448,7 @@ transition: opacity 0.3s ease, transform 0.2s ease, background-color 0.3s ease;
 background-color: #d4a72a;
 transform: translateY(-60%) scale(1.05);
 }
-/ ADDON 1: Class to hide buttons */
+/* ADDON 1: Class to hide buttons */
 .carousel-scroll-button.hidden {
 opacity: 0;
 pointer-events: none;
@@ -1493,22 +1491,19 @@ position: relative;
 }
 
 .trending-carousel-scroll-area {
-display: flex;
-gap: 25px;
-overflow-x: auto;
-/* Add padding to show partial cards and make space for buttons */
-
-text
-
-padding: 0 0 0 0;
- /* Extra left padding to show partial card */
-scrollbar-width: none;
--ms-overflow-style: none;
--webkit-overflow-scrolling: touch;
-scroll-snap-type: x mandatory;
- scroll-padding-left: 0;
+    display: flex;
+    gap: 25px;
+    overflow-x: auto;
+    /* Add padding to show partial cards and make space for buttons */
+   
+    padding: 0 0 0 0;
+     /* Extra left padding to show partial card */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+     scroll-padding-left: 0;
 }
-
 .trending-carousel-scroll-area > * {
 scroll-snap-align: start;
 }
@@ -1517,7 +1512,7 @@ scroll-snap-align: start;
 display: none;
 }
 
-/* Trending Song Card - Same as Raw Library Cards /
+/* Trending Song Card - Same as Raw Library Cards */
 .trending-song-card {
 background-color: #282828;
 border-radius: 15px;
@@ -1527,7 +1522,7 @@ display: flex;
 align-items: flex-start;
 padding: 25px;
 position: relative;
-/ Fixed width to show exactly 3 cards */
+/* Fixed width to show exactly 3 cards */
 flex: 0 0 450px;
 width: 450px;
 }
@@ -1775,22 +1770,22 @@ display: none;
 
 /* --- FINAL & CORRECTED STYLES for Song Card --- */
 
-/* This is the new main container for the bottom part of the card /
+/* This is the new main container for the bottom part of the card */
 .song-card-bottom-row {
 display: flex;
-flex-direction: column; / Stack the metadata and actions vertically /
+flex-direction: column; /* Stack the metadata and actions vertically */
 justify-content: space-between;
-flex-grow: 1; / Allow it to take up remaining space */
+flex-grow: 1; /* Allow it to take up remaining space */
 margin-top: 10px;
 padding-top: 5px;
 }
 
-/* Container for the new metadata items (BPM, Key, Vocal Icon) /
+/* Container for the new metadata items (BPM, Key, Vocal Icon) */
 .song-metadata-container {
 display: flex;
 align-items: center;
-gap: 12px; / Space between items /
-margin-bottom: 10px; / Space between this row and the actions row */
+gap: 12px; /* Space between items */
+margin-bottom: 10px; /* Space between this row and the actions row */
 }
 
 /* Individual style for each metadata item (BPM, Key) */
@@ -1800,96 +1795,96 @@ color: #b0b0b0;
 font-weight: 500;
 }
 
-/* Style for the vocal icon image /
+/* Style for the vocal icon image */
 .vocal-icon {
 width: 20px;
 height: 20px;
-/ This makes the white icon visible on the dark background */
+/* This makes the white icon visible on the dark background */
 filter: brightness(0) invert(0.8);
 }
 
-/* Container for the existing action buttons (Timestamp, Like, Download, Play) /
+/* Container for the existing action buttons (Timestamp, Like, Download, Play) */
 .song-actions-container {
 display: flex;
 align-items: center;
-justify-content: space-between; / Pushes timestamp to the left and buttons to the right /
+justify-content: space-between; /* Pushes timestamp to the left and buttons to the right */
 width: 100%;
 }
-/ --- FINAL & CORRECTED STYLES for Song Card --- */
+/* --- FINAL & CORRECTED STYLES for Song Card --- */
 
-/* This is the new main container for the bottom part of the card /
+/* This is the new main container for the bottom part of the card */
 .song-card-bottom-row-final {
 display: flex;
-align-items: flex-end; / Aligns items to the bottom /
-justify-content: space-between; / Pushes metadata grid left and play button right /
-margin-top: auto; / Pushes this whole section to the bottom */
+align-items: flex-end; /* Aligns items to the bottom */
+justify-content: space-between; /* Pushes metadata grid left and play button right */
+margin-top: auto; /* Pushes this whole section to the bottom */
 padding-top: 10px;
 }
 
-/* This is the container for the two metadata/action rows /
+/* This is the container for the two metadata/action rows */
 .metadata-grid {
 display: flex;
 flex-direction: column;
-gap: 8px; / Vertical space between the two rows /
-flex-grow: 1; / Allows the grid to take up available space /
-/ This ensures the grid doesn't get squished by the play button */
+gap: 8px; /* Vertical space between the two rows */
+flex-grow: 1; /* Allows the grid to take up available space */
+/* This ensures the grid doesn't get squished by the play button */
 margin-right: 10px;
 }
 
-/* This styles BOTH rows to ensure they behave consistently /
+/* This styles BOTH rows to ensure they behave consistently */
 .card-row {
 display: flex;
 width: 100%;
-align-items: center; / Vertically centers items within each row */
+align-items: center; /* Vertically centers items within each row */
 }
 
-/* This is the container for each of the 3 columns /
+/* This is the container for each of the 3 columns */
 .card-column {
-flex-basis: 33.33%; / Each column takes up exactly one-third of the space */
+flex-basis: 33.33%; /* Each column takes up exactly one-third of the space */
 display: flex;
 align-items: center;
 }
 
-/* --- Column Alignment --- /
+/* --- Column Alignment --- */
 .card-column.left {
-justify-content: flex-start; / Aligns content to the left /
+justify-content: flex-start; /* Aligns content to the left */
 }
 .card-column.center {
-justify-content: center; / Aligns content to the center /
+justify-content: center; /* Aligns content to the center */
 }
-/ THIS IS THE KEY FIX: We now center the content in the right column /
+/* THIS IS THE KEY FIX: We now center the content in the right column */
 .card-column.right {
-justify-content: center; / Aligns content to the center */
+justify-content: center; /* Aligns content to the center */
 }
 
 /* --- Item Styling --- */
 
-/* Styles for BPM, Key, and Duration text /
+/* Styles for BPM, Key, and Duration text */
 .metadata-item,
 .song-timestamp {
 font-size: 0.9em;
 color: #b0b0b0;
 font-weight: 500;
 white-space: nowrap;
-/ This gives the text elements a minimum width to prevent them from collapsing
-and helps maintain the visual center alignment /
+/* This gives the text elements a minimum width to prevent them from collapsing
+and helps maintain the visual center alignment */
 min-width: 50px;
-text-align: center; / Ensures text itself is centered if the container is wider */
+text-align: center; /* Ensures text itself is centered if the container is wider */
 }
 
-/* A group for the heart and vocal icons to keep them together /
+/* A group for the heart and vocal icons to keep them together */
 .action-buttons-group {
 display: flex;
 justify-content: center;
 align-items: center;
-gap: 12px; / Space between heart and vocal icons */
+gap: 12px; /* Space between heart and vocal icons */
 }
 
-/* Style for the vocal icon image. /
+/* Style for the vocal icon image. */
 .vocal-icon {
 width: 33px;
 height: 33px;
-filter: brightness(0) invert(0.8); / Makes the icon white/grey */
+filter: brightness(0) invert(0.8); /* Makes the icon white/grey */
 }
 
 /* This ensures the old, unused class from your original file doesn't interfere. */
@@ -2056,13 +2051,13 @@ opacity: 0;
 animation: fadeInCard 0.6s ease-out forwards;
 }
 
-/* Centers the card and matches the non‑premium pricing card width /
+/* Centers the card and matches the non‑premium pricing card width */
 .premium-card.pricing-card {
 animation-delay: 0.2s;
 grid-column: 1 / -1;
 justify-self: center;
 width: 100%;
-max-width: 535px; / keep same visual as non‑premium card */
+max-width: 535px; /* keep same visual as non‑premium card */
 text-align: center;
 }
 
@@ -2285,15 +2280,15 @@ width: 50%;
 height: 50%;
 transform: translate(-50%, -50%);
 border-radius: 50%;
-/* Optionally darken background for better separation /
-background: rgba(235,186,47,0.95); / was #ebba2f /
+/* Optionally darken background for better separation */
+background: rgba(235,186,47,0.95); /* was #ebba2f */
 display: flex;
 align-items: center;
 justify-content: center;
 opacity: 0;
 pointer-events: none;
 transition: opacity 160ms ease, transform 160ms ease;
-/ Strengthen shadow for contrast */
+/* Strengthen shadow for contrast */
 box-shadow: 0 8px 24px rgba(0,0,0,0.45);
 border: none;
 outline: none;
@@ -2317,9 +2312,9 @@ height: 48px;
 color: #111; /* Black icon */
 }
 
-/* --- NEW: Terms Link Styles --- /
+/* --- NEW: Terms Link Styles --- */
 .terms-link {
-color: #FFD600; / bright yellow */
+color: #FFD600; /* bright yellow */
 text-decoration: underline;
 cursor: pointer;
 transition: color 0.2s;
@@ -2349,28 +2344,28 @@ outline-offset: 2px;
 border-radius: 4px;
 }
 
-/* === Premium button: fixed tick + animated text/lotus swap (no layout shift) === /
+/* === Premium button: fixed tick + animated text/lotus swap (no layout shift) === */
 .premium-button {
-position: relative; / already present; reaffirm /
+position: relative; /* already present; reaffirm */
 display: inline-flex;
 align-items: center;
-gap: 8px; / space between fixed icon and swap-area */
+gap: 8px; /* space between fixed icon and swap-area */
 }
 
-/* Keep the tick/lotus icon fixed on the left /
+/* Keep the tick/lotus icon fixed on the left */
 .premium-button .premium-icon-wrap {
 display: inline-flex;
 align-items: center;
 justify-content: center;
-flex: 0 0 auto; / never grow/shrink */
+flex: 0 0 auto; /* never grow/shrink */
 }
 
-/* Swap area holds the text and the lotus row stacked in the same place /
+/* Swap area holds the text and the lotus row stacked in the same place */
 .premium-button .premium-swap-area {
-display: grid; / stack layers /
-place-items: center; / center layers /
+display: grid; /* stack layers */
+place-items: center; /* center layers */
 position: relative;
-/ Reserve enough width to prevent layout shift when swapping layers.
+/* Reserve enough width to prevent layout shift when swapping layers.
 'PREMIUM' has 7 letters → 7ch plus small buffer. Adjust if your font differs. */
 min-width: 7.5ch;
 }
@@ -2383,7 +2378,7 @@ line-height: 1;
 white-space: nowrap;
 }
 
-/* Default: show text, hide lotus row /
+/* Default: show text, hide lotus row */
 .premium-button .premium-text-layer {
 opacity: 1;
 transform: translateY(0) scale(1);
@@ -2396,7 +2391,7 @@ gap: 8px;
 opacity: 0;
 transform: translateY(6px) scale(0.98);
 transition: opacity 220ms ease, transform 280ms cubic-bezier(0.2,0.7,0.3,1);
-pointer-events: none; / avoid intercepting clicks */
+pointer-events: none; /* avoid intercepting clicks */
 }
 
 /* Icon sizes inside swap layer (match base 20px lotus/tick) */
@@ -2427,16 +2422,16 @@ transition-delay: 90ms;
 transition-delay: 140ms;
 }
 
-/* Ensure the tick stroke remains bold and legible /
+/* Ensure the tick stroke remains bold and legible */
 .premium-button .tick-icon {
-color: #1a1a1a; / uses stroke=currentColor */
+color: #1a1a1a; /* uses stroke=currentColor */
 }
 
-/* Ensure the premium status card uses the same visual box as non-premium pricing card /
+/* Ensure the premium status card uses the same visual box as non-premium pricing card */
 .premium-status-card.premium-card.pricing-card {
-/ pricing-card already centers + sets max-width; this keeps consistency /
-/ No extra styles needed for color/border since .premium-card handles that /
-margin-bottom: 10px; / small separation from history box */
+/* pricing-card already centers + sets max-width; this keeps consistency */
+/* No extra styles needed for color/border since .premium-card handles that */
+margin-bottom: 10px; /* small separation from history box */
 }
 
 /* Tighten inner spacing a bit for status layout */
@@ -2513,11 +2508,11 @@ Override to allow overflow so tooltips can render fully. */
 overflow: visible !important;
 }
 
-/* Ensure small indicator wrappers do not clip /
+/* Ensure small indicator wrappers do not clip */
 .premium-indicator,
 .trending-premium-indicator {
 overflow: visible;
-z-index: 50; / above image and card content */
+z-index: 50; /* above image and card content */
 }
 
 /* Raise tooltip stacking to be above badges/images/cards */
@@ -2572,10 +2567,10 @@ z-index: 3; /* above content inside the notification */
 transition: background 160ms ease, color 160ms ease, transform 120ms ease, box-shadow 160ms ease;
 }
 
-/* Hover/active feedback /
+/* Hover/active feedback */
 .notification-close-btn:hover {
 background: rgba(255,255,255,0.08);
-color: #000000; / VARA yellow */
+color: #000000; /* VARA yellow */
 transform: translateY(-1px);
 box-shadow: 0 2px 10px rgba(0,0,0,0.25);
 }
@@ -2584,14 +2579,14 @@ transform: translateY(0);
 box-shadow: none;
 }
 
-/* === Raw Library: overlay play button inside cover image === /
+/* === Raw Library: overlay play button inside cover image === */
 .song-image-wrapper {
-position: relative; / only for positioning the overlay button /
+position: relative; /* only for positioning the overlay button */
 display: inline-block;
-/ No width/height here — image sizing remains controlled by .song-card-image */
+/* No width/height here — image sizing remains controlled by .song-card-image */
 }
 
-/* 48px circular button; inner icon 20px /
+/* 48px circular button; inner icon 20px */
 .cover-play-button {
 width: 48px;
 height: 48px;
@@ -2604,12 +2599,12 @@ align-items: center;
 justify-content: center;
 box-shadow: 0 6px 18px rgba(0,0,0,0.4);
 cursor: pointer;
-transition: background-color 160ms ease; / simplified: no transform */
+transition: background-color 160ms ease; /* simplified: no transform */
 }
 
 .cover-play-button:hover {
-background-color: #d4a72a; /* simple color change only /
-/ removed: transform */
+background-color: #d4a72a; /* simple color change only */
+/* removed: transform */
 }
 
 .cover-play-button svg {
@@ -2618,24 +2613,24 @@ height: 20px;
 color: #1a1a1a;
 }
 
-/* Raw Library: increase equal spacing between the three info columns /
+/* Raw Library: increase equal spacing between the three info columns */
 .song-card .card-row {
-gap: 28px; / spread left/center/right equally; keeps equal widths */
+gap: 28px; /* spread left/center/right equally; keeps equal widths */
 }
 
-/* 1) Match Raw Library column spacing on carousel cards /
+/* 1) Match Raw Library column spacing on carousel cards */
 .trending-song-card .trending-card-row {
-gap: 28px; / same as .song-card .card-row */
+gap: 28px; /* same as .song-card .card-row */
 }
 
-/* 2) Remove the old reserved space on the right side under the image /
+/* 2) Remove the old reserved space on the right side under the image */
 .trending-song-card-bottom-row-final .trending-metadata-grid {
-margin-right: 0; / there is no right-side play button anymore */
+margin-right: 0; /* there is no right-side play button anymore */
 }
 
-/* 3) Ensure the overlay play button always renders above the image (no layout changes) /
+/* 3) Ensure the overlay play button always renders above the image (no layout changes) */
 .cover-play-button {
-z-index: 2; / keep above img and content within wrapper */
+z-index: 2; /* keep above img and content within wrapper */
 }
 
 /* Instrument pill helpers (used by inline style too) */
@@ -2667,16 +2662,16 @@ background-color: #2bd56b;
 transform: translateY(-1px);
 }
 
-/* ========= Carousel cards: mimic Raw Library layout with pure CSS ========= /
-/ Make each carousel card a 2‑column grid: [image | text column] /
+/* ========= Carousel cards: mimic Raw Library layout with pure CSS ========= */
+/* Make each carousel card a 2‑column grid: [image | text column] */
 .trending-song-card {
-display: grid !important; / force grid for carousels /
-grid-template-columns: 180px 1fr; / image | text /
-grid-template-rows: auto auto; / row1: info, row2: metadata /
-column-gap: 15px; / match Raw Library spacing /
-row-gap: 4px; / reduced from 8px or unset → tighter gap like Raw Library /
+display: grid !important; /* force grid for carousels */
+grid-template-columns: 180px 1fr; /* image | text */
+grid-template-rows: auto auto; /* row1: info, row2: metadata */
+column-gap: 15px; /* match Raw Library spacing */
+row-gap: 4px; /* reduced from 8px or unset → tighter gap like Raw Library */
 align-items: start;
-padding: 25px; / keep your card padding */
+padding: 25px; /* keep your card padding */
 }
 
 .trending-song-card > .song-image-wrapper {
@@ -2705,11 +2700,11 @@ width: 100%;
 margin-right: 0;
 }
 
-/* Tighter spacing for pill containers inside carousels /
+/* Tighter spacing for pill containers inside carousels */
 .trending-song-card .trending-genre-scroll-wrapper > .trending-genre-pill-container,
 .trending-song-card .trending-genre-scroll-wrapper > .trending-subgenre-pill-container,
 .trending-song-card .trending-genre-scroll-wrapper > .trending-instrument-pill-container {
-margin-bottom: 4px !important; / was 6px */
+margin-bottom: 4px !important; /* was 6px */
 }
 
 /* No trailing gap after the last pill container */
@@ -2724,10 +2719,10 @@ margin-top: 0 !important;
 padding-top: 0 !important;
 }
 
-/* === Hero logged-in additions (scoped, additive only) === /
+/* === Hero logged-in additions (scoped, additive only) === */
 .hero-greeting {
 max-width: 900px;
-margin: 0 auto 24px auto; / center above existing headline */
+margin: 0 auto 24px auto; /* center above existing headline */
 padding: 0 12px;
 }
 
@@ -2812,28 +2807,28 @@ margin-bottom: 50px;
 
 /* === VARA OVERRIDES: Large cover image for Genre/Instrument/Sub‑Genre cards === */
 
-/* The image wrapper should take full width and hide any overflow for clean rounded corners /
+/* The image wrapper should take full width and hide any overflow for clean rounded corners */
 .genre-card-image-wrap {
 display: block;
 width: 100%;
 position: relative;
 overflow: hidden;
-border-radius: 14px; / slightly round like your design /
-margin-bottom: 18px; / tighter spacing before the title */
+border-radius: 14px; /* slightly round like your design */
+margin-bottom: 18px; /* tighter spacing before the title */
 }
 
-/* Make the cover image very large: full card width, keep it square /
+/* Make the cover image very large: full card width, keep it square */
 .genre-card-image {
 display: block;
 width: 100%;
 height: auto;
-aspect-ratio: 1 / 1; / square cover that scales with card width /
+aspect-ratio: 1 / 1; /* square cover that scales with card width */
 object-fit: cover;
-border-radius: 14px; / match wrapper to avoid edge mismatch /
-/ keep hover scale smooth (defined earlier), no layout shift */
+border-radius: 14px; /* match wrapper to avoid edge mismatch */
+/* keep hover scale smooth (defined earlier), no layout shift */
 }
 
-/* Floating circular play/explore button (appears on hover, bottom-right) /
+/* Floating circular play/explore button (appears on hover, bottom-right) */
 .browse-card-play {
 position: absolute;
 right: 10px;
@@ -2841,7 +2836,7 @@ bottom: 10px;
 width: 46px;
 height: 46px;
 border-radius: 50%;
-background: #ebba2f; / VARA yellow */
+background: #ebba2f; /* VARA yellow */
 color: #1a1a1a;
 display: inline-flex;
 align-items: center;
@@ -2861,11 +2856,11 @@ transform: translateY(0) scale(1);
 background: #d4a72a;
 }
 
-/* Red parent-genre pill (sub-genre only) — bottom edge flush with image /
+/* Red parent-genre pill (sub-genre only) — bottom edge flush with image */
 .subgenre-parent-pill {
 position: absolute !important;
 left: 50% !important;
-bottom: 0 !important; / flush with image bottom */
+bottom: 0 !important; /* flush with image bottom */
 transform: translateX(-50%) !important;
 background-color: #e74c3c !important;
 color: #fff !important;
@@ -2881,7 +2876,7 @@ line-height: 1 !important;
 box-shadow: 0 4px 14px rgba(0,0,0,0.35) !important;
 }
 
-/* Title under image — tight spacing and clear hierarchy /
+/* Title under image — tight spacing and clear hierarchy */
 .genre-card-content {
 padding: 0 2px 6px !important;
 }
@@ -2890,7 +2885,7 @@ font-family: 'Montserrat', sans-serif !important;
 font-weight: 800 !important;
 font-size: 1.05rem !important;
 color: #fff !important;
-margin: 6px 0 2px 0 !important; / tight Spotify-ish spacing */
+margin: 6px 0 2px 0 !important; /* tight Spotify-ish spacing */
 white-space: nowrap !important;
 overflow: hidden !important;
 text-overflow: ellipsis !important;
@@ -2916,19 +2911,19 @@ padding: 0 !important;
 align-items: stretch;
 }
 
-/* 2) Full-width square cover image /
+/* 2) Full-width square cover image */
 .genre-card-image-wrap {
 display: block;
 width: 100%;
 position: relative;
 overflow: hidden;
-border-radius: 14px; / rounded corners, matches your design /
-margin-bottom: 14px; / spacing before the title /
-border: 2px solid rgba(255,255,255,0); / base border (transparent) /
+border-radius: 14px; /* rounded corners, matches your design */
+margin-bottom: 14px; /* spacing before the title */
+border: 2px solid rgba(255,255,255,0); /* base border (transparent) */
 transition: border-color 200ms ease, box-shadow 220ms ease;
 }
 .genre-card-image-wrap::after {
-/ subtle white glow overlay that fades in on hover /
+/* subtle white glow overlay that fades in on hover */
 content: '';
 position: absolute;
 inset: 0;
@@ -2941,7 +2936,7 @@ pointer-events: none;
 display: block;
 width: 100%;
 height: auto;
-aspect-ratio: 1 / 1; / square cover that scales with card width */
+aspect-ratio: 1 / 1; /* square cover that scales with card width */
 object-fit: cover;
 border-radius: 14px;
 transition: transform 220ms ease;
@@ -2962,13 +2957,13 @@ background: rgba(255,255,255,0.06);
 transform: scale(1.02);
 }
 
-/* 4) Red parent-genre pill still overlaps the image bottom /
+/* 4) Red parent-genre pill still overlaps the image bottom */
 .subgenre-parent-pill {
 position: absolute;
 left: 50%;
-bottom: 0 !important; / align pill bottom with image bottom /
-transform: translateX(-50%); / centered horizontally /
-background-color: #e74c3c; / red */
+bottom: 0 !important; /* align pill bottom with image bottom */
+transform: translateX(-50%); /* centered horizontally */
+background-color: #e74c3c; /* red */
 color: #fff;
 padding: 6px 14px;
 border-radius: 9999px;
@@ -3000,11 +2995,11 @@ aspect-ratio: 1 / 1;
 border-radius: 14px !important;
 }
 
-/* === VARA CARD OUTLINE + SPACING OVERRIDES (global for genre/sub-genre/instrument) === /
+/* === VARA CARD OUTLINE + SPACING OVERRIDES (global for genre/sub-genre/instrument) === */
 .genre-card {
 position: relative;
-border-radius: 16px; / matches image radius /
-/ Faint constant border using inset shadow (no layout shift) */
+border-radius: 16px; /* matches image radius */
+/* Faint constant border using inset shadow (no layout shift) */
 box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.16) !important;
 transition: box-shadow 200ms ease, transform 200ms ease;
 }
@@ -3017,22 +3012,22 @@ inset 0 0 0 2px rgba(255,255,255,0.85),
 0 12px 30px rgba(0,0,0,0.45) !important; /* stronger outline + lift */
 }
 
-/* Cover image: square, rounded, subtle zoom on hover /
+/* Cover image: square, rounded, subtle zoom on hover */
 .genre-card-image-wrap {
 position: relative !important;
 display: block !important;
 width: 100% !important;
 overflow: hidden !important;
 border-radius: 12px !important;
-margin-bottom: 10px !important; / tight spacing (Spotify-like) /
-background: #111; / fallback bg /
+margin-bottom: 10px !important; /* tight spacing (Spotify-like) */
+background: #111; /* fallback bg */
 box-shadow: 0 6px 18px rgba(0,0,0,0.25);
 }
 .genre-card-image {
 display: block !important;
 width: 100% !important;
 height: auto !important;
-aspect-ratio: 1 / 1 !important; / square cover */
+aspect-ratio: 1 / 1 !important; /* square cover */
 object-fit: cover !important;
 border-radius: 12px !important;
 transition: transform 200ms ease !important;
@@ -3042,7 +3037,7 @@ transition: transform 200ms ease !important;
 transform: scale(1.02);
 }
 
-/* Floating circular play/explore button (appears on hover, bottom-right) /
+/* Floating circular play/explore button (appears on hover, bottom-right) */
 .browse-card-play {
 position: absolute;
 right: 10px;
@@ -3050,7 +3045,7 @@ bottom: 10px;
 width: 46px;
 height: 46px;
 border-radius: 50%;
-background: #ebba2f; / VARA yellow */
+background: #ebba2f; /* VARA yellow */
 color: #1a1a1a;
 display: inline-flex;
 align-items: center;
@@ -3070,13 +3065,13 @@ transform: translateY(0) scale(1);
 background: #d4a72a;
 }
 
-/* Red parent-genre pill (sub-genre only) — bottom edge flush with image /
+/* Red parent-genre pill (sub-genre only) — bottom edge flush with image */
 .subgenre-parent-pill {
 position: absolute;
 left: 50%;
-bottom: 0 !important; / align pill bottom with image bottom /
-transform: translateX(-50%); / centered horizontally /
-background-color: #e74c3c; / red */
+bottom: 0 !important; /* align pill bottom with image bottom */
+transform: translateX(-50%); /* centered horizontally */
+background-color: #e74c3c; /* red */
 color: #fff;
 padding: 6px 14px;
 border-radius: 9999px;
@@ -3114,16 +3109,16 @@ grid-template-columns: repeat(2, 1fr) !important;
 }
 }
 
-/* Card container: theme background, faint outline always on /
+/* Card container: theme background, faint outline always on */
 .genre-card {
-background: #282929 !important; / theme background /
+background: #282929 !important; /* theme background */
 border-radius: 16px !important;
 padding: 12px !important;
 display: flex !important;
 flex-direction: column !important;
 align-items: stretch !important;
-text-align: left !important; / Spotify-style left text /
-box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08) !important; / faint outline */
+text-align: left !important; /* Spotify-style left text */
+box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08) !important; /* faint outline */
 transition: transform 180ms ease, box-shadow 200ms ease !important;
 }
 .genre-card.clickable { cursor: pointer; }
@@ -3135,22 +3130,22 @@ inset 0 0 0 2px rgba(255,255,255,0.85),
 0 12px 30px rgba(0,0,0,0.45) !important; /* stronger outline + lift */
 }
 
-/* Cover image: square, rounded, subtle zoom on hover /
+/* Cover image: square, rounded, subtle zoom on hover */
 .genre-card-image-wrap {
 position: relative !important;
 display: block !important;
 width: 100% !important;
 overflow: hidden !important;
 border-radius: 12px !important;
-margin-bottom: 10px !important; / tight spacing (Spotify-like) /
-background: #111; / fallback bg /
+margin-bottom: 10px !important; /* tight spacing (Spotify-like) */
+background: #111; /* fallback bg */
 box-shadow: 0 6px 18px rgba(0,0,0,0.25);
 }
 .genre-card-image {
 display: block !important;
 width: 100% !important;
 height: auto !important;
-aspect-ratio: 1 / 1 !important; / square cover */
+aspect-ratio: 1 / 1 !important; /* square cover */
 object-fit: cover !important;
 border-radius: 12px !important;
 transition: transform 200ms ease !important;
@@ -3160,7 +3155,7 @@ transition: transform 200ms ease !important;
 transform: scale(1.02);
 }
 
-/* Floating circular play/explore button (appears on hover, bottom-right) /
+/* Floating circular play/explore button (appears on hover, bottom-right) */
 .browse-card-play {
 position: absolute;
 right: 10px;
@@ -3168,7 +3163,7 @@ bottom: 10px;
 width: 46px;
 height: 46px;
 border-radius: 50%;
-background: #ebba2f; / VARA yellow */
+background: #ebba2f; /* VARA yellow */
 color: #1a1a1a;
 display: inline-flex;
 align-items: center;
@@ -3188,13 +3183,13 @@ transform: translateY(0) scale(1);
 background: #d4a72a;
 }
 
-/* Red parent-genre pill (sub-genre only) — bottom edge flush with image /
+/* Red parent-genre pill (sub-genre only) — bottom edge flush with image */
 .subgenre-parent-pill {
 position: absolute;
 left: 50%;
-bottom: 0 !important; / align pill bottom with image bottom /
-transform: translateX(-50%); / centered horizontally /
-background-color: #e74c3c; / red */
+bottom: 0 !important; /* align pill bottom with image bottom */
+transform: translateX(-50%); /* centered horizontally */
+background-color: #e74c3c; /* red */
 color: #fff;
 padding: 6px 14px;
 border-radius: 9999px;
@@ -3267,13 +3262,12 @@ padding-left: 10px;
 padding-right: 10px;
 }
 }
-/* ===== END VARA: Responsive Content Tabs ===== /
+/* ===== END VARA: Responsive Content Tabs ===== */
 @media (min-width: 1024px) {
 .content-tabs {
-/ Center the tab strip when there's extra space on desktop */
+/* Center the tab strip when there's extra space on desktop */
 justify-content: center !important;
 
-text
 
 /* Restore comfortable desktop spacing between tabs */
 gap: 30px !important;
@@ -3289,22 +3283,22 @@ padding-right: 0 !important;
 @media (max-width: 1024px) {
 .content-tabs::before {
 content: '';
-display: block; /* make it a real flex item /
-flex: 0 0 22px; / gutter width; tweak 18–28px to taste /
-min-width: 22px; / ensure it doesn’t collapse /
+display: block; /* make it a real flex item */
+flex: 0 0 22px; /* gutter width; tweak 18–28px to taste */
+min-width: 22px; /* ensure it doesn’t collapse */
 }
 }
 @media (max-width: 1024px) {
 .content-tabs {
-justify-content: flex-start !important; / enforce left alignment on smaller screens /
+justify-content: flex-start !important; /* enforce left alignment on smaller screens */
 }
 .content-tabs > .tab-button:first-child {
-margin-left: 22px !important; / reliable left gutter /
-scroll-margin-left: 22px; / plays nice with scroll-snap */
+margin-left: 22px !important; /* reliable left gutter */
+scroll-margin-left: 22px; /* plays nice with scroll-snap */
 }
 }
 
-/* Slightly smaller gutter on very small phones /
+/* Slightly smaller gutter on very small phones */
 @media (max-width: 480px) {
 .content-tabs > .tab-button:first-child {
 margin-left: 18px !important;
@@ -3313,7 +3307,7 @@ scroll-margin-left: 18px;
 }
 .collection-hero {
 display: grid;
-grid-template-columns: auto 1fr; / image | text */
+grid-template-columns: auto 1fr; /* image | text */
 align-items: center;
 column-gap: 24px;
 row-gap: 8px;
@@ -3332,22 +3326,22 @@ background: #111;
 box-shadow: 0 8px 24px rgba(0,0,0,0.45);
 }
 
-/* Square, responsive cover image /
+/* Square, responsive cover image */
 .collection-hero-image {
 display: block;
-width: clamp(160px, 22vw, 240px); / scales with viewport, capped for balance */
+width: clamp(160px, 22vw, 240px); /* scales with viewport, capped for balance */
 height: auto;
 aspect-ratio: 1 / 1;
 object-fit: cover;
 border-radius: 14px;
 }
 
-/* Text column /
+/* Text column */
 .collection-hero-body {
 display: flex;
 flex-direction: column;
 gap: 10px;
-min-width: 0; / allow text to shrink gracefully */
+min-width: 0; /* allow text to shrink gracefully */
 }
 
 /* Strong, clean title with yellow underline */
@@ -3363,20 +3357,20 @@ position: relative;
 padding-bottom: 8px;
 }
 
-/* Accent underline (VARA yellow) /
+/* Accent underline (VARA yellow) */
 .collection-hero-title::after {
 content: '';
 position: absolute;
 left: 0;
 bottom: 0;
 height: 3px;
-width: 68px; / underline length /
-background: #ebba2f; / VARA yellow */
+width: 68px; /* underline length */
+background: #ebba2f; /* VARA yellow */
 box-shadow: 0 0 10px rgba(235,186,47,0.35);
 border-radius: 3px;
 }
 
-/* Supporting copy /
+/* Supporting copy */
 .collection-hero-desc {
 font-family: 'Inter', sans-serif;
 color: #cfcfcf;
@@ -3384,15 +3378,15 @@ font-weight: 500;
 font-size: clamp(0.98rem, 0.92rem + 0.2vw, 1.05rem);
 line-height: 1.55;
 margin: 0;
-max-width: 68ch; / comfortable reading width on desktop */
+max-width: 68ch; /* comfortable reading width on desktop */
 text-wrap: pretty;
 }
 
-/* --- Responsive behavior --- /
+/* --- Responsive behavior --- */
 @media (max-width: 1024px) {
 .collection-hero {
 column-gap: 18px;
-padding: 0 24px; / slightly tighter gutters on tablet */
+padding: 0 24px; /* slightly tighter gutters on tablet */
 }
 .collection-hero-image {
 width: clamp(150px, 28vw, 220px);
@@ -3401,24 +3395,24 @@ width: clamp(150px, 28vw, 220px);
 
 @media (max-width: 820px) {
 .collection-hero {
-grid-template-columns: 1fr; /* stack: image above text /
+grid-template-columns: 1fr; /* stack: image above text */
 justify-items: center;
 text-align: center;
 row-gap: 14px;
 padding: 0 20px;
 }
 .collection-hero-body {
-align-items: center; / center text block /
+align-items: center; /* center text block */
 }
 .collection-hero-title::after {
-left: 50%; / center the underline /
+left: 50%; /* center the underline */
 transform: translateX(-50%);
 }
 .collection-hero-desc {
-max-width: 60ch; / keep text readable when centered /
+max-width: 60ch; /* keep text readable when centered */
 }
 .collection-hero-image {
-width: clamp(160px, 52vw, 320px); / larger image on phones */
+width: clamp(160px, 52vw, 320px); /* larger image on phones */
 }
 }
 
@@ -3457,22 +3451,22 @@ margin-bottom: clamp(6px, 1vw, 12px);
 font-size: clamp(1rem, 0.8rem + 0.6vw, 1.25rem);
 }
 
-/* Main headline: fluid, bold, and readable /
+/* Main headline: fluid, bold, and readable */
 .hero-section h1 {
 font-family: 'Montserrat', sans-serif;
 font-weight: 800;
 color: #ffffff;
 margin: 0 0 clamp(12px, 2vw, 22px) 0;
 line-height: 1.15;
-/ Fluid font-size from phone → desktop /
+/* Fluid font-size from phone → desktop */
 font-size: clamp(1.9rem, 1.2rem + 4.2vw, 3.4rem);
-text-wrap: balance; / modern browsers: balanced lines */
+text-wrap: balance; /* modern browsers: balanced lines */
 -webkit-hyphens: auto;
 hyphens: auto;
 text-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
 }
 
-/* Description: comfortable line-length and subtle tone /
+/* Description: comfortable line-length and subtle tone */
 .hero-description {
 font-family: 'Inter', sans-serif;
 font-weight: 500;
@@ -3481,7 +3475,7 @@ margin-left: auto;
 margin-right: auto;
 margin-bottom: clamp(22px, 3.2vw, 40px);
 line-height: 1.6;
-/ Fluid size; narrower max-width for better readability */
+/* Fluid size; narrower max-width for better readability */
 font-size: clamp(0.98rem, 0.9rem + 0.4vw, 1.15rem);
 max-width: clamp(46ch, 68ch, 72ch);
 text-wrap: pretty;
@@ -3520,12 +3514,12 @@ box-shadow: 0 8px 25px rgba(255, 193, 7, 0.45);
 .hero-description { max-width: 60ch; }
 }
 
-/* Small phones /
+/* Small phones */
 @media (max-width: 480px) {
 .hero-section { padding-left: 14px; padding-right: 14px; }
 .try-audio-button { min-width: 70%; }
 }
-/ Base constants: original design size — 25% smaller by default
+/* Base constants: original design size — 25% smaller by default
 Fix: DO NOT hard‑set heights on the wrapper or the .song-card.
 Reserve vertical space with aspect-ratio and scale the inner card only.
 This prevents “elements coming out” while keeping the whole card proportional. */
@@ -3543,27 +3537,27 @@ display: block;
 position: relative;
 }
 
-/* Scale the inner card so all children scale uniformly; let height be auto /
+/* Scale the inner card so all children scale uniformly; let height be auto */
 .trending-carousel-scroll-area > div > .song-card {
-width: var(--cardW); / base canvas for scaling /
-/ height stays auto to avoid clipping/overflow of internal content /
+width: var(--cardW); /* base canvas for scaling */
+/* height stays auto to avoid clipping/overflow of internal content */
 transform: scale(var(--cardScale));
-transform-origin: top left; / anchor scaling */
+transform-origin: top left; /* anchor scaling */
 will-change: transform;
 backface-visibility: hidden;
 }
 
-/* Breakpoints: keep the same visual scale targets, but without forcing fixed heights /
+/* Breakpoints: keep the same visual scale targets, but without forcing fixed heights */
 @media (max-width: 1120px) {
-.trending-carousel-scroll-area > div { --cardScale: 0.69; } / 0.92 × 0.75 /
+.trending-carousel-scroll-area > div { --cardScale: 0.69; } /* 0.92 × 0.75 */
 }
 @media (max-width: 980px) {
-.trending-carousel-scroll-area > div { --cardScale: 0.66; } / 0.88 × 0.75 /
+.trending-carousel-scroll-area > div { --cardScale: 0.66; } /* 0.88 × 0.75 */
 }
 @media (max-width: 860px) {
-.trending-carousel-scroll-area > div { --cardScale: 0.64; } / ~0.6375 /
+.trending-carousel-scroll-area > div { --cardScale: 0.64; } /* ~0.6375 */
 }
-/ Phones: readable while showing a hint of the next card */
+/* Phones: readable while showing a hint of the next card */
 @media (max-width: 720px) {
 .trending-carousel-scroll-area > div { --cardScale: 0.615; }
 }
@@ -3571,14 +3565,14 @@ backface-visibility: hidden;
 .trending-carousel-scroll-area > div { --cardScale: 0.585; }
 }
 
-/* === RAW LIBRARY GRID LAYOUT (NEW) — keep visuals identical to carousel cards === /
+/* === RAW LIBRARY GRID LAYOUT (NEW) — keep visuals identical to carousel cards === */
 .raw-library-grid {
-/ Make this section span the full content grid width */
+/* Make this section span the full content grid width */
 grid-column: 1 / -1;
 
-/* Center the set of columns and keep gaps consistent /
+/* Center the set of columns and keep gaps consistent */
 display: grid;
-justify-content: center; / center the fixed-width columns */
+justify-content: center; /* center the fixed-width columns */
 align-content: start;
 gap: 25px;
 
@@ -3640,9 +3634,9 @@ display: block;
 position: relative;
 }
 
-/* Scale the inner song card uniformly without altering its internal layout /
+/* Scale the inner song card uniformly without altering its internal layout */
 .raw-card-sizer > .song-card {
-width: var(--cardW); / base canvas */
+width: var(--cardW); /* base canvas */
 transform: scale(var(--cardScale));
 transform-origin: top left;
 will-change: transform;
@@ -3663,12 +3657,12 @@ display: none !important;
 padding-bottom: calc(15px + env(safe-area-inset-bottom, 0px));
 }
 
-/* 1) Desktop niceties (no layout changes, ensure stable widths) /
+/* 1) Desktop niceties (no layout changes, ensure stable widths) */
 .music-player-bar {
 flex-wrap: wrap;
 }
 .player-progress {
-flex: 1 1 420px; / let progress expand on wider viewports */
+flex: 1 1 420px; /* let progress expand on wider viewports */
 min-width: 300px;
 }
 
@@ -3746,9 +3740,9 @@ height: 44px;
 }
 }
 
-/* 6) Prevent text wrapping jank; ensure titles truncate gracefully /
+/* 6) Prevent text wrapping jank; ensure titles truncate gracefully */
 .player-song-details {
-min-width: 0; / allow ellipsis to apply */
+min-width: 0; /* allow ellipsis to apply */
 }
 .player-song-title,
 .player-song-artist {
@@ -3759,17 +3753,17 @@ text-overflow: ellipsis;
 
 /* 7) Safety: no horizontal scroll introduced by player */
 
-/* Lift Go To Top button above the player on <= 1110px /
+/* Lift Go To Top button above the player on <= 1110px */
 @media (max-width: 1110px) {
 #vara-go-to-top,
 .go-to-top-wrapper {
-/ Raise the button a bit more than the player height and respect safe area /
+/* Raise the button a bit more than the player height and respect safe area */
 bottom: calc(170px + env(safe-area-inset-bottom, 0px)) !important;
-/ Optional safety: ensure it stays tappable above the player /
+/* Optional safety: ensure it stays tappable above the player */
 z-index: 1400;
 }
 }
-/ Raw Library: “Show more” button */
+/* Raw Library: “Show more” button */
 .raw-library-showmore {
 grid-column: 1 / -1;
 display: flex;
@@ -3805,21 +3799,21 @@ outline: none;
 box-shadow: 0 0 0 2px rgba(235,186,47,0.85);
 border-color: #ebba2f;
 }
-/* === VARA: Mobile fix — place badge below header, sticky (<=700px) === /
+/* === VARA: Mobile fix — place badge below header, sticky (<=700px) === */
 @media (max-width: 700px) {
 .download-badge {
 position: fixed !important;
-/ Place it just below the sticky header; adjust 74px if your header height differs /
+/* Place it just below the sticky header; adjust 74px if your header height differs */
 top: calc(74px + env(safe-area-inset-top, 0px));
 right: 16px;
 margin: 0 !important;
-z-index: 1400; / above page content; below search overlay (which uses ~3000) /
+z-index: 1400; /* above page content; below search overlay (which uses ~3000) */
 }
 }
-/ === VARA watermark overlay (bottom-right on cover image) — adjusted X inset === /
+/* === VARA watermark overlay (bottom-right on cover image) — adjusted X inset === */
 .vara-watermark {
 position: absolute;
-/ Shift further left; scale with cover width, but keep sensible min/max */
+/* Shift further left; scale with cover width, but keep sensible min/max */
 right: clamp(20px, 4.4%, 25px);
 bottom: 8px;
 
@@ -3845,9 +3839,9 @@ bottom: 6px;
 }
 }
 
-/* === VARA: Skeleton-only responsive overrides === /
+/* === VARA: Skeleton-only responsive overrides === */
 .raw-library-grid.skeleton-grid {
-/ 50% of normal card scale (does not affect real cards) */
+/* 50% of normal card scale (does not affect real cards) */
 --cardScale: 0.5;
 }
 
@@ -3858,13 +3852,13 @@ grid-template-columns: repeat(1, calc(var(--cardW) * var(--cardScale))) !importa
 }
 }
 
-/* Tablets: strictly 2 columns between 400px and 1024px /
+/* Tablets: strictly 2 columns between 400px and 1024px */
 @media (min-width: 400px) and (max-width: 1024px) {
 .raw-library-grid.skeleton-grid {
 grid-template-columns: repeat(2, calc(var(--cardW) * var(--cardScale))) !important;
 }
 }
-/ === VARA: Sub-genre carousel dots === */
+/* === VARA: Sub-genre carousel dots === */
 .sg-dots {
 display: flex;
 align-items: center;
