@@ -1381,9 +1381,27 @@ function App() {
 
       setNotification({ message: `⬇️ Preparing "${safeTitle}" for download...`, type: 'success' });
 
+      // Infer extension from source URL (default .MP3)
+      let inferredExt = '.MP3';
+      if (typeof songUrl === 'string') {
+        try {
+          const urlObj = new URL(songUrl);
+          const match = urlObj.pathname.match(/\.([a-zA-Z0-9]+)$/);
+          if (match && match[1]) {
+            const candidate = match[1].toLowerCase();
+            const allowed = ['mp3', 'wav', 'flac', 'm4a', 'ogg'];
+            if (allowed.includes(candidate)) {
+              inferredExt = `.${candidate.toUpperCase()}`;
+            }
+          }
+        } catch {
+          // keep default .MP3
+        }
+      }
+
       // Build a safe custom filename
       const sanitizedTitle = safeTitle.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '-').toUpperCase();
-      const customFilename = `${sanitizedTitle}-VARAMUSIC.COM.mp3`;
+      const customFilename = `${sanitizedTitle}-VARAMUSIC.COM${inferredExt}`;
 
       // Build proxy URL on AUTH backend
       const proxyUrl = `${authRoot}/api/files/song/${encodeURIComponent(safeSongId)}?filename=${encodeURIComponent(customFilename)}`;
