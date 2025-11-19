@@ -476,7 +476,7 @@ function App() {
         return data;
       } catch (err) {
         console.error('❌ Error fetching genres:', err);
-        setError('Failed to load genres. Please check your connection and try again.');
+        setError('website is down for maintenance. please try again later.');
         throw err;
       } finally {
         setLoadingGenres(false);
