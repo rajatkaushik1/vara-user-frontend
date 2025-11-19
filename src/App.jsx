@@ -505,7 +505,7 @@ function App() {
         return data;
       } catch (err) {
         console.error('❌ Error fetching subgenres:', err);
-        setError('Failed to load subgenres. Please check your connection and try again.');
+        setError('website is down for maintenance. please try again later.');
         throw err;
       } finally {
         setLoadingSubGenres(false);
